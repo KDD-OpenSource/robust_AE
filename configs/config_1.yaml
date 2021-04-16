@@ -1,0 +1,35 @@
+ctx:                                'Code_inputBounds'
+mode:                               ['train', 'test']
+dataset:                            'uniformClouds'
+algorithm:                          'autoencoder'
+evaluations:                        [
+    'parallelQualplots',
+    'linSubfctBarplots',
+    'linSub_unifPoints',
+    'subfunc_distmat',
+    'linsubfct_parallelPlots',
+    'singularValuePlots',
+]
+
+datasets:
+    gaussianClouds:
+        num_clouds:                 1
+        num_datapoints:             2000
+        spacedim:                   20
+        clouddim:                   5
+    uniformClouds:
+        num_clouds:                 1
+        num_datapoints:             2000
+        spacedim:                   2
+        clouddim:                   1
+        noise:                      False
+
+algorithms:
+    num_epochs:                     30
+    lr:                             1e-3
+    collect_subfcts:                True
+    autoencoder:
+        topology:                   [2,20,10,5,10,20,2]
+        #topology:                   [5,2,5]
+        bias:                       True
+        dropout:                    False
