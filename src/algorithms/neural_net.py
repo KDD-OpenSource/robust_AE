@@ -3,6 +3,7 @@ from pprint import pprint
 import abc
 import copy
 import hashlib
+import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 import numpy as np
@@ -231,55 +232,17 @@ class neural_net:
         return all(np.array_equal(signature1[key], signature2[key]) for key in
                 keys)
 
-        # the linear functions are now in linSubFcts. Each part. linear
-        # function is one row of the matrix/bias:
-        # Todo:
-            # check correctness
-            # calculate boundary
-            # proceed with below
-
-
-
-        # for every neuron: get potential boundary
-        # check for every potential boundary check if signature on
-        # interpolation stays the same
-
-
-
-#    def get_input_boundaries(self, neural_net_mod):
-#        neural_net_mod = copy.deepcopy(neural_net_mod)
-#        neural_net_relustripped = self.erase_ReLU(neural_net_mod)
-#        # iterate over 'neurons' (rows of weights)
-#        boundaries = []
-#        matrices = []
-#        biases = []
-#        for layer in neural_net_relustripped:
-#            matrices.append(layer.weight.detach().numpy())
-#            biases.append(layer.bias.detach().numpy())
-#
-#        reduced_matrices = []
-#        reduced_biases = []
-#        for layer_ind in range(len(matrices)):
-#            reduced_matrices.append(reduce(np.matmul, matrices[:layer_ind+1][::-1]))
-#
-#        for layer_ind in range(len(biases)):
-#            reduced_biases.append(biases[layer_ind])
-#            if len(reduced_biases) > 1:
-#                reduced_biases[-1] += np.matmul(matrices[layer_ind],
-#                        reduced_biases[-2])
-#
-#        for layer_mat, layer_bias in zip(reduced_matrices, reduced_biases):
-#            for neuron in zip(layer_mat, layer_bias):
-#                boundaries.append(neuron)
-
-
-
     def erase_ReLU(self, neural_net_mod):
         new_layers = []
         for layer in neural_net_mod.get_neural_net():
             if not isinstance(layer, nn.ReLU):
                 new_layers.append(layer)
         return IntermediateSequential(*new_layers)
+
+    def interpolate(point_from: torch.tensor, point_to: torch.tensor, num_steps):
+        inter_points = [point_from + int_var/(num_steps-1) * point_to for int_var in
+                range(num_steps)]
+        return torch.stack(inter_points)
 
 class IntermediateSequential(nn.Sequential):
     def __init__(self, *args, return_intermediate=True):
@@ -303,8 +266,6 @@ class linearSubfunction:
         self.matrix = matrix
         self.bias = bias
         self.name = self.__hash__()
-        # sig_string = str(np.vstack([matrix, bias]).flatten())
-        # self.signature = hashlib.sha1(sig_string.encode()).hexdigest()
 
     def __str__(self):
         return str(self.name)
