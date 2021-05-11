@@ -1,3 +1,4 @@
+import os
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
@@ -28,48 +29,47 @@ class autoencoder(neural_net):
         self.dropout = dropout
         self.collect_subfcts = collect_subfcts
         self.lin_sub_fct_Counters = []
+        self.module = autoencoderModule(self.topology, self.bias, self.dropout)
 
     def fit(self, X: pd.DataFrame):
-        self.aeModule = autoencoderModule(self.topology, self.bias, self.dropout)
         data_loader = DataLoader(
             dataset=X.values,
             batch_size=self.batch_size,
             drop_last=True,
             pin_memory=True,
         )
-        optimizer = torch.optim.Adam(params=self.aeModule.parameters(), lr=self.lr)
+        optimizer = torch.optim.Adam(params=self.module.parameters(), lr=self.lr)
         if self.collect_subfcts:
-            self.lin_sub_fct_Counters.append(self.count_lin_subfcts(self.aeModule, X))
+            self.lin_sub_fct_Counters.append(self.count_lin_subfcts(self.module, X))
         for epoch in range(self.num_epochs):
-            self.aeModule.train()
+            self.module.train()
             epoch_loss = 0
             for inst_batch in data_loader:
 
                 # this code is just for code testing
-                for inst in inst_batch:
-                    self.get_closest_funcBoundary(self.aeModule, inst)
+                # for inst in inst_batch:
+                # self.lrp_ae(self.module, inst)
+                # self.get_fctBoundary(self.module, inst)
+                # self.get_closest_funcBoundary(self.module, inst)
 
                 inst_batch = inst_batch.float()
-                reconstr = self.aeModule(inst_batch)[0]
+                reconstr = self.module(inst_batch)[0]
                 loss = nn.MSELoss()(inst_batch, reconstr)
-                self.aeModule.zero_grad()
+                self.module.zero_grad()
                 epoch_loss += loss
                 loss.backward()
                 optimizer.step()
 
             print(epoch_loss)
-            self.aeModule.eval()
+            self.module.eval()
             if self.collect_subfcts:
-                self.lin_sub_fct_Counters.append(
-                    self.count_lin_subfcts(self.aeModule, X)
-                )
-        self.aeModule.erase_dropout()
+                self.lin_sub_fct_Counters.append(self.count_lin_subfcts(self.module, X))
+        self.module.erase_dropout()
         if self.collect_subfcts:
-            self.lin_sub_fct_Counters.append(self.count_lin_subfcts(self.aeModule, X))
-
+            self.lin_sub_fct_Counters.append(self.count_lin_subfcts(self.module, X))
 
     def predict(self, X: pd.DataFrame):
-        self.aeModule.eval()
+        self.module.eval()
         data_loader = DataLoader(
             dataset=X.values,
             batch_size=self.batch_size,
@@ -79,10 +79,53 @@ class autoencoder(neural_net):
         reconstructions = []
         for inst_batch in data_loader:
             inst_batch = inst_batch.float()
-            reconstructions.append(self.aeModule(inst_batch)[0].detach().numpy())
+            reconstructions.append(self.module(inst_batch)[0].detach().numpy())
         reconstructions = np.vstack(reconstructions)
         reconstructions = pd.DataFrame(reconstructions)
         return reconstructions
+
+    def save(self, path):
+        # path is the folder within reports in which it has been trained
+        os.makedirs(os.path.join('./models', self.name), exist_ok=True)
+        torch.save(
+            {
+                "topology": self.topology,
+                "bias": self.bias,
+                "dropout": self.dropout,
+                "collect_subfcts": self.collect_subfcts,
+                "lin_sub_fct_Counters": self.lin_sub_fct_Counters
+            },
+            os.path.join(path, "model_detailed.pth"),
+        )
+
+        torch.save(
+            {
+                "topology": self.topology,
+                "bias": self.bias,
+                "dropout": self.dropout,
+                "collect_subfcts": self.collect_subfcts,
+                "lin_sub_fct_Counters": self.lin_sub_fct_Counters
+            },
+            os.path.join("./models", self.name, "model_detailed.pth"),
+        )
+
+        torch.save(self.module.state_dict(), os.path.join(path, "model.pth"))
+        torch.save(self.module.state_dict(), os.path.join("./models",
+            self.name, "model.pth"))
+
+    def load(self, path):
+        model_details = torch.load(os.path.join(path, "model_detailed.pth"))
+
+        self.topology = model_details["topology"]
+        self.bias = model_details["bias"]
+        self.dropout = model_details["dropout"]
+        self.collect_subfcts = model_details["collect_subfcts"]
+        self.lin_sub_fct_Counters = model_details["lin_sub_fct_Counters"]
+
+        self.module = autoencoderModule(self.topology, self.bias, self.dropout)
+        self.module.load_state_dict(torch.load(os.path.join(path, "model.pth")))
+
+
 
 
 class autoencoderModule(nn.Module):

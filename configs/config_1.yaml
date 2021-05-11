@@ -1,35 +1,51 @@
-ctx:                                'Code_inputBounds'
+ctx:                                'PerformanceTest_GaussianClouds'
 mode:                               ['train', 'test']
-dataset:                            'uniformClouds'
-algorithm:                          'autoencoder'
+dataset:                            'moons_2d'
+algorithm:                          './models/autoencoder_trained'
 evaluations:                        [
-    'parallelQualplots',
-    'linSubfctBarplots',
-    'linSub_unifPoints',
-    'subfunc_distmat',
-    'linsubfct_parallelPlots',
-    'singularValuePlots',
+    #    'parallelQualplots',
+    #'linSubfctBarplots',
+    #    'linSub_unifPoints',
+    #    'subfunc_distmat',
+    #    'linsubfct_parallelPlots',
+    #'singularValuePlots',
+    #'closest_linsubfct_plot',
+    #'boundary_2d_plot',
+    #'inst_area_2d_plot',
+    #'border_dist_2d',
+    'border_dist_sort_plot',
 ]
 
 datasets:
     gaussianClouds:
         num_clouds:                 1
-        num_datapoints:             2000
-        spacedim:                   20
-        clouddim:                   5
+        num_samples:                2000
+        num_anomalies:              10
+        spacedim:                   1000
+        clouddim:                   10
     uniformClouds:
         num_clouds:                 1
-        num_datapoints:             2000
+        num_samples:                2000
+        num_anomalies:              10
         spacedim:                   2
         clouddim:                   1
         noise:                      False
+    moons_2d:
+        num_samples:                2000
+        num_anomalies:              10
+        noise:                      0.1
+    parabola:
+        num_samples:                2000
+        num_anomalies:              10
+        noise:                      0.1
+        spacedim:                   2
 
 algorithms:
-    num_epochs:                     30
+    num_epochs:                     10
     lr:                             1e-3
-    collect_subfcts:                True
+    collect_subfcts:                False
     autoencoder:
-        topology:                   [2,20,10,5,10,20,2]
-        #topology:                   [5,2,5]
+        topology:                   [2,5,5,5,2]
+        #topology:                   [1000,500,250,100,30,20,10,20,30,100, 250,500,1000]
         bias:                       True
         dropout:                    False

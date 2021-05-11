@@ -10,20 +10,22 @@ class gaussianClouds(dataset):
         spacedim: int = 20,
         clouddim: int = 5,
         num_clouds: int = 5,
-        num_datapoints: int = 2000,
+        num_samples: int = 2000,
+        num_anomalies: int = 20,
     ):
         super().__init__(name)
         self.spacedim = spacedim
         self.clouddim = clouddim
         self.num_clouds = num_clouds
-        self.num_datapoints = num_datapoints
+        self.num_samples = num_samples
+        self.num_anomalies = num_anomalies
 
     def load(self):
         """
         creates a synthetic DS by projecting a gaussian cloud with unit
         variance into a high dim space
         """
-        points_per_cloud = int(self.num_datapoints / self.num_clouds)
+        points_per_cloud = int(self.num_samples / self.num_clouds)
         random_matrices = []
         random_centers = []
         random_points = []
@@ -45,9 +47,6 @@ class gaussianClouds(dataset):
 
         data = np.hstack(random_points).transpose()
         data = pd.DataFrame(data)
-        import pdb
-
-        pdb.set_trace()
         # check if correct
         data = self.scale_data(data)
         self._data = data

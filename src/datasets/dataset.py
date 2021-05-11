@@ -27,7 +27,7 @@ class dataset:
 
     def scale_data(self, data: pd.DataFrame):
         # scaler = MinMaxScaler(feature_range = (-1,1))
-        scaler = MinMaxScaler(feature_range=(0, 1))
+        scaler = MinMaxScaler(feature_range=(-0.9, 0.9))
         scaler.fit(data)
         return pd.DataFrame(scaler.transform(data), columns=data.columns)
 

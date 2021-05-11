@@ -19,7 +19,7 @@ class linSub_unifPoints:
         randPoints = pd.DataFrame(
             np.random.uniform(low=-1, high=1, size=(self.num_points, input_dim))
         )
-        linsubfctCtr = algorithm.count_lin_subfcts(algorithm.aeModule, randPoints)
+        linsubfctCtr = algorithm.count_lin_subfcts(algorithm.module, randPoints)
         fig = plt.figure()
         fctIndices = range(len(linsubfctCtr))
         values = list(map(lambda x: x[1], linsubfctCtr))

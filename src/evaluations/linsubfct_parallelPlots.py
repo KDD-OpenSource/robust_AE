@@ -21,12 +21,12 @@ class linsubfct_parallelPlots:
         output_points = algorithm.predict(input_points)
         ymax = pd.DataFrame([input_points.max(), output_points.max()]).max().max()
         ymin = pd.DataFrame([input_points.min(), output_points.min()]).min().min()
-        functions = algorithm.get_points_of_linsubfcts(algorithm.aeModule, input_points)
+        functions = algorithm.get_points_of_linsubfcts(algorithm.module, input_points)
         for function in list(functions.keys()):
             if len(functions[function]) < self.num_plots:
                 ctr = 0
                 for input_point in functions[function]:
-                    output_point = algorithm.aeModule(input_point)[0].detach()
+                    output_point = algorithm.module(input_point)[0].detach()
                     fig = plt.figure()
                     plt.ylim(ymin, ymax)
                     plt.plot(input_point, color="blue")
@@ -44,7 +44,7 @@ class linsubfct_parallelPlots:
                     len(function_points), replace=False, size=self.num_plots
                 )
                 for ind in rand_ind:
-                    output_point = algorithm.aeModule(function_points[ind])[0].detach()
+                    output_point = algorithm.module(function_points[ind])[0].detach()
                     fig = plt.figure()
                     plt.ylim(ymin, ymax)
                     plt.plot(function_points[ind], color="blue")
