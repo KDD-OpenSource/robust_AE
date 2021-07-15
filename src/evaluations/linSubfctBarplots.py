@@ -12,14 +12,12 @@ class linSubfctBarplots:
 
     def evaluate(self, dataset, algorithm):
         # sample indices
+        import pdb; pdb.set_trace()
         linSubfctDist = algorithm.lin_sub_fct_Counters
         for ind in range(len(linSubfctDist)):
-            # import pdb; pdb.set_trace()
             fig = plt.figure()
             fctIndices = range(len(linSubfctDist[ind]))
             values = list(map(lambda x: x[1], linSubfctDist[ind]))
-            # import pdb; pdb.set_trace()
             plt.bar(fctIndices, values)
-            # plt.plot(output_points.iloc[ind,:])
             self.evaluation.save_figure(fig, "barplot_" + str(ind))
             plt.close("all")

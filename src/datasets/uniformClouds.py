@@ -8,7 +8,9 @@ from .dataset import dataset
 class uniformClouds(dataset):
     def __init__(
         self,
-        name: str = "uniformCloud",
+        name: str = "uniformClouds",
+        file_path: str = None,
+        subsample: int = None,
         spacedim: int = 20,
         clouddim: int = 5,
         num_clouds: int = 5,
@@ -16,7 +18,7 @@ class uniformClouds(dataset):
         num_anomalies: int = 20,
         noise: bool = False,
     ):
-        super().__init__(name)
+        super().__init__(name, file_path, subsample)
         self.spacedim = spacedim
         self.clouddim = clouddim
         self.num_clouds = num_clouds
@@ -24,7 +26,7 @@ class uniformClouds(dataset):
         self.num_anomalies = num_anomalies
         self.noise = noise
 
-    def load(self):
+    def create(self):
         """
         creates a synthetic DS by projecting a uniform cloud with unit
         width into a high dim space
@@ -33,6 +35,8 @@ class uniformClouds(dataset):
         random_matrices = []
         random_centers = []
         random_points = []
+        label = 0
+        self.labels = pd.Series()
         for _ in range(self.num_clouds):
             random_matrices.append(
                 np.random.uniform(low=-1, high=1, size=(self.spacedim, self.clouddim))
@@ -48,6 +52,9 @@ class uniformClouds(dataset):
                 ).transpose()
             )
             random_points[-1] = np.dot(random_matrices[-1], random_points[-1])
+            labels = pd.Series(label, range(points_per_cloud))
+            self.labels = self.labels.append(labels, ignore_index = True)
+            label += 1
             if self.noise:
                 random_points[-1] += np.random.normal(
                     loc=0, scale=0.01, size=random_points[-1].shape
@@ -60,12 +67,6 @@ class uniformClouds(dataset):
         data = np.hstack(random_points).transpose()
         data = np.vstack([data, anomalies])
         data = pd.DataFrame(data)
-        import pdb
-
-        pdb.set_trace()
-        data = self.scale_data(data)
-        self.anomalies = pd.DataFrame(data.iloc[-self.num_anomalies :])
         self._data = data
-
-    def save(self):
-        pass
+        anom_labels = pd.Series(-1, range(self.num_anomalies))
+        self.labels = self.labels.append(anom_labels, ignore_index = True)
