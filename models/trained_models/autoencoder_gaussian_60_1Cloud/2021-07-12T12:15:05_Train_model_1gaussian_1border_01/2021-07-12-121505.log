@@ -1,0 +1,301 @@
+2021-07-12 12:15:05 [DEBUG] src.utils.config: Logger initialized
+2021-07-12 12:15:05 [INFO] __main__: Training epoch 0
+2021-07-12 12:15:07 [INFO] __main__: Epoch_loss: 38.02800750732422
+2021-07-12 12:15:07 [INFO] __main__: Epoch_loss_reconstr: 5.146335601806641
+2021-07-12 12:15:07 [INFO] __main__: Epoch_loss_border: 328.81671142578125
+2021-07-12 12:15:07 [INFO] __main__: Epoch_loss_fct: 0
+2021-07-12 12:15:07 [INFO] __main__: Duration: 0:00:02.012540
+2021-07-12 12:15:07 [INFO] __main__: Training epoch 1
+2021-07-12 12:15:09 [INFO] __main__: Epoch_loss: 33.78015899658203
+2021-07-12 12:15:09 [INFO] __main__: Epoch_loss_reconstr: 4.56614875793457
+2021-07-12 12:15:09 [INFO] __main__: Epoch_loss_border: 292.1401672363281
+2021-07-12 12:15:09 [INFO] __main__: Epoch_loss_fct: 0
+2021-07-12 12:15:09 [INFO] __main__: Duration: 0:00:02.035748
+2021-07-12 12:15:09 [INFO] __main__: Training epoch 2
+2021-07-12 12:15:11 [INFO] __main__: Epoch_loss: 31.563678741455078
+2021-07-12 12:15:11 [INFO] __main__: Epoch_loss_reconstr: 4.357789516448975
+2021-07-12 12:15:11 [INFO] __main__: Epoch_loss_border: 272.0588684082031
+2021-07-12 12:15:11 [INFO] __main__: Epoch_loss_fct: 0
+2021-07-12 12:15:11 [INFO] __main__: Duration: 0:00:02.031675
+2021-07-12 12:15:11 [INFO] __main__: Training epoch 3
+2021-07-12 12:15:13 [INFO] __main__: Epoch_loss: 32.45232391357422
+2021-07-12 12:15:13 [INFO] __main__: Epoch_loss_reconstr: 4.130475044250488
+2021-07-12 12:15:13 [INFO] __main__: Epoch_loss_border: 283.21844482421875
+2021-07-12 12:15:13 [INFO] __main__: Epoch_loss_fct: 0
+2021-07-12 12:15:13 [INFO] __main__: Duration: 0:00:02.031412
+2021-07-12 12:15:13 [INFO] __main__: Training epoch 4
+2021-07-12 12:15:15 [INFO] __main__: Epoch_loss: 29.63727569580078
+2021-07-12 12:15:15 [INFO] __main__: Epoch_loss_reconstr: 3.9007720947265625
+2021-07-12 12:15:15 [INFO] __main__: Epoch_loss_border: 257.36505126953125
+2021-07-12 12:15:15 [INFO] __main__: Epoch_loss_fct: 0
+2021-07-12 12:15:15 [INFO] __main__: Duration: 0:00:02.031329
+2021-07-12 12:15:15 [INFO] __main__: Training epoch 5
+2021-07-12 12:15:17 [INFO] __main__: Epoch_loss: 28.692901611328125
+2021-07-12 12:15:17 [INFO] __main__: Epoch_loss_reconstr: 3.7470169067382812
+2021-07-12 12:15:17 [INFO] __main__: Epoch_loss_border: 249.45884704589844
+2021-07-12 12:15:17 [INFO] __main__: Epoch_loss_fct: 0
+2021-07-12 12:15:17 [INFO] __main__: Duration: 0:00:02.033303
+2021-07-12 12:15:17 [INFO] __main__: Training epoch 6
+2021-07-12 12:15:19 [INFO] __main__: Epoch_loss: 29.47580337524414
+2021-07-12 12:15:19 [INFO] __main__: Epoch_loss_reconstr: 3.650481700897217
+2021-07-12 12:15:19 [INFO] __main__: Epoch_loss_border: 258.25311279296875
+2021-07-12 12:15:19 [INFO] __main__: Epoch_loss_fct: 0
+2021-07-12 12:15:19 [INFO] __main__: Duration: 0:00:02.038311
+2021-07-12 12:15:19 [INFO] __main__: Training epoch 7
+2021-07-12 12:15:21 [INFO] __main__: Epoch_loss: 28.326065063476562
+2021-07-12 12:15:21 [INFO] __main__: Epoch_loss_reconstr: 3.5902457237243652
+2021-07-12 12:15:21 [INFO] __main__: Epoch_loss_border: 247.3582000732422
+2021-07-12 12:15:21 [INFO] __main__: Epoch_loss_fct: 0
+2021-07-12 12:15:21 [INFO] __main__: Duration: 0:00:02.031989
+2021-07-12 12:15:21 [INFO] __main__: Training epoch 8
+2021-07-12 12:15:23 [INFO] __main__: Epoch_loss: 26.039396286010742
+2021-07-12 12:15:23 [INFO] __main__: Epoch_loss_reconstr: 3.419624090194702
+2021-07-12 12:15:23 [INFO] __main__: Epoch_loss_border: 226.19772338867188
+2021-07-12 12:15:23 [INFO] __main__: Epoch_loss_fct: 0
+2021-07-12 12:15:23 [INFO] __main__: Duration: 0:00:02.036822
+2021-07-12 12:15:23 [INFO] __main__: Training epoch 9
+2021-07-12 12:15:25 [INFO] __main__: Epoch_loss: 27.353534698486328
+2021-07-12 12:15:25 [INFO] __main__: Epoch_loss_reconstr: 3.293360471725464
+2021-07-12 12:15:25 [INFO] __main__: Epoch_loss_border: 240.60177612304688
+2021-07-12 12:15:25 [INFO] __main__: Epoch_loss_fct: 0
+2021-07-12 12:15:25 [INFO] __main__: Duration: 0:00:02.031984
+2021-07-12 12:15:25 [INFO] __main__: Training epoch 10
+2021-07-12 12:15:27 [INFO] __main__: Epoch_loss: 28.189891815185547
+2021-07-12 12:15:27 [INFO] __main__: Epoch_loss_reconstr: 3.122068166732788
+2021-07-12 12:15:27 [INFO] __main__: Epoch_loss_border: 250.67822265625
+2021-07-12 12:15:27 [INFO] __main__: Epoch_loss_fct: 0
+2021-07-12 12:15:27 [INFO] __main__: Duration: 0:00:02.047652
+2021-07-12 12:15:27 [INFO] __main__: Training epoch 11
+2021-07-12 12:15:29 [INFO] __main__: Epoch_loss: 26.5961856842041
+2021-07-12 12:15:29 [INFO] __main__: Epoch_loss_reconstr: 3.0644664764404297
+2021-07-12 12:15:29 [INFO] __main__: Epoch_loss_border: 235.31715393066406
+2021-07-12 12:15:29 [INFO] __main__: Epoch_loss_fct: 0
+2021-07-12 12:15:29 [INFO] __main__: Duration: 0:00:02.038382
+2021-07-12 12:15:29 [INFO] __main__: Training epoch 12
+2021-07-12 12:15:31 [INFO] __main__: Epoch_loss: 25.053375244140625
+2021-07-12 12:15:31 [INFO] __main__: Epoch_loss_reconstr: 3.044776439666748
+2021-07-12 12:15:31 [INFO] __main__: Epoch_loss_border: 220.08604431152344
+2021-07-12 12:15:31 [INFO] __main__: Epoch_loss_fct: 0
+2021-07-12 12:15:31 [INFO] __main__: Duration: 0:00:02.036633
+2021-07-12 12:15:31 [INFO] __main__: Training epoch 13
+2021-07-12 12:15:33 [INFO] __main__: Epoch_loss: 25.204988479614258
+2021-07-12 12:15:33 [INFO] __main__: Epoch_loss_reconstr: 2.8556997776031494
+2021-07-12 12:15:33 [INFO] __main__: Epoch_loss_border: 223.49288940429688
+2021-07-12 12:15:33 [INFO] __main__: Epoch_loss_fct: 0
+2021-07-12 12:15:33 [INFO] __main__: Duration: 0:00:02.041606
+2021-07-12 12:15:33 [INFO] __main__: Training epoch 14
+2021-07-12 12:15:35 [INFO] __main__: Epoch_loss: 24.791820526123047
+2021-07-12 12:15:35 [INFO] __main__: Epoch_loss_reconstr: 2.8639707565307617
+2021-07-12 12:15:35 [INFO] __main__: Epoch_loss_border: 219.2785186767578
+2021-07-12 12:15:35 [INFO] __main__: Epoch_loss_fct: 0
+2021-07-12 12:15:35 [INFO] __main__: Duration: 0:00:02.030142
+2021-07-12 12:15:35 [INFO] __main__: Training epoch 15
+2021-07-12 12:15:37 [INFO] __main__: Epoch_loss: 23.526025772094727
+2021-07-12 12:15:37 [INFO] __main__: Epoch_loss_reconstr: 2.8443081378936768
+2021-07-12 12:15:37 [INFO] __main__: Epoch_loss_border: 206.8172149658203
+2021-07-12 12:15:37 [INFO] __main__: Epoch_loss_fct: 0
+2021-07-12 12:15:37 [INFO] __main__: Duration: 0:00:02.038233
+2021-07-12 12:15:37 [INFO] __main__: Training epoch 16
+2021-07-12 12:15:39 [INFO] __main__: Epoch_loss: 23.756084442138672
+2021-07-12 12:15:39 [INFO] __main__: Epoch_loss_reconstr: 2.833625316619873
+2021-07-12 12:15:39 [INFO] __main__: Epoch_loss_border: 209.22462463378906
+2021-07-12 12:15:39 [INFO] __main__: Epoch_loss_fct: 0
+2021-07-12 12:15:39 [INFO] __main__: Duration: 0:00:02.030574
+2021-07-12 12:15:39 [INFO] __main__: Training epoch 17
+2021-07-12 12:15:41 [INFO] __main__: Epoch_loss: 25.693166732788086
+2021-07-12 12:15:41 [INFO] __main__: Epoch_loss_reconstr: 2.703005790710449
+2021-07-12 12:15:41 [INFO] __main__: Epoch_loss_border: 229.90158081054688
+2021-07-12 12:15:41 [INFO] __main__: Epoch_loss_fct: 0
+2021-07-12 12:15:41 [INFO] __main__: Duration: 0:00:02.031278
+2021-07-12 12:15:41 [INFO] __main__: Training epoch 18
+2021-07-12 12:15:43 [INFO] __main__: Epoch_loss: 22.981338500976562
+2021-07-12 12:15:43 [INFO] __main__: Epoch_loss_reconstr: 2.711815595626831
+2021-07-12 12:15:43 [INFO] __main__: Epoch_loss_border: 202.6952667236328
+2021-07-12 12:15:43 [INFO] __main__: Epoch_loss_fct: 0
+2021-07-12 12:15:43 [INFO] __main__: Duration: 0:00:02.035621
+2021-07-12 12:15:43 [INFO] __main__: Training epoch 19
+2021-07-12 12:15:45 [INFO] __main__: Epoch_loss: 23.7491397857666
+2021-07-12 12:15:45 [INFO] __main__: Epoch_loss_reconstr: 2.6353228092193604
+2021-07-12 12:15:45 [INFO] __main__: Epoch_loss_border: 211.13815307617188
+2021-07-12 12:15:45 [INFO] __main__: Epoch_loss_fct: 0
+2021-07-12 12:15:45 [INFO] __main__: Duration: 0:00:02.038423
+2021-07-12 12:15:45 [INFO] __main__: Training epoch 20
+2021-07-12 12:15:47 [INFO] __main__: Epoch_loss: 22.421560287475586
+2021-07-12 12:15:47 [INFO] __main__: Epoch_loss_reconstr: 2.646319627761841
+2021-07-12 12:15:47 [INFO] __main__: Epoch_loss_border: 197.75245666503906
+2021-07-12 12:15:47 [INFO] __main__: Epoch_loss_fct: 0
+2021-07-12 12:15:47 [INFO] __main__: Duration: 0:00:02.031440
+2021-07-12 12:15:47 [INFO] __main__: Training epoch 21
+2021-07-12 12:15:49 [INFO] __main__: Epoch_loss: 23.97041893005371
+2021-07-12 12:15:49 [INFO] __main__: Epoch_loss_reconstr: 2.6286044120788574
+2021-07-12 12:15:49 [INFO] __main__: Epoch_loss_border: 213.41815185546875
+2021-07-12 12:15:49 [INFO] __main__: Epoch_loss_fct: 0
+2021-07-12 12:15:49 [INFO] __main__: Duration: 0:00:02.030657
+2021-07-12 12:15:49 [INFO] __main__: Training epoch 22
+2021-07-12 12:15:52 [INFO] __main__: Epoch_loss: 22.461071014404297
+2021-07-12 12:15:52 [INFO] __main__: Epoch_loss_reconstr: 2.6392533779144287
+2021-07-12 12:15:52 [INFO] __main__: Epoch_loss_border: 198.21812438964844
+2021-07-12 12:15:52 [INFO] __main__: Epoch_loss_fct: 0
+2021-07-12 12:15:52 [INFO] __main__: Duration: 0:00:02.031332
+2021-07-12 12:15:52 [INFO] __main__: Training epoch 23
+2021-07-12 12:15:54 [INFO] __main__: Epoch_loss: 22.51970863342285
+2021-07-12 12:15:54 [INFO] __main__: Epoch_loss_reconstr: 2.5204083919525146
+2021-07-12 12:15:54 [INFO] __main__: Epoch_loss_border: 199.99295043945312
+2021-07-12 12:15:54 [INFO] __main__: Epoch_loss_fct: 0
+2021-07-12 12:15:54 [INFO] __main__: Duration: 0:00:02.031993
+2021-07-12 12:15:54 [INFO] __main__: Training epoch 24
+2021-07-12 12:15:56 [INFO] __main__: Epoch_loss: 21.91248321533203
+2021-07-12 12:15:56 [INFO] __main__: Epoch_loss_reconstr: 2.5383758544921875
+2021-07-12 12:15:56 [INFO] __main__: Epoch_loss_border: 193.7410888671875
+2021-07-12 12:15:56 [INFO] __main__: Epoch_loss_fct: 0
+2021-07-12 12:15:56 [INFO] __main__: Duration: 0:00:02.032706
+2021-07-12 12:15:56 [INFO] __main__: Training epoch 25
+2021-07-12 12:15:58 [INFO] __main__: Epoch_loss: 22.71565818786621
+2021-07-12 12:15:58 [INFO] __main__: Epoch_loss_reconstr: 2.4823591709136963
+2021-07-12 12:15:58 [INFO] __main__: Epoch_loss_border: 202.33299255371094
+2021-07-12 12:15:58 [INFO] __main__: Epoch_loss_fct: 0
+2021-07-12 12:15:58 [INFO] __main__: Duration: 0:00:02.042833
+2021-07-12 12:15:58 [INFO] __main__: Training epoch 26
+2021-07-12 12:16:00 [INFO] __main__: Epoch_loss: 21.809040069580078
+2021-07-12 12:16:00 [INFO] __main__: Epoch_loss_reconstr: 2.3117516040802
+2021-07-12 12:16:00 [INFO] __main__: Epoch_loss_border: 194.97280883789062
+2021-07-12 12:16:00 [INFO] __main__: Epoch_loss_fct: 0
+2021-07-12 12:16:00 [INFO] __main__: Duration: 0:00:02.033453
+2021-07-12 12:16:00 [INFO] __main__: Training epoch 27
+2021-07-12 12:16:02 [INFO] __main__: Epoch_loss: 19.26243019104004
+2021-07-12 12:16:02 [INFO] __main__: Epoch_loss_reconstr: 2.3406894207000732
+2021-07-12 12:16:02 [INFO] __main__: Epoch_loss_border: 169.21737670898438
+2021-07-12 12:16:02 [INFO] __main__: Epoch_loss_fct: 0
+2021-07-12 12:16:02 [INFO] __main__: Duration: 0:00:02.031084
+2021-07-12 12:16:02 [INFO] __main__: Training epoch 28
+2021-07-12 12:16:04 [INFO] __main__: Epoch_loss: 21.68473243713379
+2021-07-12 12:16:04 [INFO] __main__: Epoch_loss_reconstr: 2.292330265045166
+2021-07-12 12:16:04 [INFO] __main__: Epoch_loss_border: 193.92401123046875
+2021-07-12 12:16:04 [INFO] __main__: Epoch_loss_fct: 0
+2021-07-12 12:16:04 [INFO] __main__: Duration: 0:00:02.031116
+2021-07-12 12:16:04 [INFO] __main__: Training epoch 29
+2021-07-12 12:16:06 [INFO] __main__: Epoch_loss: 21.352970123291016
+2021-07-12 12:16:06 [INFO] __main__: Epoch_loss_reconstr: 2.225602626800537
+2021-07-12 12:16:06 [INFO] __main__: Epoch_loss_border: 191.27366638183594
+2021-07-12 12:16:06 [INFO] __main__: Epoch_loss_fct: 0
+2021-07-12 12:16:06 [INFO] __main__: Duration: 0:00:02.030733
+2021-07-12 12:16:06 [INFO] __main__: Training epoch 30
+2021-07-12 12:16:08 [INFO] __main__: Epoch_loss: 21.012842178344727
+2021-07-12 12:16:08 [INFO] __main__: Epoch_loss_reconstr: 2.181938648223877
+2021-07-12 12:16:08 [INFO] __main__: Epoch_loss_border: 188.3089599609375
+2021-07-12 12:16:08 [INFO] __main__: Epoch_loss_fct: 0
+2021-07-12 12:16:08 [INFO] __main__: Duration: 0:00:02.031336
+2021-07-12 12:16:08 [INFO] __main__: Training epoch 31
+2021-07-12 12:16:10 [INFO] __main__: Epoch_loss: 21.38460350036621
+2021-07-12 12:16:10 [INFO] __main__: Epoch_loss_reconstr: 2.0703396797180176
+2021-07-12 12:16:10 [INFO] __main__: Epoch_loss_border: 193.14263916015625
+2021-07-12 12:16:10 [INFO] __main__: Epoch_loss_fct: 0
+2021-07-12 12:16:10 [INFO] __main__: Duration: 0:00:02.034301
+2021-07-12 12:16:10 [INFO] __main__: Training epoch 32
+2021-07-12 12:16:12 [INFO] __main__: Epoch_loss: 19.619077682495117
+2021-07-12 12:16:12 [INFO] __main__: Epoch_loss_reconstr: 2.0363919734954834
+2021-07-12 12:16:12 [INFO] __main__: Epoch_loss_border: 175.8268280029297
+2021-07-12 12:16:12 [INFO] __main__: Epoch_loss_fct: 0
+2021-07-12 12:16:12 [INFO] __main__: Duration: 0:00:02.032512
+2021-07-12 12:16:12 [INFO] __main__: Training epoch 33
+2021-07-12 12:16:14 [INFO] __main__: Epoch_loss: 20.54189682006836
+2021-07-12 12:16:14 [INFO] __main__: Epoch_loss_reconstr: 2.026364326477051
+2021-07-12 12:16:14 [INFO] __main__: Epoch_loss_border: 185.15530395507812
+2021-07-12 12:16:14 [INFO] __main__: Epoch_loss_fct: 0
+2021-07-12 12:16:14 [INFO] __main__: Duration: 0:00:02.033413
+2021-07-12 12:16:14 [INFO] __main__: Training epoch 34
+2021-07-12 12:16:16 [INFO] __main__: Epoch_loss: 21.70441436767578
+2021-07-12 12:16:16 [INFO] __main__: Epoch_loss_reconstr: 2.266085624694824
+2021-07-12 12:16:16 [INFO] __main__: Epoch_loss_border: 194.38333129882812
+2021-07-12 12:16:16 [INFO] __main__: Epoch_loss_fct: 0
+2021-07-12 12:16:16 [INFO] __main__: Duration: 0:00:02.031658
+2021-07-12 12:16:16 [INFO] __main__: Training epoch 35
+2021-07-12 12:16:18 [INFO] __main__: Epoch_loss: 20.970857620239258
+2021-07-12 12:16:18 [INFO] __main__: Epoch_loss_reconstr: 2.280799627304077
+2021-07-12 12:16:18 [INFO] __main__: Epoch_loss_border: 186.90060424804688
+2021-07-12 12:16:18 [INFO] __main__: Epoch_loss_fct: 0
+2021-07-12 12:16:18 [INFO] __main__: Duration: 0:00:02.034241
+2021-07-12 12:16:18 [INFO] __main__: Training epoch 36
+2021-07-12 12:16:20 [INFO] __main__: Epoch_loss: 20.562585830688477
+2021-07-12 12:16:20 [INFO] __main__: Epoch_loss_reconstr: 2.1690268516540527
+2021-07-12 12:16:20 [INFO] __main__: Epoch_loss_border: 183.93560791015625
+2021-07-12 12:16:20 [INFO] __main__: Epoch_loss_fct: 0
+2021-07-12 12:16:20 [INFO] __main__: Duration: 0:00:02.031992
+2021-07-12 12:16:20 [INFO] __main__: Training epoch 37
+2021-07-12 12:16:22 [INFO] __main__: Epoch_loss: 20.10296058654785
+2021-07-12 12:16:22 [INFO] __main__: Epoch_loss_reconstr: 2.137955904006958
+2021-07-12 12:16:22 [INFO] __main__: Epoch_loss_border: 179.6500244140625
+2021-07-12 12:16:22 [INFO] __main__: Epoch_loss_fct: 0
+2021-07-12 12:16:22 [INFO] __main__: Duration: 0:00:02.031072
+2021-07-12 12:16:22 [INFO] __main__: Training epoch 38
+2021-07-12 12:16:24 [INFO] __main__: Epoch_loss: 20.885841369628906
+2021-07-12 12:16:24 [INFO] __main__: Epoch_loss_reconstr: 2.1278574466705322
+2021-07-12 12:16:24 [INFO] __main__: Epoch_loss_border: 187.57981872558594
+2021-07-12 12:16:24 [INFO] __main__: Epoch_loss_fct: 0
+2021-07-12 12:16:24 [INFO] __main__: Duration: 0:00:02.031232
+2021-07-12 12:16:24 [INFO] __main__: Training epoch 39
+2021-07-12 12:16:26 [INFO] __main__: Epoch_loss: 21.7589111328125
+2021-07-12 12:16:26 [INFO] __main__: Epoch_loss_reconstr: 1.9298220872879028
+2021-07-12 12:16:26 [INFO] __main__: Epoch_loss_border: 198.29090881347656
+2021-07-12 12:16:26 [INFO] __main__: Epoch_loss_fct: 0
+2021-07-12 12:16:26 [INFO] __main__: Duration: 0:00:02.033442
+2021-07-12 12:16:26 [INFO] __main__: Training epoch 40
+2021-07-12 12:16:28 [INFO] __main__: Epoch_loss: 22.538841247558594
+2021-07-12 12:16:28 [INFO] __main__: Epoch_loss_reconstr: 1.8841822147369385
+2021-07-12 12:16:28 [INFO] __main__: Epoch_loss_border: 206.5465850830078
+2021-07-12 12:16:28 [INFO] __main__: Epoch_loss_fct: 0
+2021-07-12 12:16:28 [INFO] __main__: Duration: 0:00:02.044722
+2021-07-12 12:16:28 [INFO] __main__: Training epoch 41
+2021-07-12 12:16:30 [INFO] __main__: Epoch_loss: 20.87500762939453
+2021-07-12 12:16:30 [INFO] __main__: Epoch_loss_reconstr: 1.9153691530227661
+2021-07-12 12:16:30 [INFO] __main__: Epoch_loss_border: 189.5963592529297
+2021-07-12 12:16:30 [INFO] __main__: Epoch_loss_fct: 0
+2021-07-12 12:16:30 [INFO] __main__: Duration: 0:00:02.033858
+2021-07-12 12:16:30 [INFO] __main__: Training epoch 42
+2021-07-12 12:16:32 [INFO] __main__: Epoch_loss: 21.147602081298828
+2021-07-12 12:16:32 [INFO] __main__: Epoch_loss_reconstr: 1.8514776229858398
+2021-07-12 12:16:32 [INFO] __main__: Epoch_loss_border: 192.96124267578125
+2021-07-12 12:16:32 [INFO] __main__: Epoch_loss_fct: 0
+2021-07-12 12:16:32 [INFO] __main__: Duration: 0:00:02.032336
+2021-07-12 12:16:32 [INFO] __main__: Training epoch 43
+2021-07-12 12:16:34 [INFO] __main__: Epoch_loss: 20.89720344543457
+2021-07-12 12:16:34 [INFO] __main__: Epoch_loss_reconstr: 1.7460083961486816
+2021-07-12 12:16:34 [INFO] __main__: Epoch_loss_border: 191.51194763183594
+2021-07-12 12:16:34 [INFO] __main__: Epoch_loss_fct: 0
+2021-07-12 12:16:34 [INFO] __main__: Duration: 0:00:02.032682
+2021-07-12 12:16:34 [INFO] __main__: Training epoch 44
+2021-07-12 12:16:36 [INFO] __main__: Epoch_loss: 18.93000602722168
+2021-07-12 12:16:36 [INFO] __main__: Epoch_loss_reconstr: 1.7601890563964844
+2021-07-12 12:16:36 [INFO] __main__: Epoch_loss_border: 171.69815063476562
+2021-07-12 12:16:36 [INFO] __main__: Epoch_loss_fct: 0
+2021-07-12 12:16:36 [INFO] __main__: Duration: 0:00:02.031688
+2021-07-12 12:16:36 [INFO] __main__: Training epoch 45
+2021-07-12 12:16:38 [INFO] __main__: Epoch_loss: 20.516679763793945
+2021-07-12 12:16:38 [INFO] __main__: Epoch_loss_reconstr: 1.8573119640350342
+2021-07-12 12:16:38 [INFO] __main__: Epoch_loss_border: 186.5936737060547
+2021-07-12 12:16:38 [INFO] __main__: Epoch_loss_fct: 0
+2021-07-12 12:16:38 [INFO] __main__: Duration: 0:00:02.032560
+2021-07-12 12:16:38 [INFO] __main__: Training epoch 46
+2021-07-12 12:16:40 [INFO] __main__: Epoch_loss: 19.49695587158203
+2021-07-12 12:16:40 [INFO] __main__: Epoch_loss_reconstr: 1.9079251289367676
+2021-07-12 12:16:40 [INFO] __main__: Epoch_loss_border: 175.89031982421875
+2021-07-12 12:16:40 [INFO] __main__: Epoch_loss_fct: 0
+2021-07-12 12:16:40 [INFO] __main__: Duration: 0:00:02.031369
+2021-07-12 12:16:40 [INFO] __main__: Training epoch 47
+2021-07-12 12:16:42 [INFO] __main__: Epoch_loss: 20.490041732788086
+2021-07-12 12:16:42 [INFO] __main__: Epoch_loss_reconstr: 2.012498378753662
+2021-07-12 12:16:42 [INFO] __main__: Epoch_loss_border: 184.77545166015625
+2021-07-12 12:16:42 [INFO] __main__: Epoch_loss_fct: 0
+2021-07-12 12:16:42 [INFO] __main__: Duration: 0:00:02.031539
+2021-07-12 12:16:42 [INFO] __main__: Training epoch 48
+2021-07-12 12:16:44 [INFO] __main__: Epoch_loss: 19.186935424804688
+2021-07-12 12:16:44 [INFO] __main__: Epoch_loss_reconstr: 1.9492827653884888
+2021-07-12 12:16:44 [INFO] __main__: Epoch_loss_border: 172.3765411376953
+2021-07-12 12:16:44 [INFO] __main__: Epoch_loss_fct: 0
+2021-07-12 12:16:44 [INFO] __main__: Duration: 0:00:02.032189
+2021-07-12 12:16:44 [INFO] __main__: Training epoch 49
+2021-07-12 12:16:46 [INFO] __main__: Epoch_loss: 18.03221893310547
+2021-07-12 12:16:46 [INFO] __main__: Epoch_loss_reconstr: 1.8574985265731812
+2021-07-12 12:16:46 [INFO] __main__: Epoch_loss_border: 161.74722290039062
+2021-07-12 12:16:46 [INFO] __main__: Epoch_loss_fct: 0
+2021-07-12 12:16:46 [INFO] __main__: Duration: 0:00:02.032405

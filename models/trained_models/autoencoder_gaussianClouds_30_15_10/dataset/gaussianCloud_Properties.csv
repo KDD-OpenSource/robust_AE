@@ -1,0 +1,8 @@
+name,gaussianCloud
+file_path,
+subsample,
+spacedim,30
+clouddim,3
+num_clouds,2
+num_samples,500
+num_anomalies,0

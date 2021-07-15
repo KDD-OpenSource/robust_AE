@@ -1,0 +1,5 @@
+name,mnist
+file_path,
+subsample,
+num_samples,35000
+num_anomalies,0
