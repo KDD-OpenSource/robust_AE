@@ -15,7 +15,7 @@ class linsubfct_distr:
         linsubfct_distr = algorithm.count_lin_subfcts(algorithm.module,
                 dataset.data())
         #import pdb; pdb.set_trace()
-        fig = plt.figure()
+        fig = plt.figure(figsize=(20,10))
         fctIndices = range(len(linsubfct_distr))
         values = list(map(lambda x: x[1], linsubfct_distr))
         plt.bar(fctIndices, values)

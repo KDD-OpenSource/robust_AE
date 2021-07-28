@@ -38,11 +38,16 @@ class error_border_dist_plot:
         df_sorted.set_index('new_index', inplace = True)
         fig = plt.figure(figsize=[20, 20])
         plt.plot(df_sorted.index, df_sorted['dist'].values, color =
-                'blue')
-        plt.plot(df_sorted.index, df_sorted['error'].values, color = 'red')
+                'blue', label='border_dist')
+        plt.plot(df_sorted.index, df_sorted['error'].values, color = 'red',
+                label='error')
+        plt.legend()
         plt.plot(df_sorted.index, np.zeros(len(df_sorted.index)), color='gray')
 
         # save figure
         self.evaluation.save_figure(fig, "error_border_dist_plot")
+        #import pdb; pdb.set_trace()
+        self.evaluation.save_csv(df_sorted[['error', 'dist']],
+                'error_border_dist_plot')
         plt.close("all")
 

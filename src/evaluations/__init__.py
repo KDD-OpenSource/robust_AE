@@ -1,5 +1,6 @@
 from .evaluation import evaluation
 from .parallelQualplots import parallelQualplots
+from .downstream_kmeans import downstream_kmeans
 from .tsne_latent import tsne_latent
 from .linSubfctBarplots import linSubfctBarplots
 from .linSub_unifPoints import linSub_unifPoints
@@ -22,9 +23,10 @@ from .image_lrp import image_lrp
 from .image_feature_imp import image_feature_imp
 from .qual_by_border_dist_plot import qual_by_border_dist_plot
 from .fct_change_by_border_dist_qual import fct_change_by_border_dist_qual
-from .marabou_test import marabou_test
+from .marabou_runtime import marabou_runtime
 from .bias_feature_imp import bias_feature_imp
 from .interpolation_func_diffs_pairs import interpolation_func_diffs_pairs
+from .interpolation_error_plot import interpolation_error_plot
 from .mnist_interpolation_func_diffs_pairs import (
     mnist_interpolation_func_diffs_pairs)
 # interpolation_func_diffs_parallel
@@ -33,6 +35,7 @@ from .mnist_interpolation_func_diffs_pairs import (
 __all__ = [
     "evaluation",
     "parallelQualplots",
+    "downstream_kmeans",
     "tsne_latent",
     "linSubfctBarplots",
     "linSub_unifPoints",
@@ -55,8 +58,9 @@ __all__ = [
     "image_feature_imp",
     "qual_by_border_dist_plot",
     "fct_change_by_border_dist_qual",
-    "marabou_test",
+    "marabou_runtime",
     "bias_feature_imp",
     "interpolation_func_diffs_pairs", # aka 'spikeplot'
+    "interpolation_error_plot",
     "mnist_interpolation_func_diffs_pairs",
 ]

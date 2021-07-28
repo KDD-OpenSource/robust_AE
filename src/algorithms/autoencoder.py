@@ -19,8 +19,10 @@ class autoencoder(neural_net):
     def __init__(
             self,
             topology: list,
+            fct_dist: list,
+            denoising: bool = False,
             border_dist: bool = False,
-            fct_dist: bool = False,
+            cross_point_sampling: bool = False,
             lambda_border: float = 0.01,
             lambda_fct: float = 0.1,
             name: str = "autoencoder",
@@ -37,7 +39,9 @@ class autoencoder(neural_net):
             ):
         super().__init__(name, num_epochs, dynamic_epochs, batch_size, lr, seed)
         self.border_dist = border_dist
+        self.cross_point_sampling = cross_point_sampling
         self.fct_dist = fct_dist
+        self.denoising = denoising
         self.topology = topology
         self.lambda_border = lambda_border
         self.lambda_fct = lambda_fct
@@ -67,13 +71,18 @@ class autoencoder(neural_net):
             i = 0
             data_len = len(data_loader)
             for inst_batch in data_loader:
+                if self.denoising:
+                    reconstr = self.module(inst_batch + np.random.normal(0,0.01,
+                            size=inst_batch.shape).astype(np.float32))[0]
+                else:
+                    reconstr = self.module(inst_batch)[0]
 
                 i = i + 1
                 #print(i/data_len)
-                reconstr = self.module(inst_batch)[0]
                 loss_reconstr = nn.MSELoss()(inst_batch, reconstr)
                 loss_border, loss_fct = smallest_k_dist_loss(self.num_border_points, border_dist =
-                        self.border_dist, penal_dist = 0.01, fct_dist = self.fct_dist)(inst_batch,
+                        self.border_dist, penal_dist = 0.01, fct_dist =
+                        self.fct_dist, cross_point_sampling = self.cross_point_sampling)(inst_batch,
                                 self.module)
                 loss = (loss_reconstr + self.lambda_border*loss_border +
                     self.lambda_fct*loss_fct)
@@ -153,6 +162,8 @@ class autoencoder(neural_net):
         torch.save(
             {
                 "topology": self.topology,
+                "denoising": self.denoising,
+                "cross_point_sampling": self.cross_point_sampling,
                 "fct_dist": self.fct_dist,
                 "border_dist": self.border_dist,
                 "lambda_border": self.lambda_border,
@@ -170,6 +181,8 @@ class autoencoder(neural_net):
         torch.save(
             {
                 "topology": self.topology,
+                "denoising": self.denoising,
+                "cross_point_sampling": self.cross_point_sampling,
                 "fct_dist": self.fct_dist,
                 "border_dist": self.border_dist,
                 "lambda_border": self.lambda_border,
@@ -194,6 +207,11 @@ class autoencoder(neural_net):
         model_details = torch.load(os.path.join(path, "model_detailed.pth"))
 
         self.topology = model_details["topology"]
+        self.denoising = model_details["denoising"]
+        self.cross_point_sampling = model_details["cross_point_sampling"]
+        # this code should render the if statements below useless
+        self.fct_dist = model_details["fct_dist"]
+        self.border_dist = model_details["border_dist"]
         self.bias = model_details["bias"]
         self.dropout = model_details["dropout"]
         self.L2Reg = model_details["L2Reg"]
@@ -201,7 +219,6 @@ class autoencoder(neural_net):
         self.lin_sub_fct_Counters = model_details["lin_sub_fct_Counters"]
         self.lambda_border = model_details["lambda_border"]
         self.lambda_fct = model_details["lambda_fct"]
-        #import pdb; pdb.set_trace()
         if self.fct_dist != model_details["fct_dist"]:
             print(f'''
                 You test with fct_dist being {self.fct_dist} but you trained
@@ -233,7 +250,6 @@ class autoencoder(neural_net):
             for inst in inst_batch:
                 reconstr = neural_net_mod(inst)[0]
                 error = nn.MSELoss()(inst, reconstr).detach().numpy()
-                import pdb; pdb.set_trace()
                 sample_error_pairs.append(
                     (inst, error)
                 )

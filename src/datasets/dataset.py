@@ -62,6 +62,13 @@ class dataset:
         scaler.fit(data)
         return pd.DataFrame(scaler.transform(data), columns=data.columns)
 
+    def calc_label_means(self):
+        label_means = {}
+        for label in self.labels.unique():
+            label_mean = self.data().loc[self.labels==label].mean()
+            label_means[label] = label_mean
+        return label_means
+
     def calc_dist_to_label_mean(self):
         self.data()
         self.dists_to_label_mean = pd.Series(0, self.labels.index)

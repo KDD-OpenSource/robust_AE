@@ -145,6 +145,11 @@ class interpolation_func_diffs_pairs:
             self.evaluation.save_figure(fig,
                     f"plot_interpolations_lrp_feature_bias_imp_{ctr}",
                     subfolder=subfolder)
+            res_df = pd.DataFrame(np.stack([orig, reconstr]).transpose(),
+                    columns=['orig', 'recon'])
+
+            self.evaluation.save_csv(res_df, f"plot_interpolations_{ctr}",
+                    subfolder=subfolder)
             plt.close("all")
             ctr +=1
 
@@ -167,6 +172,8 @@ class interpolation_func_diffs_pairs:
                 #'y', label='sign_sum_weighted')
         plt.legend()
         self.evaluation.save_figure(fig, "interp_func_dist_plot",
+                subfolder=subfolder)
+        self.evaluation.save_csv(interp_func_df['seq_func_dist'], "interp_func_dist",
                 subfolder=subfolder)
         plt.close("all")
         # plot interpolations

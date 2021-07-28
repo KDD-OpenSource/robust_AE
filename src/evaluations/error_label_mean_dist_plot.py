@@ -41,6 +41,7 @@ class error_label_mean_dist_plot:
         plt.ylim(0.0001,10)
         plt.legend()
 
+        self.evaluation.save_csv(df_sorted, "error_label_mean_dist_data")
         # save figure
         self.evaluation.save_figure(fig, "error_label_mean_dist_plot")
         plt.close("all")

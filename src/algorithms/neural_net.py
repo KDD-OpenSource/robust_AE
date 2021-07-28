@@ -108,7 +108,7 @@ class neural_net:
 
         forward_help_fct = smallest_k_dist_loss(1)
         neural_net = copy.deepcopy(neural_net_mod.get_neural_net())
-        mat, bias, relus = forward_help_fct.calculate_inst(neural_net,
+        mat, bias, relus, _ = forward_help_fct.calculate_inst(neural_net,
                 instance, max_layer=max_layer)
 
         nn_layers = list(neural_net_mod.get_neural_net())
@@ -331,10 +331,13 @@ class neural_net:
         ctr = 0
         for inst_batch in data_loader:
             for inst in inst_batch:
-                top_k_dists_sum = smallest_k_dist_loss(k,
-                        border_dist=True,
-                        fct_dist=False)(inst.unsqueeze(0),
-                            neural_net_mod)[0].detach().numpy()
+                try:
+                    top_k_dists_sum = smallest_k_dist_loss(k,
+                            border_dist=True,
+                            fct_dist=False)(inst.unsqueeze(0),
+                                neural_net_mod)[0].detach().numpy()
+                except:
+                    top_k_dists_sum = np.array([0])
                 #print(top_k_dists_sum)
                 #top_k_dists_sum = self.get_top_k_dists_sum(
                         #neural_net_mod, inst.float(), k)
@@ -958,11 +961,13 @@ def signature_dist(signature1, signature2):
     return distance
 
 class smallest_k_dist_loss(nn.Module):
-    def __init__(self, k, border_dist = False, penal_dist = None, fct_dist = False):
+    def __init__(self, k, border_dist = False, penal_dist = None, fct_dist =
+            False, cross_point_sampling = False):
         self.k = k
         self.border_dist = border_dist
         self.penal_dist = penal_dist
         self.fct_dist = fct_dist
+        self.cross_point_sampling = cross_point_sampling
         super(smallest_k_dist_loss, self).__init__()
 
     def forward(self, inputs, module):
@@ -991,52 +996,87 @@ class smallest_k_dist_loss(nn.Module):
         neural_net = neural_net_mod.get_neural_net()
 
         fct_dists = torch.tensor([])
-        inst_mat, inst_bias, dists, cross_points = self.calculate_inst(
-                neural_net, instance, dists=True)
+        if self.cross_point_sampling:
+            inst_mat, inst_bias, relus, relu_acts = self.calculate_inst(
+                    neural_net, instance, dists=False)
+        else:
+            inst_mat, inst_bias, dists, cross_points, relu_acts = self.calculate_inst(
+                    neural_net, instance, dists=True)
         #gc.collect()
-        if dists.isnan().sum() > 0:
-            #import pdb; pdb.set_trace()
-            #is the solution (probably)
-            return 0,0
-        if dists.isinf().sum() > 0:
-            #import pdb; pdb.set_trace()
-            # for debugging purposes
-            #inst_mat, inst_bias, dists, cross_points = self.calculate_inst(
-                    #neural_net, instance, dists=True)
-            #is the solution (probably)
-            return 0,0
-        top_k_dists = torch.topk(input=dists, k=self.k,
-                largest=False)
-        if self.border_dist:
-            # penalize every border that is closer than self.penal_dist (version from paper)
-            if self.penal_dist:
-                top_k_maxed = torch.max(torch.zeros(self.k),
-                        1-(top_k_dists[0]/self.penal_dist))
-            else:
-                # simply return the (true) distance (for evaluation purposes)
-                top_k_maxed = top_k_dists[0]
+            if dists.isnan().sum() > 0:
+                #import pdb; pdb.set_trace()
+                #is the solution (probably)
+                return 0,0
+            if dists.isinf().sum() > 0:
+                #import pdb; pdb.set_trace()
+                # for debugging purposes
+                #inst_mat, inst_bias, dists, cross_points = self.calculate_inst(
+                        #neural_net, instance, dists=True)
+                #is the solution (probably)
+                return 0,0
+            top_k_dists = torch.topk(input=dists, k=self.k,
+                    largest=False)
+            if self.border_dist:
+                # penalize every border that is closer than self.penal_dist (version from paper)
+                if self.penal_dist:
+                    top_k_maxed = torch.max(torch.zeros(self.k),
+                            1-(top_k_dists[0]/self.penal_dist))
+                else:
+                    # simply return the (true) distance (for evaluation purposes)
+                    top_k_maxed = top_k_dists[0]
 
-            # penelize every closest border (my version) (how to prevent
-            # dividing by 0 here?)
-            #top_k_maxed = 1/top_k_dists[0]
-            border_result += top_k_maxed.sum()/self.k
+                # penelize every closest border (my version) (how to prevent
+                # dividing by 0 here?)
+                #top_k_maxed = 1/top_k_dists[0]
+                border_result += top_k_maxed.sum()/self.k
 
         if self.fct_dist:
-            for top_k_ind in top_k_dists[1]:
-                cross_point = cross_points[top_k_ind]
-                cross_point_mat, cross_point_bias, _ = self.calculate_inst(
-                        neural_net, cross_point, dists = False)
-                mat_dist = self.calc_mat_diff(inst_mat, cross_point_mat)
-                bias_dist = self.calc_bias_diff(inst_bias, cross_point_bias)
-                if mat_dist > 0 and bias_dist > 0:
-                    fct_dist = (mat_dist + bias_dist).unsqueeze(0)
+            comp_points = []
+            if self.cross_point_sampling:
+                for _ in range(self.k):
+                    comp_points.append(instance + np.random.normal(0,
+                        self.penal_dist,
+                        size = instance.shape).astype(np.float32))
+            else:
+                for top_k_ind in top_k_dists[1]:
+                    comp_points.append(cross_points[top_k_ind])
+
+            # if self.cross_point_sampling append sample
+            # else append cross_points[top_k_ind]
+            # then iterate over comp_points
+            #for top_k_ind in top_k_dists[1]:
+            for comp_point in comp_points:
+                # sample new points (5)
+                #cross_point = cross_points[top_k_ind]
+                cross_point_mat, cross_point_bias, _, cross_point_relu_acts = self.calculate_inst(
+                        neural_net, comp_point, dists = False)
+
+                fct_dist = 0
+                greater_0_flg = True
+
+                if 'relu' in self.fct_dist:
+                    relu_dist = self.calc_relu_diff(relu_acts,
+                            cross_point_relu_acts)
+                    fct_dist += relu_dist
+                    if relu_dist <= 0:
+                        greater_0_flg = False
+                if 'mat' in self.fct_dist:
+                    mat_dist = self.calc_mat_diff(inst_mat,
+                            cross_point_mat)
+                    fct_dist += mat_dist
+                    if mat_dist <= 0:
+                        greater_0_flg = False
+                if 'bias' in self.fct_dist:
+                    bias_dist = self.calc_bias_diff(inst_bias,
+                            cross_point_bias)
+                    fct_dist += bias_dist
+                    if bias_dist <= 0:
+                        greater_0_flg = False
+                if greater_0_flg:
+                    fct_dist = fct_dist.unsqueeze(0)
                 else:
-                    fct_dist = (mat_dist + bias_dist).unsqueeze(0)
+                    fct_dist = fct_dist.unsqueeze(0)
                     fct_dist = fct_dist.detach()
-                #fct_dist = self.calc_fct_diff(inst_mat, inst_bias, cross_point_mat,
-                        #cross_point_bias)
-                #if fct_dist < 1e-3:
-                    #fct_dist = fct_dist.detach()
 
                 fct_dists = torch.cat((fct_dists,fct_dist))
             fct_result += fct_dists.sum()/self.k
@@ -1047,7 +1087,9 @@ class smallest_k_dist_loss(nn.Module):
         if max_layer:
             neural_net = copy.deepcopy(neural_net[:max_layer])
         _, intermed_results = neural_net(instance)
-        relus, weights, biases = self.get_neural_net_info(neural_net, intermed_results)
+        #relus, weights, biases = self.get_neural_net_info(neural_net, intermed_results)
+        relus, weights, biases, relu_activations = self.get_neural_net_info(
+                neural_net, intermed_results, activations=True)
 
         if dists:
             distances = torch.tensor([])
@@ -1076,14 +1118,16 @@ class smallest_k_dist_loss(nn.Module):
         inst_bias = neural_net[len(neural_net)-1].bias + torch.matmul(neural_net[len(neural_net)-1].weight, a)
 
         if dists:
-            return inst_mat, inst_bias, distances, cross_points
+            return inst_mat, inst_bias, distances, cross_points, relu_activations
         else:
-            return inst_mat, inst_bias, relus
+            return inst_mat, inst_bias, relus, relu_activations
 
-    def get_neural_net_info(self, neural_net, intermed_results):
+    def get_neural_net_info(self, neural_net, intermed_results, activations =
+            False):
         relus = []
         weights = []
         biases = []
+        relu_activations = []
         for key, value in intermed_results.items():
             if (
                 int(key) < len(neural_net) - 1
@@ -1092,12 +1136,16 @@ class smallest_k_dist_loss(nn.Module):
             ):
                 reluKey = str(int(key) + 1)
                 relu = intermed_results[reluKey]
+                relu_activations.append(torch.unsqueeze(relu, dim=1))
                 relu = torch.unsqueeze(torch.greater(relu,
                         0).type(torch.FloatTensor), dim=1)
                 relus.append(relu)
                 weights.append(neural_net[int(key)].weight)
                 biases.append(neural_net[int(key)].bias)
-        return relus, weights, biases
+        if activations:
+            return relus, weights, biases, relu_activations
+        else:
+            return relus, weights, biases
 
     def calc_fct_diff(self, inst_mat, inst_bias, other_mat,
             other_bias):
@@ -1111,6 +1159,14 @@ class smallest_k_dist_loss(nn.Module):
             torch.transpose(diff_mat,0,1)))
         res_mat = torch.sqrt(scalar_prod)
         return res_mat
+
+    def calc_relu_diff(self, inst_relu, other_relu):
+        relu_diff = 0
+        for ind in range(len(inst_relu)):
+            relu_diff += ((inst_relu[ind] - other_relu[ind])**2).sum()
+        return relu_diff
+
+
 
     def calc_bias_diff(self, inst_bias, other_bias):
         diff_bias = other_bias - inst_bias
