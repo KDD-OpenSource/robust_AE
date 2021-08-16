@@ -53,7 +53,7 @@ class boundary_2d_plot:
             list(map(lambda x: x.detach().numpy().flatten(), mapped_anomalies))
         )
         data_loader = DataLoader(
-            dataset=dataset.data().values,
+            dataset=dataset.test_data().values,
             drop_last=False,
             pin_memory=True,
         )
@@ -66,7 +66,7 @@ class boundary_2d_plot:
         )
 
         # plot points and anomalies
-        plt.scatter(dataset.data()[0], dataset.data()[1], color="gray")
+        plt.scatter(dataset.test_data()[0], dataset.test_data()[1], color="gray")
         # plt.scatter(mapped_anomalies[:,0], mapped_anomalies[:,1],
         #        color='black', s = 250)
         plt.scatter(mapped_points[:, 0], mapped_points[:, 1], color="green")
@@ -75,7 +75,7 @@ class boundary_2d_plot:
             plt.plot(point_pair[0], point_pair[1])
 
         # plot boundaries
-        inst = torch.tensor(dataset.data().values[0])
+        inst = torch.tensor(dataset.test_data().values[0])
         plt.scatter(inst[0], inst[1], color="red", s=250)
         boundary_points = algorithm.get_all_funcBoundaries(algorithm.module, inst)
         boundary_points_filtered = list(

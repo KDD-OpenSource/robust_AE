@@ -17,7 +17,7 @@ class linsubfct_parallelPlots:
         self.num_plots = num_plots
 
     def evaluate(self, dataset, algorithm):
-        input_points = dataset.data()
+        input_points = dataset.test_data()
         output_points = algorithm.predict(input_points)
         ymax = pd.DataFrame([input_points.max(), output_points.max()]).max().max()
         ymin = pd.DataFrame([input_points.min(), output_points.min()]).min().min()

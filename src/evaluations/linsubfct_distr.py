@@ -12,10 +12,11 @@ class linsubfct_distr:
 
     def evaluate(self, dataset, algorithm):
         # sample indices
-        linsubfct_distr = algorithm.count_lin_subfcts(algorithm.module,
-                dataset.data())
-        #import pdb; pdb.set_trace()
-        fig = plt.figure(figsize=(20,10))
+        linsubfct_distr = algorithm.count_lin_subfcts(
+            algorithm.module, dataset.test_data()
+        )
+        # import pdb; pdb.set_trace()
+        fig = plt.figure(figsize=(20, 10))
         fctIndices = range(len(linsubfct_distr))
         values = list(map(lambda x: x[1], linsubfct_distr))
         plt.bar(fctIndices, values)

@@ -59,6 +59,7 @@ class DebugModuleFilter(logging.Filter):
             return any([x.match(record.name) for x in self.module_pattern])
         return True
 
+
 class Dummy:
     def __init__(*args, **kwargs):
         # import pdb; pdb.set_trace()

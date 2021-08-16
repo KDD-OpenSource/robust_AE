@@ -12,7 +12,7 @@ class parabola(dataset):
         num_samples: int = 2000,
         num_anomalies: int = 20,
         noise: float = 0.1,
-        spacedim = 2
+        spacedim=2,
     ):
         super().__init__(name, file_path, subsample)
         self.num_samples = num_samples
@@ -25,15 +25,17 @@ class parabola(dataset):
         creates a synthetic DS by projecting a uniform cloud with unit
         width into a high dim space
         """
-        base_uniform_points = np.random.uniform(low = -5, high = 5, size =
-                (self.num_samples, self.spacedim - 1))
+        base_uniform_points = np.random.uniform(
+            low=-5, high=5, size=(self.num_samples, self.spacedim - 1)
+        )
         squared_dim = np.square(base_uniform_points).sum(axis=1)
         joined_data = np.hstack([base_uniform_points, squared_dim[:, np.newaxis]])
-        anomalies = np.random.uniform(low=-5, high=5, size=(self.num_anomalies,
-            self.spacedim))
+        anomalies = np.random.uniform(
+            low=-5, high=5, size=(self.num_anomalies, self.spacedim)
+        )
         data = np.vstack([joined_data, anomalies])
         data = pd.DataFrame(data)
-        self._data = data
-        self.labels = pd.Series(0, range(self.num_samples))
+        self._train_data = data
+        self.train_labels = pd.Series(0, range(self.num_samples))
         anom_labels = pd.Series(-1, range(self.num_anomalies))
-        self.labels = self.labels.append(anom_labels, ignore_index = True)
+        self.train_labels = self.train_labels.append(anom_labels, ignore_index=True)

@@ -28,7 +28,7 @@ class moons_2d(dataset):
         anomalies = np.random.uniform(low=-1, high=1, size=(self.num_anomalies, 2))
         data = np.vstack([dataset, anomalies])
         data = pd.DataFrame(data)
-        self.labels = pd.Series(0, range(self.num_samples))
+        self.train_labels = pd.Series(0, range(self.num_samples))
         anom_labels = pd.Series(-1, range(self.num_anomalies))
-        self.labels = self.labels.append(anom_labels, ignore_index = True)
-        self._data = data
+        self.train_labels = self.train_labels.append(anom_labels, ignore_index=True)
+        self._train_data = data

@@ -8,9 +8,7 @@ from .evaluation import evaluation
 
 
 class border_dist_2d:
-    def __init__(
-        self, eval_inst: evaluation, name: str = "border_dist_2d"
-    ):
+    def __init__(self, eval_inst: evaluation, name: str = "border_dist_2d"):
         self.name = name
         self.evaluation = eval_inst
 
@@ -19,8 +17,9 @@ class border_dist_2d:
         if input_dim != 2:
             raise Exception("cannot plot in 2d unless input dim is 2d too")
 
-        sample_dist_pairs = algorithm.assign_border_dists(algorithm.module,
-                dataset.data())
+        sample_dist_pairs = algorithm.assign_border_dists(
+            algorithm.module, dataset.test_data()
+        )
         points = pd.DataFrame(map(lambda x: x[0], sample_dist_pairs))
         dists = pd.DataFrame(map(lambda x: x[1], sample_dist_pairs), columns=[2])
         joined = pd.concat([points, dists], axis=1)

@@ -21,35 +21,29 @@ class inst_area_2d_plot:
             raise Exception("cannot plot in 2d unless input dim is 2d too")
 
         # plot background points
-#        randPoints = pd.DataFrame(
-#            np.random.uniform(low=-1, high=1, size=(self.num_points, input_dim))
-#        )
-#        inst_func_pairs = algorithm.assign_lin_subfcts_ind(algorithm.module, randPoints)
-#        points = pd.DataFrame(map(lambda x: x[0], inst_func_pairs))
-#        colors = pd.DataFrame(map(lambda x: x[1], inst_func_pairs), columns=[2])
-#        num_colors = len(colors[2].unique())
-#        joined = pd.concat([points, colors], axis=1)
+        #        randPoints = pd.DataFrame(
+        #            np.random.uniform(low=-1, high=1, size=(self.num_points, input_dim))
+        #        )
+        #        inst_func_pairs = algorithm.assign_lin_subfcts_ind(algorithm.module, randPoints)
+        #        points = pd.DataFrame(map(lambda x: x[0], inst_func_pairs))
+        #        colors = pd.DataFrame(map(lambda x: x[1], inst_func_pairs), columns=[2])
+        #        num_colors = len(colors[2].unique())
+        #        joined = pd.concat([points, colors], axis=1)
         fig = plt.figure(figsize=[20, 20])
-#        fig.suptitle(f"Number of colors is {num_colors}")
-#        plt.scatter(joined[0], joined[1], c=joined[2], alpha=0.5, cmap="tab20")
-#        # plot element from each 'color'
-#        color_repr = []
-#        for elem in joined[2].unique():
-#            color_repr.append(pd.DataFrame(joined[joined[2] == elem].iloc[0]))
-#        joined_color_repr = pd.concat(color_repr, axis=1).transpose()
-#        plt.scatter(joined_color_repr[0], joined_color_repr[1], c="blue")
-#
+        #        fig.suptitle(f"Number of colors is {num_colors}")
+        #        plt.scatter(joined[0], joined[1], c=joined[2], alpha=0.5, cmap="tab20")
+        #        # plot element from each 'color'
+        #        color_repr = []
+        #        for elem in joined[2].unique():
+        #            color_repr.append(pd.DataFrame(joined[joined[2] == elem].iloc[0]))
+        #        joined_color_repr = pd.concat(color_repr, axis=1).transpose()
+        #        plt.scatter(joined_color_repr[0], joined_color_repr[1], c="blue")
+        #
         # plot boundaries
-        inst = torch.tensor(dataset.data().values[0])
+        inst = torch.tensor(dataset.test_data().values[0])
         plt.scatter(inst[0], inst[1], color="red", s=250)
-        #linSubFcts = algorithm.get_all_funcBoundaries(algorithm.module, inst)
+        # linSubFcts = algorithm.get_all_funcBoundaries(algorithm.module, inst)
         area_fcts = algorithm.get_fct_area(algorithm.module, inst)
-
-
-
-
-
-
 
 
 #        boundary_points_filtered = list(
@@ -63,7 +57,6 @@ class inst_area_2d_plot:
 #        plt.scatter(x_points[:5], y_points[:5], color="blue", s=200)
 #        plt.scatter(x_points[5:], y_points[5:], color="blue", s=200)
 
-        # save figure
-        #self.evaluation.save_figure(fig, "scatter_2d_boundaries")
-        #plt.close("all")
-
+# save figure
+# self.evaluation.save_figure(fig, "scatter_2d_boundaries")
+# plt.close("all")

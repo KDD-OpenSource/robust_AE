@@ -18,7 +18,7 @@ class closest_linsubfct_plot:
         import pdb
 
         pdb.set_trace()
-        for index, point in dataset.data().iterrows():
+        for index, point in dataset.test_data().iterrows():
             dists.append(
                 algorithm.get_closest_funcBoundary(
                     algorithm.module, torch.tensor(point)

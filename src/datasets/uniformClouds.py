@@ -36,7 +36,7 @@ class uniformClouds(dataset):
         random_centers = []
         random_points = []
         label = 0
-        self.labels = pd.Series()
+        self.train_labels = pd.Series()
         for _ in range(self.num_clouds):
             random_matrices.append(
                 np.random.uniform(low=-1, high=1, size=(self.spacedim, self.clouddim))
@@ -53,7 +53,7 @@ class uniformClouds(dataset):
             )
             random_points[-1] = np.dot(random_matrices[-1], random_points[-1])
             labels = pd.Series(label, range(points_per_cloud))
-            self.labels = self.labels.append(labels, ignore_index = True)
+            self.train_labels = self.train_labels.append(labels, ignore_index=True)
             label += 1
             if self.noise:
                 random_points[-1] += np.random.normal(
@@ -67,6 +67,6 @@ class uniformClouds(dataset):
         data = np.hstack(random_points).transpose()
         data = np.vstack([data, anomalies])
         data = pd.DataFrame(data)
-        self._data = data
+        self._train_data = data
         anom_labels = pd.Series(-1, range(self.num_anomalies))
-        self.labels = self.labels.append(anom_labels, ignore_index = True)
+        self.train_labels = self.train_labels.append(anom_labels, ignore_index=True)
