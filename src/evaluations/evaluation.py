@@ -13,14 +13,17 @@ class evaluation:
         else:
             self.result_folder = os.path.join(os.getcwd(), "reports")
 
-    def make_run_folder(self, ctx):
+    def make_run_folder(self, ctx, exp_run=None):
         #        datetime = time.strftime("%Y-%m-%dT%H:%M:%S")
         #        folder_name = datetime + "_" + ctx
         #        self.run_folder = os.path.join(self.result_folder, folder_name)
         #        os.makedirs(self.run_folder, exist_ok = True)
         try:
             datetime = time.strftime("%Y-%m-%dT%H:%M:%S")
-            folder_name = datetime + "_" + ctx
+            if exp_run:
+                folder_name = datetime + "_" + ctx +'_run_' + str(exp_run)
+            else:
+                folder_name = datetime + "_" + ctx
             self.run_folder = os.path.join(self.result_folder, folder_name)
             os.makedirs(self.run_folder)
         except:
@@ -47,10 +50,10 @@ class evaluation:
         if subfolder:
             os.makedirs(os.path.join(self.run_folder, subfolder), exist_ok=True)
             with open(os.path.join(self.run_folder, subfolder, name), "w") as out_file:
-                json.dump(res_dict, out_file)
+                json.dump(res_dict, out_file, indent=4)
         else:
             with open(os.path.join(self.run_folder, name), "w") as out_file:
-                json.dump(res_dict, out_file)
+                json.dump(res_dict, out_file, indent=4)
 
     def save_csv(self, data, name: str, subfolder=None):
         if isinstance(data, np.ndarray):

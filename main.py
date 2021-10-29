@@ -6,7 +6,7 @@ def main():
     cfgs = load_cfgs()
     start_timestamp = time.strftime("%Y-%m-%dT%H:%M:%S")
     if parallel:
-        pool = mp.Pool(int(mp.cpu_count()))
+        pool = mp.Pool(int((1)*mp.cpu_count()))
         for cfg in cfgs:
             pool.apply_async(exec_cfg, args=((cfg, start_timestamp)))
         pool.close()
@@ -31,9 +31,12 @@ def exec_cfg(cfg, start_timestamp):
 
     for repetition in range(cfg.repeat_experiments):
         check_cfg_consistency(cfg)
-        dataset, algorithm, eval_inst, evals = load_objects_cfgs(
-            #cfg, base_folder=base_folder + "_" + str(repetition)
-            cfg, base_folder=base_folder)
+        if cfg.repeat_experiments > 1:
+            dataset, algorithm, eval_inst, evals = load_objects_cfgs(
+                cfg, base_folder=base_folder, exp_run = str(repetition))
+        else:
+            dataset, algorithm, eval_inst, evals = load_objects_cfgs(
+                cfg, base_folder=base_folder)
         if "train" in cfg.mode:
             init_logging(eval_inst.get_run_folder())
             logger = logging.getLogger(__name__)
@@ -170,7 +173,7 @@ def read_cfg(cfg):
                         cfg.dataset = row[1]
             dataset_type = cfg.dataset
             for cfg_dataset in cfg.datasets.items():
-                if cfg_dataset[0] == dataset_type:
+                if cfg_dataset[0] in dataset_type:
                     cfg_dataset[1].file_path = dataset_path
     return cfgs
 
@@ -182,10 +185,10 @@ def check_cfg_consistency(cfg):
     # if no train, then you must have a load field
 
 
-def load_objects_cfgs(cfg, base_folder):
+def load_objects_cfgs(cfg, base_folder, exp_run=None):
     dataset = load_dataset(cfg)
     algorithm = load_algorithm(cfg)
-    eval_inst, evals = load_evals(cfg, base_folder)
+    eval_inst, evals = load_evals(cfg, base_folder, exp_run)
     return dataset, algorithm, eval_inst, evals
 
 
@@ -210,6 +213,16 @@ def load_dataset(cfg):
             num_clouds=cfg.datasets.gaussianClouds.num_clouds,
             num_samples=cfg.datasets.gaussianClouds.num_samples,
             num_anomalies=cfg.datasets.gaussianClouds.num_anomalies,
+            num_testpoints=cfg.datasets.synthetic_test_samples,
+        )
+    elif cfg.dataset == "sineNoise":
+        dataset = sineNoise(
+            file_path=cfg.datasets.sineNoise.file_path,
+            subsample=cfg.datasets.subsample,
+            scale=False,
+            spacedim=cfg.datasets.sineNoise.spacedim,
+            num_samples=cfg.datasets.sineNoise.num_samples,
+            num_anomalies=cfg.datasets.sineNoise.num_anomalies,
             num_testpoints=cfg.datasets.synthetic_test_samples,
         )
     elif cfg.dataset == "moons_2d":
@@ -263,14 +276,37 @@ def load_dataset(cfg):
             file_path=cfg.datasets.chinatown.file_path,
             subsample=cfg.datasets.subsample,
         )
-    elif cfg.dataset == "crop":
+    elif "crop" in cfg.dataset:
         dataset = crop(
+            name = cfg.dataset,
+            class1 = cfg.datasets.crop.class1,
+            class2 = cfg.datasets.crop.class2,
             file_path=cfg.datasets.crop.file_path,
             subsample=cfg.datasets.subsample,
         )
     elif cfg.dataset == "moteStrain":
         dataset = moteStrain(
             file_path=cfg.datasets.moteStrain.file_path,
+            subsample=cfg.datasets.subsample,
+        )
+    elif cfg.dataset == "wafer":
+        dataset = wafer(
+            file_path=cfg.datasets.wafer.file_path,
+            subsample=cfg.datasets.subsample,
+        )
+    elif cfg.dataset == "insectWbs":
+        dataset = insectWbs(
+            file_path=cfg.datasets.insectWbs.file_path,
+            subsample=cfg.datasets.subsample,
+        )
+    elif cfg.dataset == "chlorineConcentration":
+        dataset = chlorineConcentration(
+            file_path=cfg.datasets.chlorineConcentration.file_path,
+            subsample=cfg.datasets.subsample,
+        )
+    elif cfg.dataset == "melbournePedestrian":
+        dataset = melbournePedestrian(
+            file_path=cfg.datasets.melbournePedestrian.file_path,
             subsample=cfg.datasets.subsample,
         )
     elif cfg.dataset == "proximalPhalanxOutlineCorrect":
@@ -323,6 +359,7 @@ def load_algorithm(cfg):
             algorithm.load(cfg.algorithm)
     elif cfg.algorithm == "autoencoder":
         algorithm = autoencoder(
+            train_robust_ae = cfg.algorithms.autoencoder.train_robust_ae,
             denoising=cfg.algorithms.autoencoder.denoising,
             fct_dist=cfg.algorithms.autoencoder.fct_dist,
             fct_dist_layer=cfg.algorithms.autoencoder.fct_dist_layer,
@@ -344,9 +381,9 @@ def load_algorithm(cfg):
     return algorithm
 
 
-def load_evals(cfg, base_folder=None):
+def load_evals(cfg, base_folder=None, exp_run = None):
     eval_inst = evaluation(base_folder)
-    eval_inst.make_run_folder(ctx=cfg.ctx)
+    eval_inst.make_run_folder(ctx=cfg.ctx, exp_run = exp_run)
     evals = []
     if "parallelQualplots" in cfg.evaluations:
         evals.append(parallelQualplots(eval_inst=eval_inst))
@@ -354,6 +391,8 @@ def load_evals(cfg, base_folder=None):
         evals.append(downstream_kmeans(eval_inst=eval_inst))
     if "downstream_naiveBayes" in cfg.evaluations:
         evals.append(downstream_naiveBayes(eval_inst=eval_inst))
+    if "downstream_knn" in cfg.evaluations:
+        evals.append(downstream_knn(eval_inst=eval_inst))
     if "linSubfctBarplots" in cfg.evaluations:
         evals.append(linSubfctBarplots(eval_inst=eval_inst))
     if "linSub_unifPoints" in cfg.evaluations:
@@ -364,6 +403,12 @@ def load_evals(cfg, base_folder=None):
         evals.append(linsubfct_parallelPlots(eval_inst=eval_inst))
     if "linsubfct_distr" in cfg.evaluations:
         evals.append(linsubfct_distr(eval_inst=eval_inst))
+    if "reconstr_dataset" in cfg.evaluations:
+        evals.append(reconstr_dataset(eval_inst=eval_inst))
+    if "label_info" in cfg.evaluations:
+        evals.append(label_info(eval_inst=eval_inst))
+    if "mse_test" in cfg.evaluations:
+        evals.append(mse_test(eval_inst=eval_inst))
     if "singularValuePlots" in cfg.evaluations:
         evals.append(singularValuePlots(eval_inst=eval_inst))
     if "closest_linsubfct_plot" in cfg.evaluations:
@@ -394,8 +439,14 @@ def load_evals(cfg, base_folder=None):
         evals.append(qual_by_border_dist_plot(eval_inst=eval_inst))
     if "fct_change_by_border_dist_qual" in cfg.evaluations:
         evals.append(fct_change_by_border_dist_qual(eval_inst=eval_inst))
-    if "marabou_runtime" in cfg.evaluations:
-        evals.append(marabou_runtime(eval_inst=eval_inst))
+    if "marabou_classes" in cfg.evaluations:
+        evals.append(marabou_classes(eval_inst=eval_inst))
+    if "marabou_robust" in cfg.evaluations:
+        evals.append(marabou_robust(eval_inst=eval_inst))
+    if "marabou_anomalous" in cfg.evaluations:
+        evals.append(marabou_anomalous(eval_inst=eval_inst))
+    if "marabou_largest_error" in cfg.evaluations:
+        evals.append(marabou_largest_error(eval_inst=eval_inst))
     if "bias_feature_imp" in cfg.evaluations:
         evals.append(bias_feature_imp(eval_inst=eval_inst))
     if "interpolation_func_diffs_pairs" in cfg.evaluations:

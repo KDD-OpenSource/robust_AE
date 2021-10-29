@@ -1,8 +1,11 @@
+repeat_experiments:                 1
+#ctx:                                'train_crop_3_15'
 #ctx:                                'Code'
-ctx:                                'Train_model_1gaussian_no_reg'
+ctx:                                'Code_Robust_AE'
+#ctx:                                'Train_model_3gaussian_no_reg'
 mode:                               ['train']
 multiple_models:                    Null
-dataset:                            'gaussianClouds'
+dataset:                            'sineNoise'
 #algorithm:                          './models/trained_models/autoencoder_mnist_784_150_10'
 #algorithm:                          './models/trained_models/autoencoder_mnist'
 #algorithm:                          './models/autoencoder_float_test'
@@ -42,14 +45,15 @@ evaluations:                        [
 
 datasets:
     subsample:                      Null
+    synthetic_test_samples:         1000
     gaussianClouds:
         #file_path:                  './datasets/synthetic/gaussianClouds/60'
         file_path:                  Null
-        num_clouds:                 1
+        num_clouds:                 2
         num_samples:                1000
         num_anomalies:              0
-        spacedim:                   60
-        clouddim:                   5
+        spacedim:                   30
+        clouddim:                   4
     uniformClouds:
         #file_path:                  Null
         file_path:                  './datasets/synthetic/uniformClouds/60'
@@ -59,6 +63,12 @@ datasets:
         spacedim:                   60
         clouddim:                   4
         noise:                      False
+    sineNoise:
+        #file_path:                  './datasets/synthetic/sineNoise/60'
+        file_path:                  Null
+        num_samples:                1000
+        num_anomalies:              0
+        spacedim:                   30
     moons_2d:
         #file_path:                  Null
         file_path:                  './datasets/synthetic/moons_2d'
@@ -85,6 +95,32 @@ datasets:
         file_path:                  Null
         num_samples:                -1
         num_anomalies:              0
+    electricDevices:
+        file_path:                  Null
+    italyPowerDemand:
+        file_path:                  Null
+    ecg5000:
+        file_path:                  Null
+    proximalPhalanxOutlineCorrect:
+        file_path:                  Null
+    sonyAIBORobotSurface1:
+        file_path:                  Null
+    sonyAIBORobotSurface2:
+        file_path:                  Null
+    syntheticControl:
+        file_path:                  Null
+    twoLeadEcg:
+        file_path:                  Null
+    chinatown:
+        file_path:                  Null
+    crop:
+        file_path:                  Null
+        class1:                     4
+        class2:                     12
+    moteStrain:
+        file_path:                  Null
+    melbournePedestrian:
+        file_path:                  Null
 
 algorithms:
     num_epochs:                     50
@@ -92,13 +128,39 @@ algorithms:
     lr:                             1e-3
     collect_subfcts:                False
     autoencoder:
+        train_robust_ae:            0.1
+        denoising:                  0.0
         border_dist:                False
-        fct_dist:                   False
-        lambda_border:              0.005
-        lambda_fct:                 0.05
+        cross_point_sampling:       False
+        fct_dist:                   [] # ('mat', 'bias', 'relu')
+        fct_dist_layer:             Null #(give 3 to get middle layer in [24,15,10,15,24])
+        lambda_border:              0.000
+        lambda_fct:                 0.0000
         #lambda_fct:                 0.005
         dropout:                    False
-        L2Reg:                      0.000
+        L2Reg:                      0.0000
+        topology:                   [30,15,10,15,30]
+        bias:                       True
+        num_border_points:          5
+    validation:
+        parameter:                  'lambda_border'
+        range:                      [0.00000, 0.0003]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         #topology:                   [2,5,5,5,2]
         #topology:                   [784,350,150,50,10,50,150,350,784]
             # for mnist
@@ -107,7 +169,4 @@ algorithms:
             #topology:                   [50,15,3,15,50]
             # for predMaintenance
             #topology:                   [1000,500,250,100,30,20,10,20,30,100, 250,500,1000]
-        topology:                   [60,30,5,30,60]
-        #topology:                   [30,15,10,15,30]
-        bias:                       True
-        num_border_points:          1
+            #topology:                   [60,30,20,30,60]

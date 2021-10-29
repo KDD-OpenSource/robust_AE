@@ -55,13 +55,19 @@ class interpolation_error_plot:
             self.evaluate_inst_pair(dataset, algorithm, inst_pair, subfolder)
 
     def evaluate_inst_pair(self, dataset, algorithm, insts, subfolder):
-        interpolations = over_interpolate(insts, 60)
+        interpolations = over_interpolate(insts, 100)
         reconstructions = algorithm.predict(interpolations)
         fig = plt.figure(figsize=[20, 20])
         interp_errors = np.sqrt(
             ((interpolations - reconstructions) ** 2).sum(axis=1).values
         )
+        error_mean1 = np.sqrt((reconstructions -
+            insts.iloc[0])**2).sum(axis=1).values
+        error_mean2 = np.sqrt((reconstructions -
+            insts.iloc[1])**2).sum(axis=1).values
         plt.plot(interp_errors, label="interpolation_errors")
+        plt.plot(error_mean1, label='error_reconstr_label1')
+        plt.plot(error_mean2, label='error_reconstr_label2')
         plt.legend()
         self.evaluation.save_figure(fig, "interpolation_errors", subfolder=subfolder)
         self.evaluation.save_csv(

@@ -24,7 +24,8 @@ class autoencoder(neural_net):
         topology: list,
         fct_dist: list,
         fct_dist_layer: int = None,
-        denoising: bool = False,
+        train_robust_ae: float = None,
+        denoising: float = None,
         border_dist: bool = False,
         cross_point_sampling: bool = False,
         lambda_border: float = 0.01,
@@ -49,6 +50,10 @@ class autoencoder(neural_net):
             self.fct_dist_layer = fct_dist_layer + 1
         else:
             self.fct_dist_layer = None
+        if isinstance(denoising, bool):
+            # todo: change denoising parameter to 0.01 (default value)
+            raise Exception('Denoising is supposed to be a float')
+        self.train_robust_ae = train_robust_ae
         self.denoising = denoising
         self.topology = topology
         self.lambda_border = lambda_border
@@ -69,7 +74,13 @@ class autoencoder(neural_net):
         )
         if self.collect_subfcts:
             self.lin_sub_fct_Counters.append(self.count_lin_subfcts(self.module, X))
+        if self.train_robust_ae is not None:
+            S = pd.DataFrame(np.zeros(X.shape).astype(np.float32))
         for epoch in range(self.num_epochs):
+            if self.train_robust_ae is not None:
+                L_D = X - S
+                data_loader = self.get_data_loader(L_D)
+
             if logger:
                 logger.info(f"Training epoch {epoch}")
             epoch_start = datetime.datetime.now()
@@ -84,7 +95,7 @@ class autoencoder(neural_net):
                 if self.denoising:
                     reconstr = self.module(
                         inst_batch
-                        + np.random.normal(0, 0.01, size=inst_batch.shape).astype(
+                        + np.random.normal(0, scale = self.denoising, size=inst_batch.shape).astype(
                             np.float32
                         )
                     )[0]
@@ -148,9 +159,100 @@ class autoencoder(neural_net):
             duration = epoch_end - epoch_start
             if logger:
                 logger.info(f"Duration: {duration}")
+            if self.train_robust_ae is not None:
+                L_D = self.predict(L_D)
+                S = X - L_D
+                S = self.prox_l1(S)
+                #L_D = recon
         self.module.erase_dropout()
         if self.collect_subfcts:
             self.lin_sub_fct_Counters.append(self.count_lin_subfcts(self.module, X))
+
+    def prox_l1(self, S):
+        S[abs(S)<self.train_robust_ae] = 0
+        S[S>self.train_robust_ae] -= self.train_robust_ae
+        S[S<self.train_robust_ae] += self.train_robust_ae
+        return S
+
+    def train_ae():
+        if logger:
+            logger.info(f"Training epoch {epoch}")
+        epoch_start = datetime.datetime.now()
+        self.module.train()
+        epoch_loss = 0
+        epoch_loss_reconstr = 0
+        epoch_loss_border = 0
+        epoch_loss_fct = 0
+        i = 0
+        data_len = len(data_loader)
+        for inst_batch in data_loader:
+            if self.denoising:
+                reconstr = self.module(
+                    inst_batch
+                    + np.random.normal(0, scale = self.denoising, size=inst_batch.shape).astype(
+                        np.float32
+                    )
+                )[0]
+            else:
+                reconstr = self.module(inst_batch)[0]
+
+            i = i + 1
+            # print(i/data_len)
+            loss_reconstr = nn.MSELoss()(inst_batch, reconstr)
+            loss_border, loss_fct = smallest_k_dist_loss(
+                self.num_border_points,
+                border_dist=self.border_dist,
+                penal_dist=0.01,
+                fct_dist=self.fct_dist,
+                cross_point_sampling=self.cross_point_sampling,
+                max_layer=self.fct_dist_layer,
+            )(inst_batch, self.module)
+            loss = (
+                loss_reconstr
+                + self.lambda_border * loss_border
+                + self.lambda_fct * loss_fct
+            )
+
+            self.module.zero_grad()
+            epoch_loss += loss
+            epoch_loss_reconstr += loss_reconstr
+            epoch_loss_border += loss_border
+            epoch_loss_fct += loss_fct
+            loss.backward()
+            for layer_ind in range(len(self.module.get_neural_net())):
+                if isinstance(self.module.get_neural_net()[layer_ind], nn.Linear):
+                    if (
+                        self.module.get_neural_net()[layer_ind]
+                        .weight.grad.isnan()
+                        .sum()
+                        > 0
+                    ):
+                        import pdb
+
+                        pdb.set_trace()
+                        loss_border, loss_fct = smallest_k_dist_loss(
+                            self.num_border_points,
+                            border_dist=self.border_dist,
+                            fct_dist=self.fct_dist,
+                        )(inst_batch, self.module)
+
+            optimizer.step()
+            # gc.collect()
+
+        if run_folder:
+            self.save(run_folder)
+        if logger:
+            logger.info(f"Epoch_loss: {epoch_loss}")
+            logger.info(f"Epoch_loss_reconstr: {epoch_loss_reconstr}")
+            logger.info(f"Epoch_loss_border: {epoch_loss_border}")
+            logger.info(f"Epoch_loss_fct: {epoch_loss_fct}")
+        self.module.eval()
+        if self.collect_subfcts:
+            self.lin_sub_fct_Counters.append(self.count_lin_subfcts(self.module, X))
+        epoch_end = datetime.datetime.now()
+        duration = epoch_end - epoch_start
+        if logger:
+            logger.info(f"Duration: {duration}")
 
     def predict(self, X: pd.DataFrame):
         self.module.eval()
@@ -304,7 +406,10 @@ class autoencoder(neural_net):
         # this code should render the if statements below useless
         #import pdb; pdb.set_trace()
         self.fct_dist = model_details["fct_dist"]
-        self.fct_dist_layer = model_details["fct_dist_layer"]
+        if 'fct_dist_layer' in model_details.keys():
+            self.fct_dist_layer = model_details["fct_dist_layer"]
+        else:
+            self.fct_dist_layer = None
         self.border_dist = model_details["border_dist"]
         self.num_border_points = model_details["num_border_points"]
         self.bias = model_details["bias"]

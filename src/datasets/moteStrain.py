@@ -24,7 +24,7 @@ class moteStrain(dataset):
         )
         # electricDevices_data = pd.concat([electricDevices_train,
         # electricDevices_test], ignore_index=True)
-        import pdb; pdb.set_trace()
+        dataset_train, dataset_test = self.rebalance_train_test(dataset_train, dataset_test)
         self.train_labels = dataset_train[0]
         dataset_train.drop([0], inplace=True, axis=1)
         self._train_data = dataset_train

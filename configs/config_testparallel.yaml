@@ -1,8 +1,9 @@
+repeat_experiments:                 1
 ctx:                                'Code_Test_parallelplots'
 mode:                               ['test']
-multiple_models:                    './models/trained_models/autoencoder_gaussian_60_1Cloud'
+multiple_models:                    './models/trained_models/autoencoder_ecg5000'
 #multiple_models:                    Null
-dataset:                            'gaussianClouds'
+dataset:                            'italyPowerDemand'
 #algorithm:                          './models/trained_models/autoencoder_mnist_784_150_10'
 #algorithm:                          './models/trained_models/autoencoder_mnist'
 #algorithm:                          './models/autoencoder_float_test'
@@ -86,6 +87,12 @@ datasets:
         file_path:                  Null
         num_samples:                -1
         num_anomalies:              0
+    electricDevices:
+        file_path:                  Null
+    italyPowerDemand:
+        file_path:                  Null
+    ecg5000:
+        file_path:                  Null
 
 algorithms:
     num_epochs:                     50

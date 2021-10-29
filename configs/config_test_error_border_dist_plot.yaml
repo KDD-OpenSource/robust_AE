@@ -1,6 +1,6 @@
 ctx:                                'Test_error_border_dist_plot'
 mode:                               ['test']
-multiple_models:                    './models/trained_models/autoencoder_uniform_60_coll'
+multiple_models:                    './models/trained_models/autoencoder_gaussian_60_3Cloud'
 dataset:                            'uniformClouds'
 #algorithm:                          './models/trained_models/autoencoder_mnist_784_150_10'
 #algorithm:                          './models/trained_models/autoencoder_mnist'

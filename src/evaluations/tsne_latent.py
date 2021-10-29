@@ -10,7 +10,7 @@ from .evaluation import evaluation
 
 
 class tsne_latent:
-    def __init__(self, eval_inst: evaluation, name: str = "tsne_latent", tsne_dim=3):
+    def __init__(self, eval_inst: evaluation, name: str = "tsne_latent", tsne_dim=2):
         self.name = name
         self.evaluation = eval_inst
         self.tsne_dim = tsne_dim
@@ -22,7 +22,8 @@ class tsne_latent:
             tsne = TSNE(n_components=2, random_state=0)
             tsne_obj = tsne.fit_transform(latent_repr)
             fig = plt.figure(figsize=(20, 10))
-            plt.scatter(tsne_obj[:, 0], tsne_obj[:, 1])
+            plt.scatter(tsne_obj[:, 0], tsne_obj[:, 1],
+                    c=dataset.test_labels.values, cmap='tab20')
             # plt.plot(label_mean,
             # label='label_mean')
             # plt.legend()

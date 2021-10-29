@@ -1,6 +1,7 @@
 from .dataset import dataset
 from .gaussianClouds import gaussianClouds
 from .uniformClouds import uniformClouds
+from .sineNoise import sineNoise
 from .moons_2d import moons_2d
 from .parabola import parabola
 from .mnist import mnist
@@ -17,11 +18,16 @@ from .twoLeadEcg import twoLeadEcg
 from .chinatown import chinatown
 from .crop import crop
 from .moteStrain import moteStrain
+from .wafer import wafer
+from .chlorineConcentration import chlorineConcentration
+from .insectWbs import insectWbs
+from .melbournePedestrian import melbournePedestrian
 
 __all__ = [
     "dataset",
     "gaussianClouds",
     "uniformClouds",
+    "sineNoise",
     "moons_2d",
     "parabola",
     "mnist",
@@ -36,6 +42,10 @@ __all__ = [
     "chinatown",
     "crop",
     "moteStrain",
+    "wafer",
+    "chlorineConcentration",
+    "insectWbs",
+    "melbournePedestrian",
     "electricDevices",
     "italyPowerDemand",
 ]

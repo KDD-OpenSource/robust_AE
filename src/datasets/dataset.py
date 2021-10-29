@@ -7,12 +7,14 @@ from sklearn.preprocessing import MinMaxScaler
 
 
 class dataset:
-    def __init__(self, name: str, file_path: str, subsample: int = None):
+    def __init__(self, name: str, file_path: str, subsample: int = None,
+            scale=True):
         self.name = name
         self.file_path = file_path
         self.subsample = subsample
         self._train_data = None
         self._test_data = None
+        self.scale = scale
 
     def __str__(self) -> str:
         return self.name
@@ -82,14 +84,16 @@ class dataset:
         train_data = self._train_data.values
         train_data = train_data.astype(np.float32)
         train_data = pd.DataFrame(train_data, index=train_index)
-        train_data, scaler = self.scale_data(train_data, return_scaler=True)
+        if self.scale == True:
+            train_data, scaler = self.scale_data(train_data, return_scaler=True)
         self._train_data = train_data
         test_data = self._test_data.values
         test_data = test_data.astype(np.float32)
         test_data = pd.DataFrame(test_data, index=test_index)
-        test_data = pd.DataFrame(
-            scaler.transform(test_data), columns=test_data.columns, index=test_index
-        )
+        if self.scale == True:
+            test_data = pd.DataFrame(
+                scaler.transform(test_data), columns=test_data.columns, index=test_index
+            )
         self._test_data = test_data
 
     def scale_data(
@@ -113,10 +117,14 @@ class dataset:
     def calc_label_means(self, subset):
         label_means = {}
         if subset == "train":
+            if self._train_data is None:
+                self.train_data()
             for label in self.train_labels.unique():
                 label_mean = self.train_data().loc[self.train_labels == label].mean()
                 label_means[label] = label_mean
         elif subset == "test":
+            if self._test_data is None:
+                self.test_data()
             for label in self.test_labels.unique():
                 label_mean = self.test_data().loc[self.test_labels == label].mean()
                 label_means[label] = label_mean
@@ -164,3 +172,17 @@ class dataset:
             self.load()
             self.preprocess()
         return self._test_data
+
+    def rebalance_train_test(self, dataset_train, dataset_test):
+        # shuffle:
+        dataset_train = dataset_train.sample(frac = 1)
+        dataset_test = dataset_test.sample(frac = 1)
+        # concat and divide
+        tot_num_samples = dataset_train.shape[0] + dataset_test.shape[0]
+        train_num_samples = int(tot_num_samples/2)
+        test_num_samples = int(tot_num_samples/2)
+        df_tot = pd.concat([dataset_train, dataset_test], ignore_index =
+                True)
+        dataset_train = df_tot[:train_num_samples]
+        dataset_test = df_tot[train_num_samples:train_num_samples + test_num_samples]
+        return dataset_train, dataset_test

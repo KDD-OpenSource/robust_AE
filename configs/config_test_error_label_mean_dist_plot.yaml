@@ -1,7 +1,7 @@
-ctx:                                'Code'
-#ctx:                                'Train_model_1fct_dist_mnist'
+#ctx:                                'Code'
+ctx:                                'Test_error_label_mean_dist'
 mode:                               ['test']
-multiple_models:                    './models/trained_models/autoencoder_gaussian_60_1Cloud'
+multiple_models:                    './models/trained_models/autoencoder_gaussian_60_3Cloud'
 dataset:                            'gaussianClouds'
 #algorithm:                          './models/trained_models/autoencoder_mnist_784_150_10'
 #algorithm:                          './models/trained_models/autoencoder_mnist'

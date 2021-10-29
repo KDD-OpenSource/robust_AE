@@ -90,8 +90,11 @@ algorithms:
     lr:                             1e-3
     collect_subfcts:                False
     autoencoder:
+        # want to add: DAE, sampling approach, different types of fct_dists
         border_dist:                False
-        fct_dist:                   False
+        # to add: cross_point_sampling
+        fct_dist:                   False # -> to be replaced by ['mat', 'bias', 'relu']
+        # to add: DAE
         lambda_border:              0.01
         lambda_fct:                 0.1
         #topology:                   [2,5,5,5,2]

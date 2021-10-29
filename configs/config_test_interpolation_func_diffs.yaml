@@ -1,7 +1,7 @@
 ctx:                                'Test_interpolation_func_diffs'
 mode:                               ['test']
-multiple_models:                    './models/trained_models/autoencoder_uniform_60_coll'
-dataset:                            'uniformClouds'
+multiple_models:                    './models/trained_models/autoencoder_gaussian_60_3Cloud'
+dataset:                            'gaussianClouds'
 #algorithm:                          './models/trained_models/autoencoder_mnist_784_150_10'
 #algorithm:                          './models/trained_models/autoencoder_mnist'
 #algorithm:                          './models/autoencoder_float_test'

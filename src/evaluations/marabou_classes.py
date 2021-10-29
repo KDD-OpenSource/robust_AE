@@ -15,7 +15,8 @@ from .evaluation import evaluation
 
 class marabou_classes:
     def __init__(
-        self, eval_inst: evaluation, name: str = "marabou_classes", num_eps_steps=100
+        self, eval_inst: evaluation, name: str = "marabou_classes",
+        num_eps_steps=30
     ):
         self.name = name
         self.evaluation = eval_inst
@@ -26,6 +27,7 @@ class marabou_classes:
         # model one network but with 2 inputs (like a small batch).
         # -> simulates two networks
         randomInput = torch.randn(2, algorithm.topology[0])
+        zeros = torch.zeros(2, algorithm.topology[0])
         # '202' as short for '2021'
         run_folder = self.evaluation.run_folder[
             self.evaluation.run_folder.rfind("202") :
@@ -69,6 +71,8 @@ class marabou_classes:
                 raise Exception("Something is wrong with the test_labels")
 
         # add equations for input and output
+        #options = Marabou.createOptions(verbosity=2)
+        #solutions, stats = maraboupy.MarabouCore.solve(loaded_network, options)
         numOutputVars = loaded_network.getNumOutputVariables()
         for ind1, ind2 in zip(
             range(int(numOutputVars / 2)), range(int(numOutputVars / 2), numOutputVars)
@@ -79,7 +83,10 @@ class marabou_classes:
             # test for equality
             equation.addAddend(1, outputInd1)
             equation.addAddend(-1, outputInd2)
+            equation.setScalar(0)
             loaded_network.addEquation(equation)
+            #network.addEquation(equation)
+        #solutions, stats = maraboupy.MarabouCore.solve(loaded_network, options)
 
         # add lower and upper bounds + iterate over different values of epsilon
         res_dict = {}
@@ -95,8 +102,6 @@ class marabou_classes:
                     input_ind = loaded_network.inputVariableByIndex(net_ind)
                     lower_bound = max(cur_mean - epsilon, -1)
                     upper_bound = min(cur_mean + epsilon, 1)
-                    # loaded_network.setLowerBound(input_ind, cur_mean - epsilon)
-                    # loaded_network.setUpperBound(input_ind, cur_mean + epsilon)
                     loaded_network.setLowerBound(input_ind, lower_bound)
                     loaded_network.setUpperBound(input_ind, upper_bound)
 
@@ -111,15 +116,18 @@ class marabou_classes:
                     upper_bound = min(cur_mean + epsilon, 1)
                     loaded_network.setLowerBound(input_ind, lower_bound)
                     loaded_network.setUpperBound(input_ind, upper_bound)
+                    network.setLowerBound(input_ind, lower_bound)
+                    network.setUpperBound(input_ind, upper_bound)
 
                 # THIS CODE MAKES IT SLOW AND CORRECT (A PROBLEM FOR NOT CONSISTENT
                 # RESULTS WERE (MOST LIKELY) A COMBINATION OF PRECISION ERRORS AND
                 # WRONG (PRECALCULATED) BOUNDS. HENCE WE CORRECT THE 'WRONG
                 # PRECALCULATIONS')
-                #    for net_ind in range(int(numInputVars),
-                #            loaded_network.getNumberOfVariables()):
-                #        loaded_network.setLowerBound(net_ind, -10)
-                #        loaded_network.setUpperBound(net_ind, 10)
+ #               for net_ind in range(int(numInputVars),
+ #                       loaded_network.getNumberOfVariables()):
+ #                   loaded_network.setLowerBound(net_ind, -100)
+ #                   loaded_network.setUpperBound(net_ind, 100)
+
 
                 options = Marabou.createOptions(verbosity=2)
                 solutions, stats = maraboupy.MarabouCore.solve(loaded_network, options)
@@ -129,7 +137,6 @@ class marabou_classes:
                     curr_solution = solutions
                 else:
                     # if is_sat == True:
-                    # import pdb; pdb.set_trace()
                     is_sat = False
                 res_dict[(label1, label2, epsilon)] = (total_time, is_sat)
             filtered_dict = dict(
@@ -184,6 +191,6 @@ def extract_solution_points(solutions, loaded_network):
     outputpoint2 = []
     for ind2 in range(int(numOutputVars / 2), numOutputVars):
         output_ind = loaded_network.outputVariableByIndex(ind2)
-        outputpoint2.append(solutions[output_ind])
+        outputpoint1.append(solutions[output_ind])
 
     return inputpoint1, outputpoint1, inputpoint2, outputpoint2

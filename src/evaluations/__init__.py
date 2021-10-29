@@ -2,12 +2,15 @@ from .evaluation import evaluation
 from .parallelQualplots import parallelQualplots
 from .downstream_kmeans import downstream_kmeans
 from .downstream_naiveBayes import downstream_naiveBayes
+from .downstream_knn import downstream_knn
 from .tsne_latent import tsne_latent
 from .linSubfctBarplots import linSubfctBarplots
 from .linSub_unifPoints import linSub_unifPoints
 from .subfunc_distmat import subfunc_distmat
 from .linsubfct_parallelPlots import linsubfct_parallelPlots
 from .linsubfct_distr import linsubfct_distr
+from .label_info import label_info
+from .mse_test import mse_test
 from .singularValuePlots import singularValuePlots
 from .closest_linsubfct_plot import closest_linsubfct_plot
 from .boundary_2d_plot import boundary_2d_plot
@@ -25,6 +28,9 @@ from .image_feature_imp import image_feature_imp
 from .qual_by_border_dist_plot import qual_by_border_dist_plot
 from .fct_change_by_border_dist_qual import fct_change_by_border_dist_qual
 from .marabou_classes import marabou_classes
+from .marabou_robust import marabou_robust
+from .marabou_anomalous import marabou_anomalous
+from .marabou_largest_error import marabou_largest_error
 from .bias_feature_imp import bias_feature_imp
 from .interpolation_func_diffs_pairs import interpolation_func_diffs_pairs
 from .interpolation_error_plot import interpolation_error_plot
@@ -38,12 +44,15 @@ __all__ = [
     "parallelQualplots",
     "downstream_kmeans",
     "downstream_naiveBayes",
+    "downstream_knn",
     "tsne_latent",
     "linSubfctBarplots",
     "linSub_unifPoints",
     "subfunc_distmat",
     "linsubfct_parallelPlots",
     "linsubfct_distr",
+    "label_info",
+    "mse_test",
     "singularValuePlots",
     "closest_linsubfct_plot",
     "boundary_2d_plot",
@@ -61,6 +70,9 @@ __all__ = [
     "qual_by_border_dist_plot",
     "fct_change_by_border_dist_qual",
     "marabou_classes",
+    "marabou_robust",
+    "marabou_anomalous",
+    "marabou_largest_error",
     "bias_feature_imp",
     "interpolation_func_diffs_pairs",  # aka 'spikeplot'
     "interpolation_error_plot",

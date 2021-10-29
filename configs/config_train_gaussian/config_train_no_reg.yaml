@@ -1,5 +1,5 @@
 #ctx:                                'Code'
-ctx:                                'Train_model_1gaussian_no_reg'
+ctx:                                'Train_model_3gaussian_no_reg'
 mode:                               ['train']
 multiple_models:                    Null
 dataset:                            'gaussianClouds'
@@ -43,7 +43,7 @@ evaluations:                        [
 datasets:
     subsample:                      Null
     gaussianClouds:
-        file_path:                  './datasets/synthetic/gaussianClouds/60_1Cloud'
+        file_path:                  './datasets/synthetic/gaussianClouds/60_3Cloud'
         #file_path:                  Null
         num_clouds:                 1
         num_samples:                1000
@@ -107,7 +107,7 @@ algorithms:
             #topology:                   [50,15,3,15,50]
             # for predMaintenance
             #topology:                   [1000,500,250,100,30,20,10,20,30,100, 250,500,1000]
-        topology:                   [60,30,5,30,60]
+        topology:                   [60,30,20,30,60]
         #topology:                   [30,15,10,15,30]
         bias:                       True
         num_border_points:          1

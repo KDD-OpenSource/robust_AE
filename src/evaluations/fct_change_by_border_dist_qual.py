@@ -7,6 +7,8 @@ import pandas as pd
 
 from .evaluation import evaluation
 
+# for images
+
 
 class fct_change_by_border_dist_qual:
     def __init__(
