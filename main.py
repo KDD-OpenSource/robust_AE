@@ -2,11 +2,11 @@ from imports import *
 
 
 def main():
-    parallel = False
+    parallel = True
     cfgs = load_cfgs()
     start_timestamp = time.strftime("%Y-%m-%dT%H:%M:%S")
     if parallel:
-        pool = mp.Pool(int((1)*mp.cpu_count()))
+        pool = mp.Pool(int(1*mp.cpu_count()))
         for cfg in cfgs:
             pool.apply_async(exec_cfg, args=((cfg, start_timestamp)))
         pool.close()
@@ -393,6 +393,8 @@ def load_evals(cfg, base_folder=None, exp_run = None):
         evals.append(downstream_naiveBayes(eval_inst=eval_inst))
     if "downstream_knn" in cfg.evaluations:
         evals.append(downstream_knn(eval_inst=eval_inst))
+    if "downstream_rf" in cfg.evaluations:
+        evals.append(downstream_rf(eval_inst=eval_inst))
     if "linSubfctBarplots" in cfg.evaluations:
         evals.append(linSubfctBarplots(eval_inst=eval_inst))
     if "linSub_unifPoints" in cfg.evaluations:

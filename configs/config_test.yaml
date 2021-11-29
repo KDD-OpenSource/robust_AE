@@ -1,9 +1,9 @@
-repeat_experiments:                 1
+repeat_experiments:                 10
 #ctx:                                'remaining_crop_models'
 #ctx:                                'test_robust_stats_moteStrain'
-ctx:                                'test_wafer_marabou_rob_no_rog_minimal'
+ctx:                                'marabou_robust_repeat'
 mode:                               ['test']
-multiple_models:                    './models/trained_models/autoencoder_tmp2'
+multiple_models:                    './models/trained_models/autoencoder_sinecurve_denoising'
 #multiple_models:                    './models/trained_models/autoencoder_crop_diff_ds'
 #multiple_models:                    Null
 dataset:                            'melbournePedestrian'
@@ -17,10 +17,11 @@ algorithm:                          './models/trained_models/autoencoder'
 #algorithm:                          './models/trained_models/autoencoder_test_nan'
 #algorithm:                          'autoencoder'
 evaluations:                        [
-    'parallelQualplots',
+    #'parallelQualplots',
     #'downstream_kmeans',
     #'downstream_naiveBayes',
     #'downstream_knn',
+    #'downstream_rf',
     #'tsne_latent',
     #'linSubfctBarplots',
     #'linsubfct_distr',
