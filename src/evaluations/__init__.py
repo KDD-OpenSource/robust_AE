@@ -32,6 +32,7 @@ from .marabou_robust import marabou_robust
 from .marabou_anomalous import marabou_anomalous
 from .marabou_largest_error import marabou_largest_error
 from .marabou_superv_robust import marabou_superv_robust
+from .deepoc_adv_marabou_borderpoint import deepoc_adv_marabou_borderpoint
 from .bias_feature_imp import bias_feature_imp
 from .interpolation_func_diffs_pairs import interpolation_func_diffs_pairs
 from .interpolation_error_plot import interpolation_error_plot
@@ -81,6 +82,7 @@ __all__ = [
     "marabou_anomalous",
     "marabou_largest_error",
     "marabou_superv_robust",
+    "deepoc_adv_marabou_borderpoint",
     "bias_feature_imp",
     "interpolation_func_diffs_pairs",  # aka 'spikeplot'
     "interpolation_error_plot",

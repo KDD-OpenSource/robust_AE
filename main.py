@@ -9,7 +9,7 @@ import torch
 
 def main():
 
-    parallel = True
+    parallel = False
     cfgs = load_cfgs()
     start_timestamp = time.strftime("%Y-%m-%dT%H:%M:%S")
     if parallel:

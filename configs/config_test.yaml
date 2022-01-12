@@ -1,9 +1,9 @@
 repeat_experiments:                 1
 #ctx:                                'remaining_crop_models'
 #ctx:                                'test_robust_stats_moteStrain'
-ctx:                                'test_marabou_superv'
+ctx:                                'test_deepoc_marabou_borderpoint'
 mode:                               ['test']
-multiple_models:                    './models/trained_models/fcnnClassifier_sineClass'
+multiple_models:                    './models/trained_models/deepOcc_tmp'
 #multiple_models:                    './models/trained_models/autoencoder_crop_diff_ds'
 #multiple_models:                    Null
 dataset:                            'melbournePedestrian'
@@ -57,7 +57,8 @@ evaluations:                        [
     #'marabou_robust',
     #'marabou_anomalous',
     #'marabou_largest_error',
-    'marabou_superv_robust',
+    #'marabou_superv_robust',
+    'deepoc_adv_marabou_borderpoint',
     #'bias_feature_imp',
     #'interpolation_func_diffs_pairs',
     #'interpolation_error_plot',
