@@ -7,8 +7,7 @@ from sklearn.preprocessing import MinMaxScaler
 
 
 class dataset:
-    def __init__(self, name: str, file_path: str, subsample: int = None,
-            scale=True):
+    def __init__(self, name: str, file_path: str, subsample: int = None, scale=True):
         self.name = name
         self.file_path = file_path
         self.subsample = subsample
@@ -95,6 +94,9 @@ class dataset:
                 scaler.transform(test_data), columns=test_data.columns, index=test_index
             )
         self._test_data = test_data
+        self.train_labels = self.train_labels.astype(np.float32)
+        self.test_labels = self.test_labels.astype(np.float32)
+
 
     def scale_data(
         self, data: pd.DataFrame, min_val=-1, max_val=1, return_scaler=False
@@ -175,14 +177,13 @@ class dataset:
 
     def rebalance_train_test(self, dataset_train, dataset_test):
         # shuffle:
-        dataset_train = dataset_train.sample(frac = 1)
-        dataset_test = dataset_test.sample(frac = 1)
+        dataset_train = dataset_train.sample(frac=1)
+        dataset_test = dataset_test.sample(frac=1)
         # concat and divide
         tot_num_samples = dataset_train.shape[0] + dataset_test.shape[0]
-        train_num_samples = int(tot_num_samples/2)
-        test_num_samples = int(tot_num_samples/2)
-        df_tot = pd.concat([dataset_train, dataset_test], ignore_index =
-                True)
+        train_num_samples = int(tot_num_samples / 2)
+        test_num_samples = int(tot_num_samples / 2)
+        df_tot = pd.concat([dataset_train, dataset_test], ignore_index=True)
         dataset_train = df_tot[:train_num_samples]
-        dataset_test = df_tot[train_num_samples:train_num_samples + test_num_samples]
+        dataset_test = df_tot[train_num_samples : train_num_samples + test_num_samples]
         return dataset_train, dataset_test

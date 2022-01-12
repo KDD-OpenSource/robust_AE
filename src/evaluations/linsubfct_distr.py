@@ -22,15 +22,15 @@ class linsubfct_distr:
         values = list(map(lambda x: x[1], linsubfct_distr))
         plt.bar(fctIndices, values)
         self.evaluation.save_figure(fig, "model_linsubfct_distr")
-        self.evaluation.save_csv(np.array(values), name='linsubfct_distr')
+        self.evaluation.save_csv(np.array(values), name="linsubfct_distr")
         plt.close("all")
-        res_values = self.get_top_perc(values,perc)
+        res_values = self.get_top_perc(values, perc)
         fctIndices = range(len(res_values))
-        fig = plt.figure(figsize=(20,10))
+        fig = plt.figure(figsize=(20, 10))
         plt.bar(fctIndices, res_values)
         self.evaluation.save_figure(fig, f"model_linsubfct_distr_{perc}")
-        self.evaluation.save_csv(np.array(values), name=f'linsubfct_distr_{perc}')
-        plt.close('all')
+        self.evaluation.save_csv(np.array(values), name=f"linsubfct_distr_{perc}")
+        plt.close("all")
         result_dict = {}
         result_dict["lin_subfct"] = len(values)
         result_dict[f"lin_subfct_{perc}"] = len(res_values)
@@ -39,7 +39,7 @@ class linsubfct_distr:
     def get_top_perc(self, values, perc):
         values = sorted(values, reverse=True)
         tot = sum(values)
-        perc_tot = perc*tot
+        perc_tot = perc * tot
         cur_sum = 0
         res_values = []
         i = 0

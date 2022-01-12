@@ -13,6 +13,8 @@ class reconstr_dataset:
     def evaluate(self, dataset, algorithm):
         pass
         # sample indices
+
+
 #        linsubfct_distr = algorithm.count_lin_subfcts(
 #            algorithm.module, dataset.test_data()
 #        )
@@ -36,4 +38,3 @@ class reconstr_dataset:
 #        result_dict["lin_subfct"] = len(values)
 #        result_dict[f"lin_subfct_{perc}"] = len(res_values)
 #        self.evaluation.save_json(result_dict, "num_subfcts")
-

@@ -15,12 +15,14 @@ class syntheticControl(dataset):
 
     def create(self):
         dataset_train = pd.read_csv(
-            "./datasets/SyntheticControl/SyntheticControl_TRAIN", header=None,
-            delimiter='\t',
+            "./datasets/SyntheticControl/SyntheticControl_TRAIN",
+            header=None,
+            delimiter="\t",
         )
         dataset_test = pd.read_csv(
-            "./datasets/SyntheticControl/SyntheticControl_TEST", header=None,
-            delimiter='\t',
+            "./datasets/SyntheticControl/SyntheticControl_TEST",
+            header=None,
+            delimiter="\t",
         )
         # electricDevices_data = pd.concat([electricDevices_train,
         # electricDevices_test], ignore_index=True)

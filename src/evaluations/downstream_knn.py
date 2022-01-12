@@ -16,12 +16,12 @@ class downstream_knn:
         latent_repr_train = algorithm.extract_latent(dataset.train_data())
         latent_repr_test = algorithm.extract_latent(dataset.test_data())
         # num_classes = len(dataset.test_labels.unique())
-        knn_orig = KNeighborsClassifier(n_neighbors = 10)
+        knn_orig = KNeighborsClassifier(n_neighbors=10)
         knn_orig.fit(dataset.train_data(), dataset.train_labels)
         orig_res = knn_orig.predict(dataset.test_data())
         # compare orig_res to dataset.test_labels
 
-        knn_latent = KNeighborsClassifier(n_neighbors = 10)
+        knn_latent = KNeighborsClassifier(n_neighbors=10)
         knn_latent.fit(latent_repr_train, dataset.train_labels)
         latent_res = knn_latent.predict(latent_repr_test)
 

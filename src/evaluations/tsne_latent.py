@@ -22,8 +22,12 @@ class tsne_latent:
             tsne = TSNE(n_components=2, random_state=0)
             tsne_obj = tsne.fit_transform(latent_repr)
             fig = plt.figure(figsize=(20, 10))
-            plt.scatter(tsne_obj[:, 0], tsne_obj[:, 1],
-                    c=dataset.test_labels.values, cmap='tab20')
+            plt.scatter(
+                tsne_obj[:, 0],
+                tsne_obj[:, 1],
+                c=dataset.test_labels.values,
+                cmap="tab20",
+            )
             # plt.plot(label_mean,
             # label='label_mean')
             # plt.legend()

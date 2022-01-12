@@ -15,8 +15,7 @@ from .evaluation import evaluation
 
 class marabou_classes:
     def __init__(
-        self, eval_inst: evaluation, name: str = "marabou_classes",
-        num_eps_steps=30
+        self, eval_inst: evaluation, name: str = "marabou_classes", num_eps_steps=30
     ):
         self.name = name
         self.evaluation = eval_inst
@@ -71,8 +70,8 @@ class marabou_classes:
                 raise Exception("Something is wrong with the test_labels")
 
         # add equations for input and output
-        #options = Marabou.createOptions(verbosity=2)
-        #solutions, stats = maraboupy.MarabouCore.solve(loaded_network, options)
+        # options = Marabou.createOptions(verbosity=2)
+        # solutions, stats = maraboupy.MarabouCore.solve(loaded_network, options)
         numOutputVars = loaded_network.getNumOutputVariables()
         for ind1, ind2 in zip(
             range(int(numOutputVars / 2)), range(int(numOutputVars / 2), numOutputVars)
@@ -85,8 +84,8 @@ class marabou_classes:
             equation.addAddend(-1, outputInd2)
             equation.setScalar(0)
             loaded_network.addEquation(equation)
-            #network.addEquation(equation)
-        #solutions, stats = maraboupy.MarabouCore.solve(loaded_network, options)
+            # network.addEquation(equation)
+        # solutions, stats = maraboupy.MarabouCore.solve(loaded_network, options)
 
         # add lower and upper bounds + iterate over different values of epsilon
         res_dict = {}
@@ -123,11 +122,10 @@ class marabou_classes:
                 # RESULTS WERE (MOST LIKELY) A COMBINATION OF PRECISION ERRORS AND
                 # WRONG (PRECALCULATED) BOUNDS. HENCE WE CORRECT THE 'WRONG
                 # PRECALCULATIONS')
- #               for net_ind in range(int(numInputVars),
- #                       loaded_network.getNumberOfVariables()):
- #                   loaded_network.setLowerBound(net_ind, -100)
- #                   loaded_network.setUpperBound(net_ind, 100)
-
+                #               for net_ind in range(int(numInputVars),
+                #                       loaded_network.getNumberOfVariables()):
+                #                   loaded_network.setLowerBound(net_ind, -100)
+                #                   loaded_network.setUpperBound(net_ind, 100)
 
                 options = Marabou.createOptions(verbosity=2)
                 solutions, stats = maraboupy.MarabouCore.solve(loaded_network, options)

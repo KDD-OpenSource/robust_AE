@@ -2,6 +2,7 @@ from .dataset import dataset
 from .gaussianClouds import gaussianClouds
 from .uniformClouds import uniformClouds
 from .sineNoise import sineNoise
+from .sineClasses import sineClasses
 from .moons_2d import moons_2d
 from .parabola import parabola
 from .mnist import mnist
@@ -28,6 +29,7 @@ __all__ = [
     "gaussianClouds",
     "uniformClouds",
     "sineNoise",
+    "sineClasses",
     "moons_2d",
     "parabola",
     "mnist",

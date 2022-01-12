@@ -14,10 +14,14 @@ from .evaluation import evaluation
 
 # eps is the area we are searching in, delta is the largest error value
 
+
 class marabou_largest_error:
     def __init__(
-        self, eval_inst: evaluation, name: str = "marabou_largest_error",
-        num_eps_steps=100, eps = 0.1,
+        self,
+        eval_inst: evaluation,
+        name: str = "marabou_largest_error",
+        num_eps_steps=100,
+        eps=0.1,
     ):
         self.name = name
         self.evaluation = eval_inst
@@ -35,15 +39,25 @@ class marabou_largest_error:
             input_sample = pd.DataFrame(label_means[key]).transpose()
             output_sample = algorithm.predict(input_sample)
             solution, tot_time, delta, tot_solution_stats = self.binary_search_delta(
-                    network, input_sample, output_sample, delta_accuracy,
-                    marabou_options)
+                network, input_sample, output_sample, delta_accuracy, marabou_options
+            )
 
-            self.plot_and_save(result_dict, key, solution, network,
-                    input_sample, output_sample, delta, tot_time,
-                    tot_solution_stats, collapsing)
-            self.plot_and_save_surrounding_fcts(result_dict, input_sample,
-                    solution, network, algorithm, key)
-        self.evaluation.save_json(result_dict, 'results_marabou_largest')
+            self.plot_and_save(
+                result_dict,
+                key,
+                solution,
+                network,
+                input_sample,
+                output_sample,
+                delta,
+                tot_time,
+                tot_solution_stats,
+                collapsing,
+            )
+            self.plot_and_save_surrounding_fcts(
+                result_dict, input_sample, solution, network, algorithm, key
+            )
+        self.evaluation.save_json(result_dict, "results_marabou_largest")
 
     def get_network(self, algorithm, dataset):
         randomInput = torch.randn(1, algorithm.topology[0])
@@ -69,19 +83,22 @@ class marabou_largest_error:
         )
         network = Marabou.read_onnx(
             os.path.join(onnx_folder, "saved_algorithm.onnx"),
-            outputName=str(2*len(algorithm.module.get_neural_net())+1),
+            outputName=str(2 * len(algorithm.module.get_neural_net()) + 1),
         )
         return network
 
-    def binary_search_delta(self, network, input_sample, output_sample,
-        accuracy, marabou_options):
+    def binary_search_delta(
+        self, network, input_sample, output_sample, accuracy, marabou_options
+    ):
         eps = self.eps
         numInputVars = len(network.inputVars[0][0])
         for ind in range(numInputVars):
-            network.setLowerBound(network.inputVars[0][0][ind],
-                    input_sample.values[0][ind] - eps)
-            network.setUpperBound(network.inputVars[0][0][ind],
-                    input_sample.values[0][ind] + eps)
+            network.setLowerBound(
+                network.inputVars[0][0][ind], input_sample.values[0][ind] - eps
+            )
+            network.setUpperBound(
+                network.inputVars[0][0][ind], input_sample.values[0][ind] + eps
+            )
 
         found_largest_delta = False
         delta = 1
@@ -112,119 +129,146 @@ class marabou_largest_error:
 
             network.disjunctionList = []
             network.addDisjunctionConstraint(disj_eqs)
-            network_solution = network.solve(options = marabou_options)
+            network_solution = network.solve(options=marabou_options)
             solution_stats = extract_solution_stats(network_solution)
-            tot_solution_stats = add_solution_stats(tot_solution_stats,
-                    solution_stats)
+            tot_solution_stats = add_solution_stats(tot_solution_stats, solution_stats)
             if network_solution[1].hasTimedOut():
                 solution = None
                 break
             if len(network_solution[0]) > 0:
                 extr_solution = extract_solution_point(network_solution, network)
-                diff_input = abs(np.array(extr_solution[0]) -
-                        input_sample.values[0]).max()
-                #diff_output = abs(np.array(extr_solution[1]) -
-                        #output_sample.values[0]).max()
-                larg_diff = abs(np.array(extr_solution[1]) -
-                        np.array(extr_solution[0])).max()
+                diff_input = abs(
+                    np.array(extr_solution[0]) - input_sample.values[0]
+                ).max()
+                # diff_output = abs(np.array(extr_solution[1]) -
+                # output_sample.values[0]).max()
+                larg_diff = abs(
+                    np.array(extr_solution[1]) - np.array(extr_solution[0])
+                ).max()
                 solution = network_solution
 
-                if ((diff_input < eps + accuracy) and
-                        larg_diff > delta - accuracy):
+                if (diff_input < eps + accuracy) and larg_diff > delta - accuracy:
                     delta = delta + delta_change
                 else:
                     delte = delta - delta_change
-
 
             else:
                 delta = delta - delta_change
 
             if delta_change <= accuracy:
                 found_largest_delta = True
-            delta_change = delta_change/2
+            delta_change = delta_change / 2
 
         end_time = time.time()
         tot_time = end_time - start_time
         return solution, tot_time, delta, tot_solution_stats
 
-    def plot_and_save(self, result_dict, key, solution, network, input_sample,
-            output_sample, delta, tot_time, tot_solution_stats, collapsing):
+    def plot_and_save(
+        self,
+        result_dict,
+        key,
+        solution,
+        network,
+        input_sample,
+        output_sample,
+        delta,
+        tot_time,
+        tot_solution_stats,
+        collapsing,
+    ):
         if solution is not None:
             solution_stat_dict = extract_solution_stats(solution)
             extr_solution = extract_solution_point(solution, network)
-            diff_input = abs(np.array(extr_solution[0]) -
-                    input_sample.values[0]).max()
-            larg_diff = abs(np.array(extr_solution[1]) -
-                    np.array(extr_solution[0])).max()
-            fig, ax = plt.subplots(nrows = 2, ncols = 1, figsize=[20,20])
-            fig.suptitle(f'Calculation took {tot_time}')
-            ax[0].plot(input_sample.values[0], label='input_sample')
-            ax[0].plot(extr_solution[0], label='input_solution')
-            ax[0].set_title(f'''L_infty dist is at most {self.eps}. (real:
-                    {diff_input})''')
+            diff_input = abs(np.array(extr_solution[0]) - input_sample.values[0]).max()
+            larg_diff = abs(
+                np.array(extr_solution[1]) - np.array(extr_solution[0])
+            ).max()
+            fig, ax = plt.subplots(nrows=2, ncols=1, figsize=[20, 20])
+            fig.suptitle(f"Calculation took {tot_time}")
+            ax[0].plot(input_sample.values[0], label="input_sample")
+            ax[0].plot(extr_solution[0], label="input_solution")
+            ax[0].set_title(
+                f"""L_infty dist is at most {self.eps}. (real:
+                    {diff_input})"""
+            )
             ax[0].legend()
-            ax[0].set_ylim(-1.25,1.25)
-            ax[1].plot(extr_solution[0],label='input_solution')
-            ax[1].plot(extr_solution[1], label='output_solution')
-            ax[1].set_title(f'''L_infty dist is at least {delta} (up to
-                accuracy) real: {larg_diff}''')
+            ax[0].set_ylim(-1.25, 1.25)
+            ax[1].plot(extr_solution[0], label="input_solution")
+            ax[1].plot(extr_solution[1], label="output_solution")
+            ax[1].set_title(
+                f"""L_infty dist is at least {delta} (up to
+                accuracy) real: {larg_diff}"""
+            )
             ax[1].legend()
-            ax[1].set_ylim(-1.25,1.25)
+            ax[1].set_ylim(-1.25, 1.25)
             self.evaluation.save_figure(
-                fig, f"marabou_largest_error_close_to_sample_{key}")
-            plt.close('all')
+                fig, f"marabou_largest_error_close_to_sample_{key}"
+            )
+            plt.close("all")
 
-            self.evaluation.save_csv(input_sample, 'input_sample',
-                    subfolder=f'results_largest_error_{key}')
-            self.evaluation.save_csv(output_sample, 'output_sample',
-                    subfolder=f'results_largest_error_{key}')
-            self.evaluation.save_csv(pd.DataFrame(extr_solution[0]), 'input_solution',
-                    subfolder=f'results_largest_error_{key}')
-            self.evaluation.save_csv(pd.DataFrame(extr_solution[1]), 'output_solution',
-                    subfolder=f'results_largest_error_{key}')
-            result_dict['label_'+str(key)] = {'calc_time': tot_time,
-                    'dist_to_y': self.eps,
-                    'error': delta,
-                    'real_dist_to_y': diff_input,
-                    'real_error': larg_diff}
-            result_dict['label_'+str(key)].update(solution_stat_dict)
+            self.evaluation.save_csv(
+                input_sample, "input_sample", subfolder=f"results_largest_error_{key}"
+            )
+            self.evaluation.save_csv(
+                output_sample, "output_sample", subfolder=f"results_largest_error_{key}"
+            )
+            self.evaluation.save_csv(
+                pd.DataFrame(extr_solution[0]),
+                "input_solution",
+                subfolder=f"results_largest_error_{key}",
+            )
+            self.evaluation.save_csv(
+                pd.DataFrame(extr_solution[1]),
+                "output_solution",
+                subfolder=f"results_largest_error_{key}",
+            )
+            result_dict["label_" + str(key)] = {
+                "calc_time": tot_time,
+                "dist_to_y": self.eps,
+                "error": delta,
+                "real_dist_to_y": diff_input,
+                "real_error": larg_diff,
+            }
+            result_dict["label_" + str(key)].update(solution_stat_dict)
             tot_solution_stats = update_to_tot_key(tot_solution_stats)
-            result_dict['label_'+str(key)].update(tot_solution_stats)
-            result_dict['collapsing'] = collapsing
+            result_dict["label_" + str(key)].update(tot_solution_stats)
+            result_dict["collapsing"] = collapsing
         else:
-            result_dict['label_'+str(key)] = {'calc_time': tot_time,
-                    'dist_to_y': self.eps,
-                    'error': None,
-                    'real_dist_to_y': None,
-                    'real_error': None}
+            result_dict["label_" + str(key)] = {
+                "calc_time": tot_time,
+                "dist_to_y": self.eps,
+                "error": None,
+                "real_dist_to_y": None,
+                "real_error": None,
+            }
             tot_solution_stats = update_to_tot_key(tot_solution_stats)
-            result_dict['label_'+str(key)].update(tot_solution_stats)
-            result_dict['collapsing'] = collapsing
+            result_dict["label_" + str(key)].update(tot_solution_stats)
+            result_dict["collapsing"] = collapsing
 
-
-    def plot_and_save_surrounding_fcts(self, result_dict, input_sample, solution, network,
-            algorithm, key):
-        #extr_solution = extract_solution_point(solution, network)
-        #diff_input = abs(np.array(extr_solution[0]) -
-                #input_sample.values[0]).max()
+    def plot_and_save_surrounding_fcts(
+        self, result_dict, input_sample, solution, network, algorithm, key
+    ):
+        # extr_solution = extract_solution_point(solution, network)
+        # diff_input = abs(np.array(extr_solution[0]) -
+        # input_sample.values[0]).max()
         samples = np.random.uniform(
-                low = (input_sample - self.eps).values,
-                high = (input_sample + self.eps).values,
-                size=(1000, len(input_sample.columns))
-                )
-        distr = algorithm.count_lin_subfcts(algorithm.module,
-                pd.DataFrame(samples))
-        sorted_distr = sorted(list(map(lambda x:x[1], distr)), reverse=True)
-        fig, ax = plt.subplots(1,1,figsize=(20,10))
+            low=(input_sample - self.eps).values,
+            high=(input_sample + self.eps).values,
+            size=(1000, len(input_sample.columns)),
+        )
+        distr = algorithm.count_lin_subfcts(algorithm.module, pd.DataFrame(samples))
+        sorted_distr = sorted(list(map(lambda x: x[1], distr)), reverse=True)
+        fig, ax = plt.subplots(1, 1, figsize=(20, 10))
         fct_indices = range(len(sorted_distr))
         ax.bar(fct_indices, sorted_distr)
-        self.evaluation.save_figure(
-            fig, f"surrounding_fcts_distr_{key}")
-        self.evaluation.save_csv(pd.DataFrame(sorted_distr),
-                f'surrounding_fcts_distr_{key}',
-                subfolder=f'results_largest{key}')
-        result_dict['label_'+str(key)].update({'surrounding_fcts':
-            len(sorted_distr)})
+        self.evaluation.save_figure(fig, f"surrounding_fcts_distr_{key}")
+        self.evaluation.save_csv(
+            pd.DataFrame(sorted_distr),
+            f"surrounding_fcts_distr_{key}",
+            subfolder=f"results_largest{key}",
+        )
+        result_dict["label_" + str(key)].update({"surrounding_fcts": len(sorted_distr)})
+
 
 def extract_solution_point(solution, network):
     solution = solution[0]
@@ -241,25 +285,24 @@ def extract_solution_point(solution, network):
 
 def extract_solution_stats(solution):
     res_dict = {}
-    res_dict['MaxDegradation'] = solution[1].getMaxDegradation()
-    res_dict['MaxStackDepth'] = solution[1].getMaxStackDepth()
-    res_dict['NumConstrainFixingSteps'] = solution[
-            1].getNumConstraintFixingSteps()
-    res_dict['NumMainLoopIterations'] = solution[1].getNumMainLoopIterations()
-    res_dict['NumPops'] = solution[1].getNumPops()
-    res_dict['NumPrecisionRestorations'] = solution[
-            1].getNumPrecisionRestorations()
-    res_dict['NumSimplexPivotSelectionsIgnoredForStability'] = solution[
-            1].getNumSimplexPivotSelectionsIgnoredForStability()
-    res_dict['NumSimplexUnstablePivots'] = solution[
-            1].getNumSimplexUnstablePivots()
-    res_dict['NumSplits'] = solution[1].getNumSplits()
-    res_dict['NumTableauPivots'] = solution[1].getNumTableauPivots()
-    res_dict['NumVisitedTreeStates'] = solution[1].getNumVisitedTreeStates()
-    res_dict['TimeSimplexStepsMicro'] = solution[1].getTimeSimplexStepsMicro()
-    res_dict['TotalTime'] = solution[1].getTotalTime()
-    res_dict['hasTimedOut'] = solution[1].hasTimedOut()
+    res_dict["MaxDegradation"] = solution[1].getMaxDegradation()
+    res_dict["MaxStackDepth"] = solution[1].getMaxStackDepth()
+    res_dict["NumConstrainFixingSteps"] = solution[1].getNumConstraintFixingSteps()
+    res_dict["NumMainLoopIterations"] = solution[1].getNumMainLoopIterations()
+    res_dict["NumPops"] = solution[1].getNumPops()
+    res_dict["NumPrecisionRestorations"] = solution[1].getNumPrecisionRestorations()
+    res_dict["NumSimplexPivotSelectionsIgnoredForStability"] = solution[
+        1
+    ].getNumSimplexPivotSelectionsIgnoredForStability()
+    res_dict["NumSimplexUnstablePivots"] = solution[1].getNumSimplexUnstablePivots()
+    res_dict["NumSplits"] = solution[1].getNumSplits()
+    res_dict["NumTableauPivots"] = solution[1].getNumTableauPivots()
+    res_dict["NumVisitedTreeStates"] = solution[1].getNumVisitedTreeStates()
+    res_dict["TimeSimplexStepsMicro"] = solution[1].getTimeSimplexStepsMicro()
+    res_dict["TotalTime"] = solution[1].getTotalTime()
+    res_dict["hasTimedOut"] = solution[1].hasTimedOut()
     return res_dict
+
 
 def add_solution_stats(solution1, solution2):
     if solution1 == 0:
@@ -271,15 +314,17 @@ def add_solution_stats(solution1, solution2):
         res_solution[key] = solution1[key] + solution2[key]
     return res_solution
 
+
 def update_to_tot_key(res_dict):
     updated_dict = {}
     for key in res_dict:
-        updated_dict['tot_' + key] = res_dict[key]
+        updated_dict["tot_" + key] = res_dict[key]
     return updated_dict
+
 
 def test_for_collapsing(dataset, algorithm):
     pred_dataset = algorithm.predict(dataset.test_data())
     if pred_dataset.var().sum() < 0.00001:
         return True
-    else: 
+    else:
         return False

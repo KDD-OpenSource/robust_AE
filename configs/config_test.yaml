@@ -1,9 +1,9 @@
-repeat_experiments:                 10
+repeat_experiments:                 1
 #ctx:                                'remaining_crop_models'
 #ctx:                                'test_robust_stats_moteStrain'
-ctx:                                'marabou_robust_repeat'
+ctx:                                'test_marabou_superv'
 mode:                               ['test']
-multiple_models:                    './models/trained_models/autoencoder_sinecurve_denoising'
+multiple_models:                    './models/trained_models/fcnnClassifier_sineClass'
 #multiple_models:                    './models/trained_models/autoencoder_crop_diff_ds'
 #multiple_models:                    Null
 dataset:                            'melbournePedestrian'
@@ -28,6 +28,12 @@ evaluations:                        [
     #'reconstr_dataset',
     #'label_info',
     #'mse_test',
+    #'anomaly_score_hist',
+    #'anomaly_score_samples',
+    #'anomaly_quantile_radius',
+    #'ad_box_creator',
+    #'calc_linfct_volume',
+    #'superv_accuracy',
     #    'linSub_unifPoints',
     #    'subfunc_distmat',
     #    'linsubfct_parallelPlots',
@@ -48,9 +54,10 @@ evaluations:                        [
     #'qual_by_border_dist_plot',
     #'fct_change_by_border_dist_qual',
     #'marabou_classes',
-    'marabou_robust',
+    #'marabou_robust',
     #'marabou_anomalous',
     #'marabou_largest_error',
+    'marabou_superv_robust',
     #'bias_feature_imp',
     #'interpolation_func_diffs_pairs',
     #'interpolation_error_plot',
@@ -84,6 +91,13 @@ datasets:
         num_samples:                1000
         num_anomalies:              0
         spacedim:                   60
+    sineClasses:
+        #file_path:                  './datasets/synthetic/sineNoise/60'
+        file_path:                  Null
+        num_samples:                1000
+        num_anomalies:              0
+        spacedim:                   50
+        num_classes:                3
     moons_2d:
         #file_path:                  Null
         file_path:                  './datasets/synthetic/moons_2d'

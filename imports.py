@@ -1,9 +1,8 @@
 import os
 import csv
 import copy
-import sys
 import time
-import multiprocessing as mp
+import sys
 
 import numpy as np
 import pandas as pd
@@ -22,6 +21,7 @@ from box import Box
 from src.datasets.gaussianClouds import gaussianClouds
 from src.datasets.uniformClouds import uniformClouds
 from src.datasets.sineNoise import sineNoise
+from src.datasets.sineClasses import sineClasses
 from src.datasets.moons_2d import moons_2d
 from src.datasets.parabola import parabola
 from src.datasets.mnist import mnist
@@ -43,6 +43,8 @@ from src.datasets.insectWbs import insectWbs
 from src.datasets.chlorineConcentration import chlorineConcentration
 from src.datasets.melbournePedestrian import melbournePedestrian
 from src.algorithms.autoencoder import autoencoder
+from src.algorithms.deepOcc import deepOcc
+from src.algorithms.fcnnClassifier import fcnnClassifier
 from src.algorithms.neural_net import reset_weights
 from src.evaluations.parallelQualplots import parallelQualplots
 from src.evaluations.downstream_kmeans import downstream_kmeans
@@ -55,9 +57,14 @@ from src.evaluations.linSub_unifPoints import linSub_unifPoints
 from src.evaluations.subfunc_distmat import subfunc_distmat
 from src.evaluations.linsubfct_parallelPlots import linsubfct_parallelPlots
 from src.evaluations.linsubfct_distr import linsubfct_distr
+from src.evaluations.calc_linfct_volume import calc_linfct_volume
 from src.evaluations.reconstr_dataset import reconstr_dataset
 from src.evaluations.label_info import label_info
 from src.evaluations.mse_test import mse_test
+from src.evaluations.anomaly_score_hist import anomaly_score_hist
+from src.evaluations.anomaly_score_samples import anomaly_score_samples
+from src.evaluations.anomaly_quantile_radius import anomaly_quantile_radius
+from src.evaluations.ad_box_creator import ad_box_creator
 from src.evaluations.singularValuePlots import singularValuePlots
 from src.evaluations.closest_linsubfct_plot import closest_linsubfct_plot
 from src.evaluations.boundary_2d_plot import boundary_2d_plot
@@ -65,6 +72,7 @@ from src.evaluations.inst_area_2d_plot import inst_area_2d_plot
 from src.evaluations.border_dist_2d import border_dist_2d
 from src.evaluations.border_dist_sort_plot import border_dist_sort_plot
 from src.evaluations.error_border_dist_plot import error_border_dist_plot
+from src.evaluations.superv_accuracy import superv_accuracy
 from src.evaluations.orig_latent_dist_ratios import orig_latent_dist_ratios
 from src.evaluations.error_label_mean_dist_plot import error_label_mean_dist_plot
 from src.evaluations.error_border_dist_plot_colored import (
@@ -81,6 +89,7 @@ from src.evaluations.marabou_classes import marabou_classes
 from src.evaluations.marabou_robust import marabou_robust
 from src.evaluations.marabou_anomalous import marabou_anomalous
 from src.evaluations.marabou_largest_error import marabou_largest_error
+from src.evaluations.marabou_superv_robust import marabou_superv_robust
 from src.evaluations.fct_change_by_border_dist_qual import (
     fct_change_by_border_dist_qual,
 )

@@ -31,10 +31,17 @@ from .marabou_classes import marabou_classes
 from .marabou_robust import marabou_robust
 from .marabou_anomalous import marabou_anomalous
 from .marabou_largest_error import marabou_largest_error
+from .marabou_superv_robust import marabou_superv_robust
 from .bias_feature_imp import bias_feature_imp
 from .interpolation_func_diffs_pairs import interpolation_func_diffs_pairs
 from .interpolation_error_plot import interpolation_error_plot
 from .mnist_interpolation_func_diffs_pairs import mnist_interpolation_func_diffs_pairs
+from .anomaly_score_hist import anomaly_score_hist
+from .anomaly_score_samples import anomaly_score_samples
+from .anomaly_quantile_radius import anomaly_quantile_radius
+from .ad_box_creator import ad_box_creator
+from .calc_linfct_volume import calc_linfct_volume
+from .superv_accuracy import superv_accuracy
 
 # interpolation_func_diffs_parallel
 # parallel_feature_imp
@@ -73,8 +80,15 @@ __all__ = [
     "marabou_robust",
     "marabou_anomalous",
     "marabou_largest_error",
+    "marabou_superv_robust",
     "bias_feature_imp",
     "interpolation_func_diffs_pairs",  # aka 'spikeplot'
     "interpolation_error_plot",
     "mnist_interpolation_func_diffs_pairs",
+    "anomaly_score_hist",
+    "anomaly_score_samples",
+    "anomaly_quantile_radius",
+    "ad_box_creator",
+    "calc_linfct_volume",
+    "superv_accuracy"
 ]

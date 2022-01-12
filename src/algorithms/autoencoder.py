@@ -41,8 +41,10 @@ class autoencoder(neural_net):
         lr: float = 1e-3,
         seed: int = None,
         collect_subfcts=False,
+        save_interm_models=False,
     ):
-        super().__init__(name, num_epochs, dynamic_epochs, batch_size, lr, seed)
+        super().__init__(name, num_epochs, dynamic_epochs, batch_size, lr,
+                seed, save_interm_models)
         self.border_dist = border_dist
         self.cross_point_sampling = cross_point_sampling
         self.fct_dist = fct_dist
@@ -51,8 +53,7 @@ class autoencoder(neural_net):
         else:
             self.fct_dist_layer = None
         if isinstance(denoising, bool):
-            # todo: change denoising parameter to 0.01 (default value)
-            raise Exception('Denoising is supposed to be a float')
+            raise Exception("Denoising is supposed to be a float")
         self.train_robust_ae = train_robust_ae
         self.denoising = denoising
         self.topology = topology
@@ -66,23 +67,19 @@ class autoencoder(neural_net):
         self.lin_sub_fct_Counters = []
         self.module = autoencoderModule(self.topology, self.bias, self.dropout)
 
-    def fit(self, X: pd.DataFrame, run_folder=None, logger=None):
+    def fit(self, dataset, run_folder=None, logger=None):
+        if isinstance(dataset, pd.DataFrame):
+            X = dataset
+        else:
+            X = dataset.train_data()
+
         data_loader = self.get_data_loader(X)
-        # print(self.num_epochs)
         optimizer = torch.optim.Adam(
             params=self.module.parameters(), lr=self.lr, weight_decay=self.L2Reg
         )
         if self.collect_subfcts:
             self.lin_sub_fct_Counters.append(self.count_lin_subfcts(self.module, X))
-        if self.train_robust_ae is not None:
-            S = pd.DataFrame(np.zeros(X.shape).astype(np.float32))
         for epoch in range(self.num_epochs):
-            if self.train_robust_ae is not None:
-                L_D = X - S
-                data_loader = self.get_data_loader(L_D)
-
-            if logger:
-                logger.info(f"Training epoch {epoch}")
             epoch_start = datetime.datetime.now()
             self.module.train()
             epoch_loss = 0
@@ -93,17 +90,14 @@ class autoencoder(neural_net):
             data_len = len(data_loader)
             for inst_batch in data_loader:
                 if self.denoising:
-                    reconstr = self.module(
-                        inst_batch
-                        + np.random.normal(0, scale = self.denoising, size=inst_batch.shape).astype(
-                            np.float32
-                        )
-                    )[0]
+                    noise = np.random.normal(0, scale=self.denoising,
+                            size=inst_batch.shape).astype(np.float32)
+                    inst_batch_noise = inst_batch + noise
+                    reconstr = self.module(inst_batch_noise)[0]
                 else:
                     reconstr = self.module(inst_batch)[0]
 
                 i = i + 1
-                # print(i/data_len)
                 loss_reconstr = nn.MSELoss()(inst_batch, reconstr)
                 loss_border, loss_fct = smallest_k_dist_loss(
                     self.num_border_points,
@@ -125,134 +119,59 @@ class autoencoder(neural_net):
                 epoch_loss_border += loss_border
                 epoch_loss_fct += loss_fct
                 loss.backward()
-                for layer_ind in range(len(self.module.get_neural_net())):
-                    if isinstance(self.module.get_neural_net()[layer_ind], nn.Linear):
-                        if (
-                            self.module.get_neural_net()[layer_ind]
-                            .weight.grad.isnan()
-                            .sum()
-                            > 0
-                        ):
-                            import pdb
-
-                            pdb.set_trace()
-                            loss_border, loss_fct = smallest_k_dist_loss(
-                                self.num_border_points,
-                                border_dist=self.border_dist,
-                                fct_dist=self.fct_dist,
-                            )(inst_batch, self.module)
-
+                self.check_nan()
                 optimizer.step()
-                # gc.collect()
-
-            if run_folder:
-                self.save(run_folder)
-            if logger:
-                logger.info(f"Epoch_loss: {epoch_loss}")
-                logger.info(f"Epoch_loss_reconstr: {epoch_loss_reconstr}")
-                logger.info(f"Epoch_loss_border: {epoch_loss_border}")
-                logger.info(f"Epoch_loss_fct: {epoch_loss_fct}")
+                if run_folder and self.save_interm_models:
+                    self.save(run_folder, subfolder=f'Epochs/Epoch_{epoch}')
+                    #self.save(run_folder)
             self.module.eval()
+            if self.train_robust_ae is not None:
+                if epoch == 0:
+                    L_D = self.predict(X)
+                else:
+                    L_D = self.predict(L_D)
+                S = X - L_D
+                S = self.prox_l1(S)
+                L_D = X - S
+                data_loader = self.get_data_loader(L_D)
             if self.collect_subfcts:
                 self.lin_sub_fct_Counters.append(self.count_lin_subfcts(self.module, X))
             epoch_end = datetime.datetime.now()
             duration = epoch_end - epoch_start
+            if run_folder:
+                self.save(run_folder)
             if logger:
+                logger.info(f"Training epoch {epoch}")
+                logger.info(f"Epoch_loss: {epoch_loss}")
+                logger.info(f"Epoch_loss_reconstr: {epoch_loss_reconstr}")
+                logger.info(f"Epoch_loss_border: {epoch_loss_border}")
+                logger.info(f"Epoch_loss_fct: {epoch_loss_fct}")
                 logger.info(f"Duration: {duration}")
-            if self.train_robust_ae is not None:
-                L_D = self.predict(L_D)
-                S = X - L_D
-                S = self.prox_l1(S)
-                #L_D = recon
         self.module.erase_dropout()
         if self.collect_subfcts:
             self.lin_sub_fct_Counters.append(self.count_lin_subfcts(self.module, X))
 
     def prox_l1(self, S):
-        S[abs(S)<self.train_robust_ae] = 0
-        S[S>self.train_robust_ae] -= self.train_robust_ae
-        S[S<self.train_robust_ae] += self.train_robust_ae
+        S[abs(S) < self.train_robust_ae] = 0
+        S[S > self.train_robust_ae] -= self.train_robust_ae
+        S[S < self.train_robust_ae] += self.train_robust_ae
         return S
 
-    def train_ae():
-        if logger:
-            logger.info(f"Training epoch {epoch}")
-        epoch_start = datetime.datetime.now()
-        self.module.train()
-        epoch_loss = 0
-        epoch_loss_reconstr = 0
-        epoch_loss_border = 0
-        epoch_loss_fct = 0
-        i = 0
-        data_len = len(data_loader)
-        for inst_batch in data_loader:
-            if self.denoising:
-                reconstr = self.module(
-                    inst_batch
-                    + np.random.normal(0, scale = self.denoising, size=inst_batch.shape).astype(
-                        np.float32
-                    )
-                )[0]
-            else:
-                reconstr = self.module(inst_batch)[0]
-
-            i = i + 1
-            # print(i/data_len)
-            loss_reconstr = nn.MSELoss()(inst_batch, reconstr)
-            loss_border, loss_fct = smallest_k_dist_loss(
-                self.num_border_points,
-                border_dist=self.border_dist,
-                penal_dist=0.01,
-                fct_dist=self.fct_dist,
-                cross_point_sampling=self.cross_point_sampling,
-                max_layer=self.fct_dist_layer,
-            )(inst_batch, self.module)
-            loss = (
-                loss_reconstr
-                + self.lambda_border * loss_border
-                + self.lambda_fct * loss_fct
-            )
-
-            self.module.zero_grad()
-            epoch_loss += loss
-            epoch_loss_reconstr += loss_reconstr
-            epoch_loss_border += loss_border
-            epoch_loss_fct += loss_fct
-            loss.backward()
-            for layer_ind in range(len(self.module.get_neural_net())):
-                if isinstance(self.module.get_neural_net()[layer_ind], nn.Linear):
-                    if (
-                        self.module.get_neural_net()[layer_ind]
-                        .weight.grad.isnan()
-                        .sum()
-                        > 0
-                    ):
-                        import pdb
-
-                        pdb.set_trace()
-                        loss_border, loss_fct = smallest_k_dist_loss(
-                            self.num_border_points,
-                            border_dist=self.border_dist,
-                            fct_dist=self.fct_dist,
-                        )(inst_batch, self.module)
-
-            optimizer.step()
-            # gc.collect()
-
-        if run_folder:
-            self.save(run_folder)
-        if logger:
-            logger.info(f"Epoch_loss: {epoch_loss}")
-            logger.info(f"Epoch_loss_reconstr: {epoch_loss_reconstr}")
-            logger.info(f"Epoch_loss_border: {epoch_loss_border}")
-            logger.info(f"Epoch_loss_fct: {epoch_loss_fct}")
-        self.module.eval()
-        if self.collect_subfcts:
-            self.lin_sub_fct_Counters.append(self.count_lin_subfcts(self.module, X))
-        epoch_end = datetime.datetime.now()
-        duration = epoch_end - epoch_start
-        if logger:
-            logger.info(f"Duration: {duration}")
+    def check_nan(self):
+        for layer_ind in range(len(self.module.get_neural_net())):
+            if isinstance(self.module.get_neural_net()[layer_ind], nn.Linear):
+                if (
+                    self.module.get_neural_net()[layer_ind]
+                    .weight.grad.isnan()
+                    .sum()
+                    > 0
+                ):
+                    import pdb; pdb.set_trace()
+                    loss_border, loss_fct = smallest_k_dist_loss(
+                        self.num_border_points,
+                        border_dist=self.border_dist,
+                        fct_dist=self.fct_dist,
+                    )(inst_batch, self.module)
 
     def predict(self, X: pd.DataFrame):
         self.module.eval()
@@ -319,16 +238,6 @@ class autoencoder(neural_net):
             current_best_gaussian_var,
         )
 
-    def calc_naive_bayes(self, train_data, test_data, train_labels, test_labels):
-        latent_repr_train = self.extract_latent(train_data)
-        latent_repr_test = self.extract_latent(test_data)
-
-        gaussian_latent = GaussianNB()
-        gaussian_latent.fit(latent_repr_train, train_labels)
-        latent_res = gaussian_latent.predict(latent_repr_test)
-        acc_latent = accuracy_score(test_labels, latent_res)
-        return acc_latent
-
     def extract_latent(self, X: pd.DataFrame):
         self.module.eval()
         data_loader = DataLoader(
@@ -348,55 +257,58 @@ class autoencoder(neural_net):
         latent_repr = pd.DataFrame(latent_repr)
         return latent_repr
 
-    def save(self, path):
-        # path is the folder within reports in which it has been trained
-        os.makedirs(os.path.join("./models/trained_models", self.name), exist_ok=True)
-        torch.save(
-            {
-                "topology": self.topology,
-                "denoising": self.denoising,
-                "cross_point_sampling": self.cross_point_sampling,
-                "fct_dist": self.fct_dist,
-                "fct_dist_layer": self.fct_dist_layer,
-                "border_dist": self.border_dist,
-                "lambda_border": self.lambda_border,
-                "lambda_fct": self.lambda_fct,
-                "num_border_points": self.num_border_points,
-                "bias": self.bias,
-                "dropout": self.dropout,
-                "L2Reg": self.L2Reg,
-                "collect_subfcts": self.collect_subfcts,
-                "lin_sub_fct_Counters": self.lin_sub_fct_Counters,
-            },
-            os.path.join(path, "model_detailed.pth"),
-        )
-
-        torch.save(
-            {
-                "topology": self.topology,
-                "denoising": self.denoising,
-                "cross_point_sampling": self.cross_point_sampling,
-                "fct_dist": self.fct_dist,
-                "fct_dist_layer": self.fct_dist_layer,
-                "border_dist": self.border_dist,
-                "lambda_border": self.lambda_border,
-                "lambda_fct": self.lambda_fct,
-                "num_border_points": self.num_border_points,
-                "bias": self.bias,
-                "dropout": self.dropout,
-                "L2Reg": self.L2Reg,
-                "collect_subfcts": self.collect_subfcts,
-                "lin_sub_fct_Counters": self.lin_sub_fct_Counters,
-            },
-            os.path.join("./models/trained_models", self.name, "model_detailed.pth"),
-        )
-
-        torch.save(self.module.state_dict(), os.path.join(path, "model.pth"))
-        torch.save(
-            self.module.state_dict(),
-            os.path.join("./models/trained_models", self.name, "model.pth"),
-        )
-
+#    def save(self, path):
+#        # path is the folder within reports in which it has been trained
+#        #import pdb; pdb.set_trace()
+#        os.makedirs(os.path.join("./models/trained_models", self.name), exist_ok=True)
+#        torch.save(
+#            self.__dict__,
+#            {
+#                "topology": self.topology,
+#                "denoising": self.denoising,
+#                "cross_point_sampling": self.cross_point_sampling,
+#                "fct_dist": self.fct_dist,
+#                "fct_dist_layer": self.fct_dist_layer,
+#                "border_dist": self.border_dist,
+#                "lambda_border": self.lambda_border,
+#                "lambda_fct": self.lambda_fct,
+#                "num_border_points": self.num_border_points,
+#                "bias": self.bias,
+#                "dropout": self.dropout,
+#                "L2Reg": self.L2Reg,
+#                "collect_subfcts": self.collect_subfcts,
+#                "lin_sub_fct_Counters": self.lin_sub_fct_Counters,
+#            },
+#            os.path.join(path, "model_detailed.pth"),
+#        )
+#
+#        torch.save(
+#            self.__dict__,
+##            {
+#                "topology": self.topology,
+#                "denoising": self.denoising,
+#                "cross_point_sampling": self.cross_point_sampling,
+#                "fct_dist": self.fct_dist,
+#                "fct_dist_layer": self.fct_dist_layer,
+#                "border_dist": self.border_dist,
+#                "lambda_border": self.lambda_border,
+#                "lambda_fct": self.lambda_fct,
+#                "num_border_points": self.num_border_points,
+#                "bias": self.bias,
+#                "dropout": self.dropout,
+#                "L2Reg": self.L2Reg,
+#                "collect_subfcts": self.collect_subfcts,
+#                "lin_sub_fct_Counters": self.lin_sub_fct_Counters,
+#            },
+#            os.path.join("./models/trained_models", self.name, "model_detailed.pth"),
+#        )
+#
+##        torch.save(self.module.state_dict(), os.path.join(path, "model.pth"))
+##        torch.save(
+##            self.module.state_dict(),
+#            os.path.join("./models/trained_models", self.name, "model.pth"),
+#        )
+#
     def load(self, path):
         model_details = torch.load(os.path.join(path, "model_detailed.pth"))
 
@@ -404,9 +316,9 @@ class autoencoder(neural_net):
         self.denoising = model_details["denoising"]
         self.cross_point_sampling = model_details["cross_point_sampling"]
         # this code should render the if statements below useless
-        #import pdb; pdb.set_trace()
+        # import pdb; pdb.set_trace()
         self.fct_dist = model_details["fct_dist"]
-        if 'fct_dist_layer' in model_details.keys():
+        if "fct_dist_layer" in model_details.keys():
             self.fct_dist_layer = model_details["fct_dist_layer"]
         else:
             self.fct_dist_layer = None
@@ -482,14 +394,14 @@ class autoencoderModule(nn.Module):
         if dropout:
             nn_layers = np.array(
                 [
-                    [nn.Linear(int(a), int(b)), nn.ReLU(), nn.Dropout(p=0.1)]
+                    [nn.Linear(int(a), int(b), bias=bias), nn.ReLU(), nn.Dropout(p=0.1)]
                     for a, b in layers.reshape(-1, 2)
                 ]
             ).flatten()[:-2]
         else:
             nn_layers = np.array(
                 [
-                    [nn.Linear(int(a), int(b)), nn.ReLU()]
+                    [nn.Linear(int(a), int(b), bias=bias), nn.ReLU()]
                     for a, b in layers.reshape(-1, 2)
                 ]
             ).flatten()[:-1]

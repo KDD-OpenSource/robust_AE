@@ -16,12 +16,12 @@ class downstream_rf:
         latent_repr_train = algorithm.extract_latent(dataset.train_data())
         latent_repr_test = algorithm.extract_latent(dataset.test_data())
         # num_classes = len(dataset.test_labels.unique())
-        rf_orig = RandomForestClassifier(n_estimators = 10)
+        rf_orig = RandomForestClassifier(n_estimators=10)
         rf_orig.fit(dataset.train_data(), dataset.train_labels)
         orig_res = rf_orig.predict(dataset.test_data())
         # compare orig_res to dataset.test_labels
 
-        rf_latent= RandomForestClassifier(n_estimators = 10)
+        rf_latent = RandomForestClassifier(n_estimators=10)
         rf_latent.fit(latent_repr_train, dataset.train_labels)
         latent_res = rf_latent.predict(latent_repr_test)
 

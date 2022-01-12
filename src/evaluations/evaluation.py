@@ -21,7 +21,7 @@ class evaluation:
         try:
             datetime = time.strftime("%Y-%m-%dT%H:%M:%S")
             if exp_run:
-                folder_name = datetime + "_" + ctx +'_run_' + str(exp_run)
+                folder_name = datetime + "_" + ctx + "_run_" + str(exp_run)
             else:
                 folder_name = datetime + "_" + ctx
             self.run_folder = os.path.join(self.result_folder, folder_name)

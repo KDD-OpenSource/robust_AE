@@ -61,13 +61,11 @@ class interpolation_error_plot:
         interp_errors = np.sqrt(
             ((interpolations - reconstructions) ** 2).sum(axis=1).values
         )
-        error_mean1 = np.sqrt((reconstructions -
-            insts.iloc[0])**2).sum(axis=1).values
-        error_mean2 = np.sqrt((reconstructions -
-            insts.iloc[1])**2).sum(axis=1).values
+        error_mean1 = np.sqrt((reconstructions - insts.iloc[0]) ** 2).sum(axis=1).values
+        error_mean2 = np.sqrt((reconstructions - insts.iloc[1]) ** 2).sum(axis=1).values
         plt.plot(interp_errors, label="interpolation_errors")
-        plt.plot(error_mean1, label='error_reconstr_label1')
-        plt.plot(error_mean2, label='error_reconstr_label2')
+        plt.plot(error_mean1, label="error_reconstr_label1")
+        plt.plot(error_mean2, label="error_reconstr_label2")
         plt.legend()
         self.evaluation.save_figure(fig, "interpolation_errors", subfolder=subfolder)
         self.evaluation.save_csv(

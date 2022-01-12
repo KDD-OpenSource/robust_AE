@@ -29,21 +29,28 @@ class label_info:
             variances.append(label_var)
 
         label_mean_tuples = list(zip(test_labels, means))
-        label_var_tuples_dims = dict(zip(list(map(lambda x:
-            str(x),test_labels)), list(map(lambda x:
-                list(x.values.astype(np.float64)),variances))))
-        label_var_tuples_aggr = dict(zip(list(map(lambda x:
-            str(x),test_labels)), list(map(lambda x:
-                x.var().astype(np.float64),variances))))
+        label_var_tuples_dims = dict(
+            zip(
+                list(map(lambda x: str(x), test_labels)),
+                list(map(lambda x: list(x.values.astype(np.float64)), variances)),
+            )
+        )
+        label_var_tuples_aggr = dict(
+            zip(
+                list(map(lambda x: str(x), test_labels)),
+                list(map(lambda x: x.var().astype(np.float64), variances)),
+            )
+        )
         result_dict = {}
         for label_mean1, label_mean2 in list(combinations(label_mean_tuples, 2)):
             label1 = label_mean1[0]
             label2 = label_mean2[0]
             mean1 = pd.DataFrame(label_mean1[1]).transpose()
             mean2 = pd.DataFrame(label_mean2[1]).transpose()
-            mean_dist = np.sqrt(
-                    ((mean1-mean2)**2).sum(axis=1)).values[0].astype(np.float64)
-            result_dict[str(label1) + '_' + str(label2)] = mean_dist
-        self.evaluation.save_json(result_dict, 'label_mean_dist')
-        self.evaluation.save_json(dict(label_var_tuples_dims), 'label_vars_dims')
-        self.evaluation.save_json(dict(label_var_tuples_aggr), 'label_vars_aggr')
+            mean_dist = (
+                np.sqrt(((mean1 - mean2) ** 2).sum(axis=1)).values[0].astype(np.float64)
+            )
+            result_dict[str(label1) + "_" + str(label2)] = mean_dist
+        self.evaluation.save_json(result_dict, "label_mean_dist")
+        self.evaluation.save_json(dict(label_var_tuples_dims), "label_vars_dims")
+        self.evaluation.save_json(dict(label_var_tuples_aggr), "label_vars_aggr")
