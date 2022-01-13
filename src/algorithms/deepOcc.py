@@ -24,6 +24,7 @@ class deepOcc(neural_net):
         topology: list,
         center: list,
         name: str = "deepOcc",
+        anom_quantile: float = 0.99,
         dropout: float = 0,
         L2Reg: float = 0,
         num_epochs: int = 100,
@@ -40,6 +41,8 @@ class deepOcc(neural_net):
         self.dropout = dropout
         self.L2Reg = L2Reg
         self.module = deepOccModule(self.topology, self.center, self.dropout)
+        self.anom_radius = 0
+        self.anom_quantile = anom_quantile
 
     def fit(self, dataset, run_folder=None, logger=None):
         X = dataset.train_data()
@@ -65,6 +68,7 @@ class deepOcc(neural_net):
                 optimizer.step()
             epoch_end = datetime.datetime.now()
             duration = epoch_end - epoch_start
+            self.set_anom_radius(self.module, X)
             if run_folder and self.save_interm_models:
                 self.save(run_folder, subfolder=f'Epochs/Epoch_{epoch}')
             else:
@@ -160,6 +164,14 @@ class deepOcc(neural_net):
             anomalyScore = nn.MSELoss()(self.center, output).detach().numpy()
             anomalyScores.loc[ind] = anomalyScore
         return anomalyScores
+
+    def set_anom_radius(self, neural_net_mod, X):
+        anomalyScores = self.calc_anomalyScores(neural_net_mod, X)
+        import pdb; pdb.set_trace()
+        # check right syntax
+        self.anom_radius = np.quantile(anomalyScores, self.anom_quantile)
+
+
 
 
 class deepOccModule(nn.Module):
