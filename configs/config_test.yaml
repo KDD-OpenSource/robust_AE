@@ -1,12 +1,16 @@
 repeat_experiments:                 1
 #ctx:                                'remaining_crop_models'
 #ctx:                                'test_robust_stats_moteStrain'
-ctx:                                'test_deepoc_marabou_borderpoint'
+#ctx:                                'marabou_ens_normal_rob_tot_eps_approx'
+ctx:                                'marabou_ens_normal_approx_eps_10_samples'
 mode:                               ['test']
-multiple_models:                    './models/trained_models/deepOcc_tmp'
+  #multiple_models:                    './models/trained_models/autoencoder_tmp'
+  #multiple_models:                    './models/trained_models/simon_merged'
+multiple_models:                    './models/trained_models/simon4'
 #multiple_models:                    './models/trained_models/autoencoder_crop_diff_ds'
 #multiple_models:                    Null
-dataset:                            'melbournePedestrian'
+#dataset:                            'melbournePedestrian'
+dataset:                            'mnist'
 #algorithm:                          './models/trained_models/autoencoder_mnist_784_150_10'
 #algorithm:                          './models/trained_models/autoencoder_mnist'
 #algorithm:                          './models/autoencoder_float_test'
@@ -17,7 +21,22 @@ algorithm:                          './models/trained_models/autoencoder'
 #algorithm:                          './models/trained_models/autoencoder_test_nan'
 #algorithm:                          'autoencoder'
 evaluations:                        [
+    #'num_anomalies_sanity',
     #'parallelQualplots',
+    #'plot_entire_train_set',
+    #'save_nn_in_format',
+    #'marabou_ens_largErr',
+    'marabou_ens_normal_rob',
+    #'lirpa_ens_normal_rob',
+    #'marabou_ens_anom_rob',
+    #'parallel_plot_same_subfcts',
+    #'deepOcc_2d_implot',
+    #'latent_avg_cos_sim',
+    #'num_subfcts_per_class',
+    #'code_test_on_trained_model',
+    #'avg_min_fctborder_dist',
+    #'plot_closest_border_dist',
+    #'nn_eval_avg_layer_weights',
     #'downstream_kmeans',
     #'downstream_naiveBayes',
     #'downstream_knn',
@@ -58,7 +77,9 @@ evaluations:                        [
     #'marabou_anomalous',
     #'marabou_largest_error',
     #'marabou_superv_robust',
-    'deepoc_adv_marabou_borderpoint',
+    #'deepoc_adv_marabou_borderpoint',
+    #'deepoc_adv_marabou_borderplane',
+    #'deepoc_adv_derivative',
     #'bias_feature_imp',
     #'interpolation_func_diffs_pairs',
     #'interpolation_error_plot',
@@ -68,6 +89,8 @@ evaluations:                        [
 datasets:
     subsample:                      Null
     synthetic_test_samples:         100
+    num_samples:                    Null
+    scale:                          False
     gaussianClouds:
         #file_path:                  './datasets/synthetic/gaussianClouds/60'
         file_path:                  './models/trained_models/autoencoder/dataset/gaussianClouds'
@@ -96,7 +119,8 @@ datasets:
         #file_path:                  './datasets/synthetic/sineNoise/60'
         file_path:                  Null
         num_samples:                1000
-        num_anomalies:              0
+        num_test_anomalies:         200
+        num_train_anomalies:        0
         spacedim:                   50
         num_classes:                3
     moons_2d:

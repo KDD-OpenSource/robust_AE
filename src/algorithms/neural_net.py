@@ -43,6 +43,131 @@ class neural_net:
     def load(self):
         pass
 
+    def calc_min_avg_border_dist(self, dataset, subsample = None):
+        if subsample is not None:
+            dataset = dataset.sample(subsample)
+        if subsample == 0:
+            return None
+        data_loader = DataLoader(
+            dataset=dataset.values,
+            batch_size=20,
+            drop_last=False,
+            pin_memory=True,
+        )
+        closest_dists = []
+        for inst_batch in data_loader:
+            for instance in inst_batch:
+                subfcts = self.get_neuron_border_subFcts(self.module,
+                        instance)
+                dists = sorted(
+                        self.get_dists_from_border_subFcts(instance,
+                    subfcts))
+                closest_dists.append(
+                        dists[0],
+                            )
+        avg_min_fctborder_dist = np.mean(closest_dists)
+        return avg_min_fctborder_dist
+
+    def get_top_k_closest_neurons(self, instance, k=1, dists = True):
+        # calculate dists with respective neurons return neurons only
+        # a neuron will be a pair of (i,j) where i is the network layer and j
+        # is the neuron index. The network layer corresponds to the layer in
+        # neural_not_mod
+        subfcts = self.get_neuron_border_subFcts(self.module,
+                instance, subfct_inds = True)
+        dists = self.get_dists_from_border_subFcts(instance, subfcts,
+                signed_dists = True)
+        sorted_dists = dict(sorted(dists.items(), key=lambda x:abs(x[1])))
+        return list(sorted_dists.items())[:k]
+
+    #def push_closest_fctborders_set(self, X: pd.DataFrame, dist_fct,
+    def push_closest_fctborders_set(self, X: pd.DataFrame, cond_fct,
+            bias_shift, subset = None):
+        if subset is not None:
+            X = X.sample(subset)
+        if subset == 0:
+            return 0
+        data_loader = DataLoader(
+            dataset=X.values,
+            batch_size=self.batch_size,
+            drop_last=False,
+            pin_memory=True,
+        )
+        ctr = 0
+        data_len = len(data_loader)
+        pushed_samples = 0
+        for inst_batch in data_loader:
+            for inst in inst_batch:
+                #condition = self.get_push_condition(condition_type)
+                condition = cond_fct(self.k_dist_model, inst)
+                pushed_samples += self.push_closest_fctborder_inst(inst,
+                        bias_shift, condition)
+                ctr += 1
+        return pushed_samples
+
+    def push_closest_fctborder_inst(self, instance, bias_shift, condition =
+            None, advanced = True):
+        push_neurons_dists = self.get_top_k_closest_neurons(instance, k=1, dists =
+                True)
+        neural_net = self.module.get_neural_net()
+        for neuron_ind, dist in push_neurons_dists:
+            with torch.no_grad():
+                # increase distance by 10 percent through change of bias
+                if self.check_push_condition(condition, instance, dist):
+                #if max_dist is not None and abs(dist) < max_dist:
+                    normalized_weight = np.linalg.norm(
+                            neural_net[neuron_ind[0]].weight[neuron_ind[1]])
+                    neural_net[
+                            neuron_ind[0]].bias[neuron_ind[1]] += (
+                                    (bias_shift - 1) *
+                                    (dist*normalized_weight))
+                    if advanced:
+                        self.adjust_followup_bias(neuron_ind, dist, bias_shift,
+                                normalized_weight, neural_net)
+                    return 1
+                else:
+                    return 0
+
+    def adjust_followup_bias(self, neuron_ind, dist, bias_shift,
+            normalized_weight, neural_net):
+        with torch.no_grad():
+            shift_val = (bias_shift - 1) * (dist*normalized_weight)
+            # we are sure to have a relu layer inbetween, hence + 2
+            spread_layer = neuron_ind[0] + 2
+            # now we get the column as we are interested in weight
+            # going from the part. neuron
+            spread_layer_weights = neural_net[
+                    spread_layer].weight[:,neuron_ind[1]]
+            spread_layer_weights_sum = sum(abs(spread_layer_weights))
+            for tar_bias_ind, tar_bias in enumerate(neural_net[
+                spread_layer].bias):
+                cur_weight = neural_net[
+                        spread_layer].weight[tar_bias_ind,
+                                neuron_ind[1]]
+                neural_net[
+                        spread_layer].bias[tar_bias_ind] = (tar_bias
+                        - (cur_weight/spread_layer_weights_sum)*shift_val)
+
+    def check_push_condition(self, condition, instance, dist):
+        if condition is None:
+            return False
+        if isinstance(condition, np.float32):
+            # max_dist condition: if the dist to the next border is smaller
+            # than some threshold we push
+            if abs(dist) < condition:
+                return True
+            else:
+                return False
+        elif type(condition) == type(instance):
+            inst_fct = self.get_lin_subfct(self.module, instance)
+            for sample_ind in range(condition.shape[0]):
+                cond_fct = self.get_lin_subfct(self.module,
+                        condition[sample_ind])
+                if cond_fct != inst_fct:
+                    return True
+            return False
+
+
     def save(self, path, subfolder = None):
         os.makedirs(os.path.join("./models/trained_models", self.name,
             'subfolder'), exist_ok=True)
@@ -92,7 +217,38 @@ class neural_net:
             )
         return data_loader
 
-    def calc_linfct_volume(self, instances):
+    def calc_layer_stats_weights(self):
+        neural_net = self.module.get_neural_net()
+        stat_dict = {}
+        for ind, layer in enumerate(neural_net):
+            if isinstance(layer, nn.Linear):
+                weights = layer.weight.detach().numpy()
+                abs_weights = abs(weights)
+                stat_dict[ind] = {}
+                stat_dict[ind]['mean'] = abs_weights.mean()
+                stat_dict[ind]['std'] = abs_weights.std()
+                stat_dict[ind]['min'] = weights.min()
+                stat_dict[ind]['max'] = weights.max()
+        return stat_dict
+
+
+    def calc_layer_stats_biases(self):
+        neural_net = self.module.get_neural_net()
+        stat_dict = {}
+        for ind, layer in enumerate(neural_net):
+            if isinstance(layer, nn.Linear):
+                if layer.bias is not None:
+                    biases = layer.bias.detach().numpy()
+                    abs_biases = abs(biases)
+                    stat_dict[ind] = {}
+                    stat_dict[ind]['mean'] = abs_biases.mean()
+                    stat_dict[ind]['std'] = abs_biases.std()
+                    stat_dict[ind]['min'] = biases.min()
+                    stat_dict[ind]['max'] = biases.max()
+        return stat_dict
+
+
+    # def calc_linfct_volume(self, instances):
 #        halfspaces = np.array([[-1,0,0],
 #            [0,-1,0],
 #            [1,1,-1],
@@ -107,30 +263,30 @@ class neural_net:
         # (EVEN THOUGH IT IS THEORETICALLY CLEAR HOW TO DO IT/ THERE EVEN
         # EXISTS THE PYTHON FUNCTIONALITY FOR IT) -> TOO MANY FACETS ON THE
         # POLYTOPE
-        space_dim = 50
-        num_eq = 52
-        inner_point = np.random.uniform(low=-1,high=1, size=(space_dim))
-        equations = []
-        while len(equations) < num_eq:
-            linfct = np.random.uniform(low=-1, high=1, size=space_dim + 1)
-            test_inside = (np.dot(linfct[:space_dim], inner_point) +
-                    linfct[space_dim] < 0)
-            if test_inside:
-                equations.append(linfct)
-        import pdb; pdb.set_trace()
-        halfspaces = np.array(equations)
-        hs = HalfspaceIntersection(halfspaces, inner_point)
-        print(len(hs.intersections))
-        convhull = ConvexHull(hs.intersections)
+        # space_dim = 50
+        # num_eq = 52
+        # inner_point = np.random.uniform(low=-1,high=1, size=(space_dim))
+        # equations = []
+        # while len(equations) < num_eq:
+            # linfct = np.random.uniform(low=-1, high=1, size=space_dim + 1)
+            # test_inside = (np.dot(linfct[:space_dim], inner_point) +
+                    # linfct[space_dim] < 0)
+            # if test_inside:
+                # equations.append(linfct)
+        # halfspaces = np.array(equations)
+        # hs = HalfspaceIntersection(halfspaces, inner_point)
+        # print(len(hs.intersections))
+        # convhull = ConvexHull(hs.intersections)
 
         # generate them and always let a given point be in there...)
-        import pdb; pdb.set_trace()
         # calc borders, calc convex hull of borders ()
 
 
     def get_lin_subfct(self, neural_net_mod, instance, max_layer=None):
+        # if max_layer is added, we calcuate it until and including the layer
         forward_help_fct = smallest_k_dist_loss(1)
         neural_net = copy.deepcopy(neural_net_mod.get_neural_net())
+        #calculate_inst calculates function until but excluding max_layer
         mat, bias, relus, _ = forward_help_fct.calculate_inst(
             neural_net, instance, max_layer=max_layer
         )
@@ -360,12 +516,24 @@ class neural_net:
         return nparray
 
     def get_interm_linFct(self, neural_net_mod, instance):
+        # sees each layer including relu
         neural_net_mod = copy.deepcopy(neural_net_mod)
         linSubFcts = []
         linLayers = self.get_linLayers(neural_net_mod)
         for layer_ind in linLayers:
             linSubFcts.append(
                 self.get_lin_subfct(neural_net_mod, instance, layer_ind + 1)
+            )
+        return linSubFcts
+
+    def get_interm_pre_relu_linFct(self, neural_net_mod, instance):
+        # calculates lin_subfct without relus
+        neural_net_mod = copy.deepcopy(neural_net_mod)
+        linSubFcts = []
+        linLayers = self.get_linLayers(neural_net_mod)
+        for layer_ind in linLayers[:-1]:
+            linSubFcts.append(
+                self.get_lin_subfct(neural_net_mod, instance, layer_ind)
             )
         return linSubFcts
 
@@ -533,7 +701,7 @@ class neural_net:
     def get_closest_funcBoundaries(self, neural_net_mod, instance):
         neural_net_mod = copy.deepcopy(neural_net_mod)
         instance_sig = self.get_signature(neural_net_mod, instance)
-        linSubFcts = self.get_interm_linFct(neural_net_mod, instance)
+        linSubFcts = self.get_interm_pre_relu_linFct(neural_net_mod, instance)
         # calculate crosspoints
         cross_points = []
         neuron_subFcts = self.get_neuron_border_subFcts(neural_net_mod, instance)
@@ -580,28 +748,86 @@ class neural_net:
             neuron_subFcts.extend(self.get_neuron_subFcts_from_layer(layer))
         return neuron_subFcts
 
-    def get_neuron_border_subFcts(self, neural_net_mod, instance):
-        linSubFcts = self.get_interm_linFct(neural_net_mod, instance)
+    def get_neuron_border_subFcts(self, neural_net_mod, instance, subfct_inds =
+            False):
+        linSubFcts = self.get_interm_pre_relu_linFct(neural_net_mod, instance)
+        lin_layers = self.get_linLayers(neural_net_mod)
+        if isinstance(neural_net_mod.get_neural_net()[-1], nn.Linear):
+            lin_layers = lin_layers[:-1]
         neuron_subFcts = []
-        for layer in linSubFcts[:-1]:
-            neuron_subFcts.extend(self.get_neuron_subFcts_from_layer(layer))
-        return neuron_subFcts
+        for layer_ind, layer in zip(lin_layers, linSubFcts):
+            if subfct_inds:
+                subfcts = self.get_neuron_subFcts_from_layer(layer, neuron_inds
+                        = True)
+                subfcts_layer = list(zip(len(subfcts)*[layer_ind], subfcts))
+                subfcts_format = [((x[0], x[1][0]), x[1][1]) for x in
+                        subfcts_layer]
+                neuron_subFcts.extend(subfcts_format)
+            else:
+                neuron_subFcts.extend(self.get_neuron_subFcts_from_layer(layer
+                    ))
+        if subfct_inds:
+            return dict(neuron_subFcts)
+        else:
+            return neuron_subFcts
 
-    def get_neuron_subFcts_from_layer(self, layer_subfunction):
-        neuron_subFcts = []
-        for neuron_ind in range(len(layer_subfunction.matrix)):
-            neuron_subFcts.append(
-                (
-                    layer_subfunction.matrix[neuron_ind],
-                    layer_subfunction.bias[neuron_ind],
+    def get_dists_from_border_subFcts(self, instance, border_subfcts,
+            signed_dists = False):
+        # signed_dists indicates whether the information on which side of the
+        # border (given by a linear function) the instance is.
+        if isinstance(border_subfcts, dict):
+            dists = {}
+            for key, neuron in border_subfcts.items():
+                normal_vector = neuron[0] / np.linalg.norm(neuron[0])
+                dist_to_border = (np.matmul(neuron[0], instance) + neuron[1]) / np.linalg.norm(
+                    neuron[0]
                 )
-            )
+                if signed_dists:
+                    dists[key]= dist_to_border.tolist()
+                else:
+                    dists[key]= abs(dist_to_border.tolist())
+            return dists
+        elif isinstance(border_subfcts, list):
+            dists = []
+            for neuron in border_subfcts:
+                normal_vector = neuron[0] / np.linalg.norm(neuron[0])
+                dist_to_border = (np.matmul(neuron[0], instance) + neuron[1]) / np.linalg.norm(
+                    neuron[0]
+                )
+                if signed_dists:
+                    dists.append(dist_to_border.tolist())
+                else:
+                    dists.append(abs(dist_to_border.tolist()))
+            return dists
+        else:
+            raise Exception('Not defined what to do with input')
+
+
+    def get_neuron_subFcts_from_layer(self, layer_subfunction, neuron_inds =
+            False):
+        neuron_subFcts = []
+        if neuron_inds:
+            for neuron_ind in range(len(layer_subfunction.matrix)):
+                neuron_subFcts.append((neuron_ind,
+                    (
+                        layer_subfunction.matrix[neuron_ind],
+                        layer_subfunction.bias[neuron_ind]
+                    ))
+                )
+        else:
+            for neuron_ind in range(len(layer_subfunction.matrix)):
+                neuron_subFcts.append(
+                    (
+                        layer_subfunction.matrix[neuron_ind],
+                        layer_subfunction.bias[neuron_ind],
+                    )
+                )
         return neuron_subFcts
 
     def get_neuron_subFct_cross_point(self, neural_net_mod, instance):
         # maybe this function is irrelevant...
         neural_net_mod = copy.deepcopy(neural_net_mod)
-        linSubFcts = self.get_interm_linFct(neural_net_mod, instance)
+        linSubFcts = self.get_interm_pre_relu_linFct(neural_net_mod, instance)
         subFct_cross_points = []
         for layer in linSubFcts:
             for neuron_ind in range(len(layer.matrix)):
@@ -667,20 +893,6 @@ class neural_net:
             if inst_lin_subFct != crossed_inst_lin_subFct:
                 limiting_neurons.append(neuron_sub_fct)
         return limiting_neurons
-
-        # for each potential boundary
-        # check if in set of real boundaries (consider cases)
-        # cases:
-        # 1) within same linear function -> check if fct changes on
-        # sampling line
-        # 2) directly reachable border -> check if fct changes on exactly the point
-        # 3) indirectly reachable border ->
-        # 4) irrelevant border (not restricting the current set)
-        # add to real boundaries (in form of an equation) to be checked.
-
-        # a simpler way is just to find out the points in the same function
-        # that remain on the same function... For the rest, just collect all
-        # the equations... (can we have a 'strip_redundant_border function?')
 
     def lin_func_feature_imp(self, neural_net_mod, instance):
         lin_func = self.get_lin_subfct(neural_net_mod, instance)
@@ -774,6 +986,28 @@ class IntermediateSequential(nn.Sequential):
 
         return output, intermediate_outputs
 
+class LinftyIntermediateSequential(nn.Sequential):
+    def __init__(self, *args, return_intermediate=True):
+        super().__init__(*args)
+        self.return_intermediate = return_intermediate
+
+    def forward(self, input):
+        if not self.return_intermediate:
+            return super().forward(input)
+
+        intermediate_outputs = {}
+        output = input
+        for name, module in self.named_children():
+            output = intermediate_outputs[name] = module(output)
+        # test with batch...
+        #inp_out = torch.cat([input, output]).reshape(1,-1)
+        #linear = nn.Linear(input.shape[1],input.shape[1], bias=False)
+        #res = linear(input)
+
+        #return inp_out, intermediate_outputs
+        return output
+        #return intermediate_outputs
+
 
 class linearSubfunction:
     def __init__(self, matrix, bias, signature):
@@ -828,6 +1062,8 @@ class linearSubfunction:
             factor = int((int(key) / 2) + 1)
             distance += factor * num_changes
         return distance
+
+
 
 
 def isequal_sig_dict(signature1, signature2):
@@ -966,10 +1202,11 @@ class smallest_k_dist_loss(nn.Module):
         return border_result, fct_result
 
     def calculate_inst(self, neural_net, instance, dists: bool = False, max_layer=None):
-        if max_layer:
-            neural_net = copy.deepcopy(neural_net[:max_layer])
+        if max_layer is not None:
+            # calculate until and including max_layer
+            # if max layer ==0, then we will get until layer 0
+            neural_net = copy.deepcopy(neural_net[:max_layer+1])
         _, intermed_results = neural_net(instance)
-        # relus, weights, biases = self.get_neural_net_info(neural_net, intermed_results)
         relus, weights, biases, relu_activations = self.get_neural_net_info(
             neural_net, intermed_results, activations=True
         )
@@ -1000,9 +1237,9 @@ class smallest_k_dist_loss(nn.Module):
                     distances = 0 # adjust dimension()
             V = V * relus[ind]
 
-        if max_layer is None:
+        if isinstance(neural_net[-1], nn.Linear):
             inst_mat = torch.matmul(neural_net[len(neural_net) - 1].weight, V)
-            if biases[0] is not None:
+            if neural_net[-1].bias is not None:
                 inst_bias = neural_net[len(neural_net) - 1].bias + torch.matmul(
                     neural_net[len(neural_net) - 1].weight, a
                     )
@@ -1014,7 +1251,6 @@ class smallest_k_dist_loss(nn.Module):
                 inst_bias = a
             else:
                 inst_bias = torch.zeros(inst_mat.shape[0])
-
 
         if dists:
             return inst_mat, inst_bias, distances, cross_points, relu_activations

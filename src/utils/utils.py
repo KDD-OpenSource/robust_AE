@@ -3,14 +3,15 @@ from imports import *
 
 
 def exec_cfg(cfg, start_timestamp):
+    cur_time_str = time.strftime("%Y-%m-%dT%H:%M:%S")
     if cfg.repeat_experiments > 1:
-        base_folder = time.strftime("%Y-%m-%dT%H:%M:%S")
+        base_folder = cur_time_str
     else:
         base_folder = None
     if cfg.multiple_models != None:
         base_folder = (
-            start_timestamp
-            + "_"
+            cur_time_str
+            + "/"
             + cfg.ctx[: cfg.ctx.find("2021")]
             + cfg.multiple_models[cfg.multiple_models.rfind("/") + 1 :]
         )
@@ -160,18 +161,21 @@ def read_cfg(cfg):
             cfg.algorithm = model_path
             cfg.ctx = cfg.ctx + "_" + model_path[model_path.rfind("/") + 1 :]
             dataset_path = model_path + "/dataset"
-            data_properties = list(
-                filter(lambda x: "Properties" in x, os.listdir(dataset_path))
-            )[0]
-            with open(os.path.join(dataset_path, data_properties)) as csvfile:
-                reader = csv.reader(csvfile)
-                for row in reader:
-                    if row[0] == "name":
-                        cfg.dataset = row[1]
-            dataset_type = cfg.dataset
-            for cfg_dataset in cfg.datasets.items():
-                if cfg_dataset[0] in dataset_type:
-                    cfg_dataset[1].file_path = dataset_path
+            try:
+                data_properties = list(
+                    filter(lambda x: "Properties" in x, os.listdir(dataset_path))
+                )[0]
+                with open(os.path.join(dataset_path, data_properties)) as csvfile:
+                    reader = csv.reader(csvfile)
+                    for row in reader:
+                        if row[0] == "name":
+                            cfg.dataset = row[1]
+                dataset_type = cfg.dataset
+                for cfg_dataset in cfg.datasets.items():
+                    if cfg_dataset[0] in dataset_type:
+                        cfg_dataset[1].file_path = dataset_path
+            except:
+                pass
     return cfgs
 
 
@@ -183,9 +187,18 @@ def check_cfg_consistency(cfg):
 
 
 def load_objects_cfgs(cfg, base_folder, exp_run=None):
-    dataset = load_dataset(cfg)
-    algorithm = load_algorithm(cfg)
-    eval_inst, evals = load_evals(cfg, base_folder, exp_run)
+    try:
+        dataset = load_dataset(cfg)
+    except:
+        dataset = None
+    try:
+        algorithm = load_algorithm(cfg)
+    except:
+        algorithm = None
+    try:
+        eval_inst, evals = load_evals(cfg, base_folder, exp_run)
+    except:
+        eval_inst, evals = None, None
     return dataset, algorithm, eval_inst, evals
 
 
@@ -197,7 +210,7 @@ def load_dataset(cfg):
             spacedim=cfg.datasets.uniformClouds.spacedim,
             clouddim=cfg.datasets.uniformClouds.clouddim,
             num_clouds=cfg.datasets.uniformClouds.num_clouds,
-            num_samples=cfg.datasets.uniformClouds.num_samples,
+            num_samples=cfg.datasets.num_samples,
             num_anomalies=cfg.datasets.uniformClouds.num_anomalies,
             noise=cfg.datasets.uniformClouds.noise,
         )
@@ -208,7 +221,7 @@ def load_dataset(cfg):
             spacedim=cfg.datasets.gaussianClouds.spacedim,
             clouddim=cfg.datasets.gaussianClouds.clouddim,
             num_clouds=cfg.datasets.gaussianClouds.num_clouds,
-            num_samples=cfg.datasets.gaussianClouds.num_samples,
+            num_samples=cfg.datasets.num_samples,
             num_anomalies=cfg.datasets.gaussianClouds.num_anomalies,
             num_testpoints=cfg.datasets.synthetic_test_samples,
         )
@@ -218,7 +231,7 @@ def load_dataset(cfg):
             subsample=cfg.datasets.subsample,
             scale=False,
             spacedim=cfg.datasets.sineNoise.spacedim,
-            num_samples=cfg.datasets.sineNoise.num_samples,
+            num_samples=cfg.datasets.num_samples,
             num_anomalies=cfg.datasets.sineNoise.num_anomalies,
             num_testpoints=cfg.datasets.synthetic_test_samples,
         )
@@ -228,8 +241,9 @@ def load_dataset(cfg):
             subsample=cfg.datasets.subsample,
             scale=False,
             spacedim=cfg.datasets.sineClasses.spacedim,
-            num_samples=cfg.datasets.sineClasses.num_samples,
-            num_anomalies=cfg.datasets.sineClasses.num_anomalies,
+            num_samples=cfg.datasets.num_samples,
+            num_train_anomalies=cfg.datasets.sineClasses.num_train_anomalies,
+            num_test_anomalies=cfg.datasets.sineClasses.num_test_anomalies,
             num_classes=cfg.datasets.sineClasses.num_classes,
             num_testpoints=cfg.datasets.synthetic_test_samples,
         )
@@ -237,7 +251,7 @@ def load_dataset(cfg):
         dataset = moons_2d(
             file_path=cfg.datasets.moons_2d.file_path,
             subsample=cfg.datasets.subsample,
-            num_samples=cfg.datasets.moons_2d.num_samples,
+            num_samples=cfg.datasets.num_samples,
             num_anomalies=cfg.datasets.moons_2d.num_anomalies,
             noise=cfg.datasets.moons_2d.noise,
         )
@@ -245,7 +259,7 @@ def load_dataset(cfg):
         dataset = parabola(
             file_path=cfg.datasets.parabola.file_path,
             subsample=cfg.datasets.subsample,
-            num_samples=cfg.datasets.parabola.num_samples,
+            num_samples=cfg.datasets.num_samples,
             num_anomalies=cfg.datasets.parabola.num_anomalies,
             noise=cfg.datasets.parabola.noise,
             spacedim=cfg.datasets.parabola.spacedim,
@@ -254,14 +268,15 @@ def load_dataset(cfg):
         dataset = mnist(
             file_path=cfg.datasets.mnist.file_path,
             subsample=cfg.datasets.subsample,
-            num_samples=cfg.datasets.mnist.num_samples,
+            scale=cfg.datasets.scale,
+            num_samples=cfg.datasets.num_samples,
             num_anomalies=cfg.datasets.mnist.num_anomalies,
         )
     elif cfg.dataset == "creditcardFraud":
         dataset = creditcardFraud(
             file_path=cfg.datasets.creditcardFraud.file_path,
             subsample=cfg.datasets.subsample,
-            num_samples=cfg.datasets.creditcardFraud.num_samples,
+            num_samples=cfg.datasets.num_samples,
             num_anomalies=cfg.datasets.creditcardFraud.num_anomalies,
         )
     elif cfg.dataset == "electricDevices":
@@ -368,7 +383,6 @@ def load_algorithm(cfg):
         if "deepOcc" in cfg.algorithm:
             algorithm = deepOcc(
                 topology=[3,2,1],
-                center=[1]
             )
             algorithm.load(cfg.algorithm)
         if "fcnnClassifier" in cfg.algorithm:
@@ -392,6 +406,8 @@ def load_algorithm(cfg):
                 dynamic_epochs=cfg.algorithms.dynamic_epochs,
                 lr=cfg.algorithms.lr,
                 collect_subfcts=cfg.algorithms.collect_subfcts,
+                bias_shift=cfg.algorithms.autoencoder.bias_shift,
+                push_factor=cfg.algorithms.push_factor,
                 dropout=cfg.algorithms.autoencoder.dropout,
                 L2Reg=cfg.algorithms.autoencoder.L2Reg,
                 num_border_points=cfg.algorithms.autoencoder.num_border_points,
@@ -399,9 +415,9 @@ def load_algorithm(cfg):
             )
         elif cfg.algorithm == "deepOcc":
             algorithm = deepOcc(
-                center = cfg.algorithms.deepOcc.center,
                 topology = cfg.algorithms.deepOcc.topology,
                 L2Reg=cfg.algorithms.deepOcc.L2Reg,
+                anom_quantile=cfg.algorithms.deepOcc.anom_quantile,
                 dropout =cfg.algorithms.deepOcc.dropout ,
                 num_epochs=cfg.algorithms.num_epochs,
                 lr=cfg.algorithms.lr,
@@ -501,6 +517,10 @@ def load_evals(cfg, base_folder=None, exp_run=None):
         evals.append(marabou_superv_robust(eval_inst=eval_inst))
     if "deepoc_adv_marabou_borderpoint" in cfg.evaluations:
         evals.append(deepoc_adv_marabou_borderpoint(eval_inst=eval_inst))
+    if "deepoc_adv_marabou_borderplane" in cfg.evaluations:
+        evals.append(deepoc_adv_marabou_borderplane(eval_inst=eval_inst))
+    if "deepoc_adv_derivative" in cfg.evaluations:
+        evals.append(deepoc_adv_derivative(eval_inst=eval_inst))
     if "bias_feature_imp" in cfg.evaluations:
         evals.append(bias_feature_imp(eval_inst=eval_inst))
     if "interpolation_func_diffs_pairs" in cfg.evaluations:
@@ -517,6 +537,36 @@ def load_evals(cfg, base_folder=None, exp_run=None):
         evals.append(calc_linfct_volume(eval_inst=eval_inst))
     if "superv_accuracy" in cfg.evaluations:
         evals.append(superv_accuracy(eval_inst=eval_inst))
+    if "num_anomalies_sanity" in cfg.evaluations:
+        evals.append(num_anomalies_sanity(eval_inst=eval_inst))
+    if "deepOcc_2d_implot" in cfg.evaluations:
+        evals.append(deepOcc_2d_implot(eval_inst=eval_inst))
+    if "latent_avg_cos_sim" in cfg.evaluations:
+        evals.append(latent_avg_cos_sim(eval_inst=eval_inst))
+    if "nn_eval_avg_layer_weights" in cfg.evaluations:
+        evals.append(nn_eval_avg_layer_weights(eval_inst=eval_inst))
+    if "plot_closest_border_dist" in cfg.evaluations:
+        evals.append(plot_closest_border_dist(eval_inst=eval_inst))
+    if "avg_min_fctborder_dist" in cfg.evaluations:
+        evals.append(avg_min_fctborder_dist(eval_inst=eval_inst))
+    if "code_test_on_trained_model" in cfg.evaluations:
+        evals.append(code_test_on_trained_model(eval_inst=eval_inst))
+    if "num_subfcts_per_class" in cfg.evaluations:
+        evals.append(num_subfcts_per_class(eval_inst=eval_inst))
+    if "parallel_plot_same_subfcts" in cfg.evaluations:
+        evals.append(parallel_plot_same_subfcts(eval_inst=eval_inst))
+    if "plot_entire_train_set" in cfg.evaluations:
+        evals.append(plot_entire_train_set(eval_inst=eval_inst))
+    if "save_nn_in_format" in cfg.evaluations:
+        evals.append(save_nn_in_format(eval_inst=eval_inst))
+    if "marabou_ens_largErr" in cfg.evaluations:
+        evals.append(marabou_ens_largErr(eval_inst=eval_inst, cfg=cfg))
+    if "marabou_ens_normal_rob" in cfg.evaluations:
+        evals.append(marabou_ens_normal_rob(eval_inst=eval_inst, cfg=cfg))
+    if "marabou_ens_anom_rob" in cfg.evaluations:
+        evals.append(marabou_ens_anom_rob(eval_inst=eval_inst, cfg=cfg))
+    if "lirpa_ens_normal_rob" in cfg.evaluations:
+        evals.append(lirpa_ens_normal_rob(eval_inst=eval_inst, cfg=cfg))
     return eval_inst, evals
 
 

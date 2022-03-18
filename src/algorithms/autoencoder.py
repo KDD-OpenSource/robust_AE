@@ -16,6 +16,7 @@ import pandas as pd
 from .neural_net import neural_net
 from .neural_net import smallest_k_dist_loss
 from .neural_net import IntermediateSequential
+from .neural_net import LinftyIntermediateSequential
 
 
 class autoencoder(neural_net):
@@ -32,6 +33,8 @@ class autoencoder(neural_net):
         lambda_fct: float = 0.1,
         name: str = "autoencoder",
         bias: bool = True,
+        bias_shift: float = None,
+        push_factor: float = None,
         dropout: bool = False,
         L2Reg: float = 0,
         num_border_points: int = 1,
@@ -60,6 +63,8 @@ class autoencoder(neural_net):
         self.lambda_border = lambda_border
         self.lambda_fct = lambda_fct
         self.bias = bias
+        self.bias_shift = bias_shift
+        self.push_factor = push_factor
         self.dropout = dropout
         self.L2Reg = L2Reg
         self.num_border_points = num_border_points
@@ -79,6 +84,9 @@ class autoencoder(neural_net):
         )
         if self.collect_subfcts:
             self.lin_sub_fct_Counters.append(self.count_lin_subfcts(self.module, X))
+        if self.bias_shift is not None:
+            self.k_dist_model = dataset.kth_nearest_neighbor_model(10)
+            tot_pushed = 0
         for epoch in range(self.num_epochs):
             epoch_start = datetime.datetime.now()
             self.module.train()
@@ -124,6 +132,39 @@ class autoencoder(neural_net):
                 if run_folder and self.save_interm_models:
                     self.save(run_folder, subfolder=f'Epochs/Epoch_{epoch}')
                     #self.save(run_folder)
+
+            # avg_border_subsample_size = int(self.push_factor*X.shape[0])
+            # min_avg_border_dist = self.calc_min_avg_border_dist(X,
+                    # subsample = avg_border_subsample_size)
+            # logger.info(f'before_push: {min_avg_border_dist}')
+            # """the last iteration shall be weight update instead of push"""
+            # if self.bias_shift is not None and epoch < self.num_epochs - 1:
+                # self.push_closest_fctborders_set(X,
+                        # min_avg_border_dist, subset =
+                        # avg_border_subsample_size)
+            # min_avg_border_dist = self.calc_min_avg_border_dist(X,
+                    # subsample = avg_border_subsample_size)
+            # logger.info(f'after_push: {min_avg_border_dist}')
+
+
+            avg_border_subsample_size = int(self.push_factor*X.shape[0])
+            # min_avg_border_dist = self.calc_min_avg_border_dist(X,
+                    # subsample = avg_border_subsample_size)
+            # logger.info(f'before_push: {min_avg_border_dist}')
+            """the last iteration shall be weight update instead of push"""
+            if self.bias_shift is not None and epoch < self.num_epochs - 1:
+                num_pushed = self.push_closest_fctborders_set(X,
+                        dataset.get_nearest_neighbor_insts, subset =
+                        #dataset.get_last_nearest_neighbor_dist, subset =
+                        avg_border_subsample_size, bias_shift = self.bias_shift)
+                tot_pushed += num_pushed
+                if avg_border_subsample_size != 0:
+                    push_ratio = num_pushed/avg_border_subsample_size
+                    logger.info(f'''ratio_pushed_samples: {push_ratio}''')
+            # min_avg_border_dist = self.calc_min_avg_border_dist(X,
+                    # subsample = avg_border_subsample_size)
+            # logger.info(f'after_push: {min_avg_border_dist}')
+
             self.module.eval()
             if self.train_robust_ae is not None:
                 if epoch == 0:
@@ -148,6 +189,8 @@ class autoencoder(neural_net):
                 logger.info(f"Epoch_loss_fct: {epoch_loss_fct}")
                 logger.info(f"Duration: {duration}")
         self.module.erase_dropout()
+        if self.bias_shift is not None:
+            logger.info(f"Total number pushed: {tot_pushed}")
         if self.collect_subfcts:
             self.lin_sub_fct_Counters.append(self.count_lin_subfcts(self.module, X))
 
@@ -409,7 +452,21 @@ class autoencoderModule(nn.Module):
 
     def forward(self, inst_batch, return_act: bool = True):
         reconstruction, intermediate_outputs = self._neural_net(inst_batch)
+        #try:
+        #if type(intermediate_outputs) == type(reconstruction):
+            #return abs(reconstruction - intermediate_outputs).sum()
+        #import pdb; pdb.set_trace()
+        # except:
+            # reconstruction = self._neural_net(inst_batch)
+            # input_dim = self.get_neural_net()[0].weight.shape[1]
+            # last_linear = nn.Bilinear(input_dim,input_dim,13, bias = False)
+            # result = last_linear(inst_batch, reconstruction)
+            # return result
+
+            #return abs(reconstruction - inst_batch)
+
         return reconstruction, intermediate_outputs
+        #return reconstruction
 
     def get_neural_net(self):
         return self._neural_net
@@ -420,6 +477,19 @@ class autoencoderModule(nn.Module):
             if not isinstance(layer, nn.Dropout):
                 new_layers.append(layer)
         self._neural_net = IntermediateSequential(*new_layers)
+
+    def add_linfty_layer(self):
+        old_layers = []
+        for layer in self.get_neural_net():
+            old_layers.append(layer)
+        input_dim = self.get_neural_net()[0].weight.shape[1]
+        last_linear = nn.Bilinear(input_dim,input_dim,13, bias = False)
+        self._neural_net = LinftyIntermediateSequential(*old_layers)
+        # self._neural_net = nn.Sequential(
+                # LinftyIntermediateSequential(*old_layers),
+                # last_linear)
+                #IntermediateSequential(*old_layers),last_linear)
+        #import pdb; pdb.set_trace()
 
 
 def reset_weights(layer):

@@ -4,14 +4,20 @@ import copy
 import time
 import sys
 
+sys.path.append('/home/bboeing/NNLinSubfct/Code/eran_files/ELINA/python_interface')
+sys.path.append('/home/bboeing/NNLinSubfct/Code/eran_files/deepg/code')
+#sys.path.append('/home/bboeing/NNLinSubfct/Code/eran_files/deepg/ERAN/tf_verify')
+sys.path.append('/home/bboeing/NNLinSubfct/Code/eran_files/tf_verify')
+
+
 import numpy as np
 import pandas as pd
 import torch
 import torch.nn as nn
 import logging
-import onnx
-from onnx2pytorch import ConvertModel
-from pytorch2keras.converter import pytorch_to_keras
+#import onnx
+#from onnx2pytorch import ConvertModel
+#from pytorch2keras.converter import pytorch_to_keras
 from sklearn.model_selection import ShuffleSplit
 from sklearn.naive_bayes import GaussianNB
 from sklearn.metrics import accuracy_score
@@ -92,6 +98,10 @@ from src.evaluations.marabou_largest_error import marabou_largest_error
 from src.evaluations.marabou_superv_robust import marabou_superv_robust
 from src.evaluations.deepoc_adv_marabou_borderpoint import (
     deepoc_adv_marabou_borderpoint)
+from src.evaluations.deepoc_adv_marabou_borderplane import (
+    deepoc_adv_marabou_borderplane)
+from src.evaluations.deepoc_adv_derivative import (
+    deepoc_adv_derivative)
 from src.evaluations.fct_change_by_border_dist_qual import (
     fct_change_by_border_dist_qual,
 )
@@ -103,6 +113,24 @@ from src.evaluations.interpolation_error_plot import interpolation_error_plot
 from src.evaluations.mnist_interpolation_func_diffs_pairs import (
     mnist_interpolation_func_diffs_pairs,
 )
+from src.evaluations.num_anomalies_sanity import num_anomalies_sanity
+from src.evaluations.deepOcc_2d_implot import deepOcc_2d_implot
+from src.evaluations.latent_avg_cos_sim import latent_avg_cos_sim
+from src.evaluations.nn_eval_avg_layer_weights import nn_eval_avg_layer_weights
+from src.evaluations.plot_closest_border_dist import plot_closest_border_dist
+from src.evaluations.avg_min_fctborder_dist import avg_min_fctborder_dist
+from src.evaluations.code_test_on_trained_model import code_test_on_trained_model
+from src.evaluations.num_subfcts_per_class import num_subfcts_per_class
+from src.evaluations.parallel_plot_same_subfcts import parallel_plot_same_subfcts
+from src.evaluations.plot_entire_train_set import plot_entire_train_set
+from src.evaluations.save_nn_in_format import save_nn_in_format
+from src.evaluations.marabou_ens_largErr import marabou_ens_largErr
+from src.evaluations.marabou_ens_normal_rob import marabou_ens_normal_rob
+from src.evaluations.marabou_ens_anom_rob import marabou_ens_anom_rob
+from src.evaluations.lirpa_ens_normal_rob import lirpa_ens_normal_rob
+
+
+
 from src.evaluations.evaluation import evaluation
 from src.utils.config import config, init_logging
 

@@ -1,9 +1,12 @@
 import abc
 import os
+import torch
 import csv
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.neighbors import NearestNeighbors
 
 
 class dataset:
@@ -33,6 +36,7 @@ class dataset:
                                 "_test_data",
                                 "train_labels",
                                 "test_labels",
+                                "scale"
                             ]:
                                 self.__dict__[dataset_prop] = row[1]
             elif "train.csv" in dataset_file:
@@ -49,6 +53,8 @@ class dataset:
                 self.test_labels = data_df["label"]
                 data_df.drop(["label"], axis=1, inplace=True)
                 self._test_data = data_df
+            elif 'readme.md' in dataset_file:
+                pass
             else:
                 print("No appropriate keyword in datafile")
 
@@ -84,7 +90,8 @@ class dataset:
         train_data = train_data.astype(np.float32)
         train_data = pd.DataFrame(train_data, index=train_index)
         if self.scale == True:
-            train_data, scaler = self.scale_data(train_data, return_scaler=True)
+            train_data, scaler = self.scale_data(train_data,
+                    return_scaler=True, scale_type = 'MinMax')
         self._train_data = train_data
         test_data = self._test_data.values
         test_data = test_data.astype(np.float32)
@@ -97,11 +104,38 @@ class dataset:
         self.train_labels = self.train_labels.astype(np.float32)
         self.test_labels = self.test_labels.astype(np.float32)
 
+    def kth_nearest_neighbor_dist(self, k):
+        neigh = NearestNeighbors(n_neighbors = k)
+        neigh.fit(self.train_data())
+        dist, ind = neigh.kneighbors(self.train_data())
+        dists = [dist[i][k-1] for i in range(len(dist))]
+        return dists
+
+    def kth_nearest_neighbor_model(self, k):
+        neigh = NearestNeighbors(n_neighbors = k)
+        neigh.fit(self.train_data())
+        return neigh
+
+    def get_last_nearest_neighbor_dist(self, neigh, instance):
+        # instance is supposed to be a single sample
+        dist, ind = neigh.kneighbors(instance.reshape(1,-1))
+        return dist.flatten()[-1]
+
+    def get_nearest_neighbor_insts(self, neigh, instance):
+        # instance is supposed to be a single sample
+        dist, ind = neigh.kneighbors(instance.reshape(1,-1))
+        res = torch.tensor(self.train_data().loc[ind.flatten()[1:]].values)
+        return res
 
     def scale_data(
-        self, data: pd.DataFrame, min_val=-1, max_val=1, return_scaler=False
+        self, data: pd.DataFrame, min_val=-1, max_val=1, return_scaler=False,
+        scale_type = 'MinMax'
     ):
-        scaler = MinMaxScaler(feature_range=(min_val, max_val))
+        if scale_type == 'MinMax':
+            scaler = MinMaxScaler(feature_range=(min_val, max_val))
+        elif scale_type == 'centered': # x - mean(x)/ max_value
+            scaler = CenteredMaxAbsScaler()
+
         data_index = data.index
         scaler.fit(data)
         if not return_scaler:
@@ -175,6 +209,11 @@ class dataset:
             self.preprocess()
         return self._test_data
 
+    def get_anom_labels_from_test_labels(self):
+        # returns 1 for anomalies, 0 for normal data
+        anom_series = (self.test_labels<0).astype(int)
+        return anom_series
+
     def rebalance_train_test(self, dataset_train, dataset_test):
         # shuffle:
         dataset_train = dataset_train.sample(frac=1)
@@ -187,3 +226,16 @@ class dataset:
         dataset_train = df_tot[:train_num_samples]
         dataset_test = df_tot[train_num_samples : train_num_samples + test_num_samples]
         return dataset_train, dataset_test
+
+class CenteredMaxAbsScaler(BaseEstimator, TransformerMixin):
+    def __init__(self):
+        self.max_abs_ = None
+        self.mean_ = None
+
+    def fit(self, X, y=None):
+        self.max_abs_ = X.max().max()
+        self.mean_ = X.mean()
+        return self
+
+    def transform(self, X):
+        return (X - self.mean_)/self.max_abs_

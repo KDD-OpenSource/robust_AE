@@ -10,18 +10,21 @@ class mnist(dataset):
         name: str = "mnist",
         file_path: str = None,
         subsample: int = None,
+        scale: bool = True,
         num_samples: int = 2000,
         num_anomalies: int = 20,
     ):
         super().__init__(name, file_path, subsample)
         self.num_samples = num_samples
         self.num_anomalies = num_anomalies
+        self.scale = scale
 
     def create(self):
         # simple version
         dataset_train = pd.read_csv("./datasets/mnist/mnist_train.csv")
         dataset_test = pd.read_csv("./datasets/mnist/mnist_test.csv")
         # complex version
+        dataset_train = dataset_train[dataset_train.label == 7]
         self.train_labels = dataset_train['label']
         dataset_train.drop(['label'], inplace=True, axis=1)
         self._train_data = dataset_train

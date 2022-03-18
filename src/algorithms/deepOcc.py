@@ -22,7 +22,6 @@ class deepOcc(neural_net):
     def __init__(
         self,
         topology: list,
-        center: list,
         name: str = "deepOcc",
         anom_quantile: float = 0.99,
         dropout: float = 0,
@@ -37,7 +36,7 @@ class deepOcc(neural_net):
                 batch_size=batch_size, lr=lr, seed=seed,
                 save_interm_models=save_interm_models)
         self.topology = topology
-        self.center = torch.tensor(np.array(center).astype(np.float32))
+        self.center = None
         self.dropout = dropout
         self.L2Reg = L2Reg
         self.module = deepOccModule(self.topology, self.center, self.dropout)
@@ -51,6 +50,7 @@ class deepOcc(neural_net):
             params=self.module.parameters(), lr=self.lr, weight_decay=self.L2Reg
         )
         self.module.train()
+        self.center = self.define_center(data_loader)
         for epoch in range(self.num_epochs):
             epoch_start = datetime.datetime.now()
             epoch_loss = 0
@@ -61,6 +61,9 @@ class deepOcc(neural_net):
                 output = self.module(inst_batch)[0]
                 i = i + 1
                 # probably center.repeat(output.size[0])
+                #import pdb; pdb.set_trace()
+                # TODO: test with MSELoss(reduction='sum') because then it is
+                # consistent wrt the anom_score calculation
                 loss = nn.MSELoss()(output, center_batch)
                 self.module.zero_grad()
                 epoch_loss += loss
@@ -79,6 +82,14 @@ class deepOcc(neural_net):
                 logger.info(f"Duration: {duration}")
         self.module.erase_dropout()
 
+    def define_center(self, data_loader):
+        output_means = []
+        for inst_batch in data_loader:
+            output = self.module(inst_batch)[0]
+            output_means.append(output.mean(axis=0).detach().numpy())
+        center = np.array(output_means).mean(axis=0)
+        return torch.tensor(center.astype(np.float32))
+
     def predict(self, X: pd.DataFrame):
         self.module.eval()
         data_loader = DataLoader(
@@ -95,34 +106,6 @@ class deepOcc(neural_net):
         outputs = pd.DataFrame(outputs, index=X.index)
         return outputs
 
-#    def save(self, path):
-#        # path is the folder within reports in which it has been trained
-#        os.makedirs(os.path.join("./models/trained_models", self.name), exist_ok=True)
-#        torch.save(
-#            {
-#                "center": self.center,
-#                "topology": self.topology,
-#                "dropout": self.dropout,
-#                "L2Reg": self.L2Reg,
-#            },
-#            os.path.join(path, "model_detailed.pth"),
-#        )
-#
-#        torch.save(
-#            {
-#                "center": self.center,
-#                "topology": self.topology,
-#                "dropout": self.dropout,
-#                "L2Reg": self.L2Reg,
-#            },
-#            os.path.join("./models/trained_models", self.name, "model_detailed.pth"),
-#        )
-#
-#        torch.save(self.module.state_dict(), os.path.join(path, "model.pth"))
-#        torch.save(
-#            self.module.state_dict(),
-#            os.path.join("./models/trained_models", self.name, "model.pth"),
-#        )
 
     def load(self, path):
         model_details = torch.load(os.path.join(path, "model_detailed.pth"))
@@ -131,6 +114,8 @@ class deepOcc(neural_net):
         self.topology = model_details["topology"]
         self.dropout = model_details["dropout"]
         self.L2Reg = model_details["L2Reg"]
+        self.anom_quantile = model_details["anom_quantile"]
+        self.anom_radius = model_details["anom_radius"]
         # note that we hardcode dropout to False as we do not want to have
         # dropout in testing (just in Training)
         self.module = deepOccModule(self.topology, self.center, dropout=0.0)
@@ -148,7 +133,8 @@ class deepOcc(neural_net):
         for inst_batch in data_loader:
             for inst in inst_batch:
                 output = neural_net_mod(inst)[0]
-                anomalyScore = nn.MSELoss()(self.center, output).detach().numpy()
+                anomalyScore = np.sqrt(nn.MSELoss(reduction='sum')(self.center,
+                    output).detach().numpy())
                 sample_anomalyScore_pairs.append((inst, anomalyScore))
         return sample_anomalyScore_pairs
 
@@ -157,22 +143,53 @@ class deepOcc(neural_net):
         ctr = 0
         data_len = X.shape[0]
         for ind in X.index:
-            print(ctr/data_len)
+            #print(ctr/data_len)
             ctr += 1
             inst = torch.tensor(X.loc[ind])
             output = neural_net_mod(inst)[0]
-            anomalyScore = nn.MSELoss()(self.center, output).detach().numpy()
+            anomalyScore = np.sqrt(nn.MSELoss(reduction='sum')(self.center,
+                output).detach().numpy())
             anomalyScores.loc[ind] = anomalyScore
         return anomalyScores
 
     def set_anom_radius(self, neural_net_mod, X):
-        anomalyScores = self.calc_anomalyScores(neural_net_mod, X)
-        import pdb; pdb.set_trace()
-        # check right syntax
-        self.anom_radius = np.quantile(anomalyScores, self.anom_quantile)
+        anomalyScores_fast = np.sqrt(((self.predict(X) -
+            self.center)**2).sum(axis=1))
+        # anomalyScores = self.calc_anomalyScores(neural_net_mod, X)
+        self.anom_radius = np.quantile(anomalyScores_fast, self.anom_quantile)
+
+    def calc_frac_to_border(self, output_sample):
+        border_point = self.calc_border_point(output_sample)
+        border_length = np.linalg.norm(border_point.values[0] -
+                self.center.numpy())
+        output_sample_length = np.linalg.norm(output_sample.values[0] -
+                self.center.numpy())
+        frac = output_sample_length/border_length
+        return frac
 
 
+    def calc_border_point(self, point):
+        center = self.center.numpy()
+        if isinstance(point, pd.DataFrame):
+            point = point.values[0]
+        anom_radius = self.anom_radius
+        diff = point - center
+        diff_length = np.sqrt(np.square(diff).sum())
+        border_point = center + anom_radius*(diff/diff_length)
+        return pd.DataFrame(border_point).transpose()
 
+    def check_anomalous(self, sample):
+        output_sample = self.predict(sample)
+        loss = np.sqrt(
+                nn.MSELoss(reduction='sum')(torch.tensor(output_sample.values[0]),
+            self.center))
+        return loss > self.anom_radius
+
+    def pred_anom_labels(self, X):
+        anomaly_scores = self.calc_anomalyScores(self.module,
+                X)
+        pred_anom_labels = (anomaly_scores > self.anom_radius).astype(int)
+        return pred_anom_labels
 
 class deepOccModule(nn.Module):
     def __init__(self, topology: list, center: list, dropout: float = 0.0):

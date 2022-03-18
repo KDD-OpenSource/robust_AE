@@ -300,9 +300,9 @@ class marabou_robust:
             randomInput.float(),
             os.path.join(onnx_folder, "saved_algorithm.onnx"),
         )
-        network = Marabou.read_onnx(
-            os.path.join(onnx_folder, "saved_algorithm.onnx"),
-            outputName=str(2 * len(algorithm.module.get_neural_net()) + 1),
+        onnx_path = os.path.join(onnx_folder, "saved_algorithm.onnx")
+        onnx_outputName = str(2 * len(algorithm.module.get_neural_net()) + 1)
+        network = Marabou.read_onnx(onnx_path, outputName = onnx_outputName
         )
         return network
 

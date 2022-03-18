@@ -2,7 +2,9 @@ repeat_experiments:                 1
 #ctx:                                'train_crop_3_15'
 #ctx:                                'Code'
 #ctx:                                'train_sineClasses_fcnn'
-ctx:                                'train_fcnn_dropout'
+ctx:                                'train_real_autoencoder'
+  #ctx:                                'sineClasses_AE_push_5perc_shift_5perc_points_1borders_10k_10NN_advanced'
+#ctx:                                'sineClasses_AE_push_5perc_20NN_insts'
 #ctx:                                'Train_model_3gaussian_no_reg'
 mode:                               ['train']
 multiple_models:                    Null
@@ -15,7 +17,7 @@ dataset:                            'sineClasses'
 #algorithm:                          './models/trained_models/autoencoder_gaussianClouds_30_15_6'
 #algorithm:                          './models/trained_models/autoencoder_gaussianClouds_100_50_30_border_fct_dist'
 #algorithm:                          './models/trained_models/autoencoder_test_nan'
-algorithm:                          'fcnnClassifier'
+algorithm:                          'autoencoder'
 evaluations:                        [
     #'parallelQualplots',
     #'linSubfctBarplots',
@@ -46,12 +48,14 @@ evaluations:                        [
 
 datasets:
     subsample:                      Null
-    synthetic_test_samples:         1000
+    num_samples:                    50000
+    synthetic_test_samples:         10000
+    scale:                          False
     gaussianClouds:
         #file_path:                  './datasets/synthetic/gaussianClouds/60'
         file_path:                  Null
         num_clouds:                 2
-        num_samples:                1000
+          #num_samples:                1000
         num_anomalies:              0
         spacedim:                   30
         clouddim:                   4
@@ -59,7 +63,7 @@ datasets:
         #file_path:                  Null
         file_path:                  './datasets/synthetic/uniformClouds/60'
         num_clouds:                 3
-        num_samples:                1000
+          ##num_samples:                1000
         num_anomalies:              0
         spacedim:                   60
         clouddim:                   4
@@ -67,41 +71,42 @@ datasets:
     sineNoise:
         #file_path:                  './datasets/synthetic/sineNoise/60'
         file_path:                  Null
-        num_samples:                1000
+          #num_samples:                1000
         num_anomalies:              0
         spacedim:                   30
     sineClasses:
-        #file_path:                  './datasets/synthetic/sineNoise/60'
+      #file_path:                  './datasets/synthetic/sineClasses/30'
         file_path:                  Null
-        num_samples:                10000
-        num_anomalies:              0
-        spacedim:                   50
-        num_classes:                5
+          #num_samples:                10000
+        num_test_anomalies:         200
+        num_train_anomalies:        0
+        spacedim:                   40
+        num_classes:                3
     moons_2d:
         #file_path:                  Null
         file_path:                  './datasets/synthetic/moons_2d'
-        num_samples:                2000
+          #num_samples:                2000
         num_anomalies:              10
         noise:                      0.1
     parabola:
         #file_path:                  Null
         file_path:                  './datasets/synthetic/parabola'
-        num_samples:                2000
+          #num_samples:                2000
         num_anomalies:              10
         noise:                      0.1
         spacedim:                   2
     mnist:
         file_path:                  Null
-        num_samples:                35000
+          #num_samples:                35000
         num_anomalies:              0
     predictiveMaintenance:
         file_path:                  Null
-        num_samples:                -1
+          #num_samples:                -1
         num_anomalies:              0
         window_size:                50
     creditcardFraud:
         file_path:                  Null
-        num_samples:                -1
+          #num_samples:                -1
         num_anomalies:              0
     electricDevices:
         file_path:                  Null
@@ -136,27 +141,33 @@ algorithms:
     lr:                             1e-3
     collect_subfcts:                False
     save_interm_models:             False
+    push_factor:                    0.1
     autoencoder:
         train_robust_ae:            0.0
         denoising:                  0.0
         border_dist:                False
         cross_point_sampling:       False
         fct_dist:                   [] # ('mat', 'bias', 'relu')
-        fct_dist_layer:             Null #(give 3 to get middle layer in [24,15,10,15,24])
-        lambda_border:              0.000
-        lambda_fct:                 0.000
+        fct_dist_layer:             Null #(can return pre and post relu: 5 to
+          #get post relu in middle layer in [24,15,10,15,24])
+        lambda_border:              0.001
+        lambda_fct:                 0.001
+        bias_shift:                 Null
         dropout:                    False
         L2Reg:                      0.0000
-        topology:                   [50,20,10,20,50]
+          #topology:                   [30,15,10,15,30]
+        topology:                   [40,20,10,20,40]
         bias:                       True
         num_border_points:          5
     deepOcc:
-        center:                     [0.5,0.5,0.5,0.5,0.5, 0.5,0.5,0.5,0.5,0.5]
-        topology:                   [30,50,50,10]
+        #center:                     [0.5,0.5,0.5,0.5,0.5, 0.5,0.5,0.5,0.5,0.5]
+        topology:                   [784,50,50,10]
+          #topology:                   [50,30,2]
         dropout:                    0.0
         L2Reg:                      0.0
+        anom_quantile:              0.99
     fcnnClassifier:
-        topology:                   [50,20,10, 5]
+        topology:                   [50,20,10, 2]
         dropout:                    0.000005
         #dropout:                    0.0
         L2Reg:                      0.0
