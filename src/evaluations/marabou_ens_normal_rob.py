@@ -39,31 +39,13 @@ class marabou_ens_normal_rob:
         approx_search = False
         pre_test_num_folders = 100
         part_model = None
-        num_folders = None
+        num_folders = 200
         for _ in range(10):
-            #normal_point = self.cust_scaler(test_data[dataset.test_labels ==
-                #7].sample(1))
             normal_point = test_data[dataset.test_labels ==
                 7].sample(1)
 
             simon_folder = os.path.join(os.getcwd(),
                     self.cfg['multiple_models'][2:])
-            #test_model_folders = self.get_test_model_folders(simon_folder,
-                    #num_folders = 100, part_model = part_model)
-            # test_model_folders = self.get_test_model_folders(simon_folder
-                    # )
-#
-
-            # tf_model_path = os.path.join(test_model_folders[0], 'saved'
-                   # )
-            # print(tf_model_path)
-            # tf_model_path = '/home/bboeing/NNLinSubfct/Code/models/trained_models/simon2/models/4366/saved'
-            # print(tf_model_path)
-            # tf_model = tf.keras.models.load_model(tf_model_path)
-            # tf_model.layers[1].get_weights()[0][0]
-
-
-            #test_model_folders = self.get_test_model_folders(simon_folder)
             marabou_options = Marabou.createOptions(timeoutInSeconds=60,
                     verbosity=2, initialTimeout=1, numWorkers=1)
 
@@ -71,132 +53,62 @@ class marabou_ens_normal_rob:
             with open(os.path.join(simon_folder, 'models', 'alltheq.json'), 'r') as json_file:
                 q_values = json.load(json_file)
 
-#            score_threshold = 0.15
             eps = 0.001
-#            eps_change = 0.025
             start_time = time.time()
             eps_res_dict = {}
-#            #eps_acc = 0.01
-#            eps_acc = 0.01
-            # I cannot go better than that, because marabou only has a certain
-            # accuracy as well... (you have no input'bounds' otherwise but an
-            # input point)
-#            while eps_change > eps_acc:
-#                print(eps)
-#                if approx_search and eps_change > 2*eps_acc:
-#                    test_model_folders = self.get_test_model_folders(simon_folder,
-#                            num_folders = pre_test_num_folders,
-#                            part_model=part_model)
-#                elif approx_search:
-#                    test_model_folders = self.get_test_model_folders(
-#                            simon_folder, part_model=part_model)
-#                else:
-#                    test_model_folders = self.get_test_model_folders(
-#                            simon_folder, part_model=part_model)
             test_model_folders = self.get_test_model_folders(
                     simon_folder, q_values, num_folders=num_folders,part_model=part_model)
-            import pdb; pdb.set_trace()
 
             model_info = []
             largest_errors = []
             res = []
             start_timestamp = time.strftime("%Y-%m-%dT%H:%M:%S")
-            #normal_point = pd.read_csv(os.path.join(os.getcwd(),
-                #'normal_point_tmp.csv'), index_col=0)
-            #normal_point.columns = range(784)
-
-                # separate into batches of 100
             if parallel:
-                if len(test_model_folders) > 100:
-                    test_model_folders_batches = []
-                    for i in range(int(len(test_model_folders)/100)):
-                        test_model_folders_batches.append(test_model_folders[
-                                i*100: i*100 + 100])
-                    #import pdb; pdb.set_trace()
-                    #normal_point = pd.read_csv(os.path.join(os.getcwd(),
-                    #    'normal_point_tmp.csv'), index_col=0)
-                    #normal_point.columns = range(784)
-                    #test_model_folders_batches = pd.read_csv(
-                    #        os.path.join(os.getcwd(),
-                    #    'model_folders_tmp.csv'), index_col=0).values
-                    #test_model_folders_batches = list(map(
-                     #   lambda x: list(x), list(test_model_folders_batches)))
-                    #import pdb; pdb.set_trace()
-#                    pd.DataFrame(
-#                            test_model_folders_batches).to_csv(
-#                                    os.path.join(os.getcwd(),
-#                                        'model_folders_tmp.csv'))
-#                    normal_point.to_csv(os.path.join(os.getcwd(),
-#                        'normal_point_tmp.csv'))
-                    for batch in test_model_folders_batches:
-                        pool = mp.Pool(int(1 * mp.cpu_count()))
-                        for onnx_path in batch:
-                            arg = (normal_point, onnx_path, eps,
-                                    model_info, q_values)
-                            res.append(pool.apply_async(self.calc_largest_error,
-                                args=(arg)))
-                        pool.close()
-                        pool.join()
-                    results = [x.get()[0] for x in res]
-                else:
-                    pool = mp.Pool(int(1 * mp.cpu_count()))
-                    for onnx_path in test_model_folders:
-                        arg = (normal_point, onnx_path, eps, model_info, q_values)
-                        res.append(pool.apply_async(self.calc_largest_error, args=(arg
-                            )))
-                    pool.close()
-                    pool.join()
-                    results = [x.get()[0] for x in res]
+                pool = mp.Pool(int(1 * mp.cpu_count()))
+                for onnx_path in test_model_folders:
+                    arg = (normal_point, onnx_path, eps, model_info, q_values)
+                    res.append(pool.apply_async(self.calc_largest_error, args=(arg
+                        )))
+                pool.close()
+                pool.join()
+                results = [x.get()[0] for x in res]
             else:
                 for onnx_path in test_model_folders:
                     res.append(self.calc_largest_error(normal_point, onnx_path,
                         eps, model_info, q_values))
                     results = res[0]
-            end_timestamp = time.strftime("%Y-%m-%dT%H:%M:%S")
-            print(end_timestamp)
-                #results = [x.get()[0] for x in res]
-            largest_errors = list(map(lambda x:x['largest_error'], results))
             largest_error_dict = dict(map(lambda
             x:(x['id'],x['largest_error']), results))
-            verified_largest_error = np.sqrt(
-                    (np.array(largest_errors)**2).sum()/len(largest_errors))
+            verified_largest_error = np.sqrt((np.array(
+                list(largest_error_dict.values()))**2).sum()/len(largest_error_dict.values()))
+
             eps_res_dict[str(eps)] = {}
+            # calc_mean_normal_point
             eps_res_dict[str(eps)]['mean_input_dict'] = dict(map(lambda x:
                 (x['id'], float(np.mean(x['input']))), results))
-            # calc_mean_normal_point
             eps_res_dict[str(eps)]['largest_error_dict'] = largest_error_dict
             eps_res_dict[str(eps)]['ver_largest_error'] = verified_largest_error
-
-#                print('made it here')
-#                print(eps)
-#                print(verified_largest_error)
-#                print(score_threshold)
-#                if verified_largest_error > score_threshold:
-#                    eps = eps - eps_change
-#                else:
-#                    eps = eps + eps_change
-#                eps_change = eps_change / 2
             end_time = time.time()
-            # once we have the verified largest error we can increase/decrease
-            # eps
-
-
 
             adv_df = pd.DataFrame(columns=range(784))
             res_counter = 0
             num_results = len(results)
+            res_list = []
+            res_list.append(adv_df)
             for result in results:
                 print(res_counter/num_results)
                 res_counter += 1
                 try:
                     res_df = pd.DataFrame([result['solution']],
                             columns=result['features'])
-                    adv_df = pd.concat([adv_df, res_df], axis=0)
+                    res_list.append(res_df)
                 except:
                     pass
-
+            adv_df = pd.concat(res_list, axis=0)
             adv_cand = pd.DataFrame(adv_df.mode().iloc[0]).transpose()
             norm_adv_pair = pd.concat([normal_point, adv_cand])
+
+
             norm_ind = str(normal_point.index[0])
             self.evaluation.save_csv(norm_adv_pair, f'norm_adv_pair_{norm_ind}')
             result_dict[norm_ind] = {
