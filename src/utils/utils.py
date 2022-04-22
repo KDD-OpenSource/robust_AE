@@ -153,10 +153,19 @@ def read_cfg(cfg):
     cfgs = []
     cfgs.append(Box(config(os.path.join(os.getcwd(), cfg)).config_dict))
     if cfgs[-1].multiple_models is not None:
+        subfolder_blocklist = ['remaining_models']
+
         model_containing_folder = cfgs[-1].multiple_models
-        for _ in range(len(os.listdir(model_containing_folder)) - 1):
+        model_list = os.listdir(model_containing_folder)
+        for blocked in subfolder_blocklist:
+            try:
+                model_list.remove(blocked)
+            except:
+                pass
+        
+        for _ in range(len(model_list) - 1):
             cfgs.append(copy.deepcopy(cfgs[0]))
-        for cfg, model_folder in zip(cfgs, os.listdir(model_containing_folder)):
+        for cfg, model_folder in zip(cfgs, model_list):
             model_path = model_containing_folder + "/" + model_folder
             cfg.algorithm = model_path
             cfg.ctx = cfg.ctx + "_" + model_path[model_path.rfind("/") + 1 :]
@@ -271,6 +280,46 @@ def load_dataset(cfg):
             scale=cfg.datasets.scale,
             num_samples=cfg.datasets.num_samples,
             num_anomalies=cfg.datasets.mnist.num_anomalies,
+        )
+    elif cfg.dataset == "cardio":
+        dataset = cardio(
+            file_path=cfg.datasets.cardio.file_path,
+            subsample=cfg.datasets.subsample,
+            scale=cfg.datasets.scale,
+            num_samples=cfg.datasets.num_samples,
+            num_anomalies=cfg.datasets.cardio.num_anomalies,
+        )
+    elif cfg.dataset == "pc3":
+        dataset = pc3(
+            file_path=cfg.datasets.pc3.file_path,
+            subsample=cfg.datasets.subsample,
+            scale=cfg.datasets.scale,
+            num_samples=cfg.datasets.num_samples,
+            num_anomalies=cfg.datasets.pc3.num_anomalies,
+        )
+    elif cfg.dataset == "wbc":
+        dataset = wbc(
+            file_path=cfg.datasets.wbc.file_path,
+            subsample=cfg.datasets.subsample,
+            scale=cfg.datasets.scale,
+            num_samples=cfg.datasets.num_samples,
+            num_anomalies=cfg.datasets.wbc.num_anomalies,
+        )
+    elif cfg.dataset == "spambase":
+        dataset = spambase(
+            file_path=cfg.datasets.spambase.file_path,
+            subsample=cfg.datasets.subsample,
+            scale=cfg.datasets.scale,
+            num_samples=cfg.datasets.num_samples,
+            num_anomalies=cfg.datasets.spambase.num_anomalies,
+        )
+    elif cfg.dataset == "satimage":
+        dataset = satimage(
+            file_path=cfg.datasets.satimage.file_path,
+            subsample=cfg.datasets.subsample,
+            scale=cfg.datasets.scale,
+            num_samples=cfg.datasets.num_samples,
+            num_anomalies=cfg.datasets.satimage.num_anomalies,
         )
     elif cfg.dataset == "creditcardFraud":
         dataset = creditcardFraud(
@@ -563,6 +612,12 @@ def load_evals(cfg, base_folder=None, exp_run=None):
         evals.append(marabou_ens_largErr(eval_inst=eval_inst, cfg=cfg))
     if "marabou_ens_normal_rob" in cfg.evaluations:
         evals.append(marabou_ens_normal_rob(eval_inst=eval_inst, cfg=cfg))
+    if "marabou_svdd_normal_rob" in cfg.evaluations:
+        evals.append(marabou_svdd_normal_rob(eval_inst=eval_inst, cfg=cfg))
+    if "marabou_ens_normal_rob_ae" in cfg.evaluations:
+        evals.append(marabou_ens_normal_rob_ae(eval_inst=eval_inst, cfg=cfg))
+    if "marabou_ens_normal_rob_submodels" in cfg.evaluations:
+        evals.append(marabou_ens_normal_rob_submodels(eval_inst=eval_inst, cfg=cfg))
     if "marabou_ens_anom_rob" in cfg.evaluations:
         evals.append(marabou_ens_anom_rob(eval_inst=eval_inst, cfg=cfg))
     if "lirpa_ens_normal_rob" in cfg.evaluations:

@@ -2,13 +2,13 @@ repeat_experiments:                 1
 #ctx:                                'train_crop_3_15'
 #ctx:                                'Code'
 #ctx:                                'train_sineClasses_fcnn'
-ctx:                                'train_real_autoencoder'
+ctx:                                'prepare_spambase'
   #ctx:                                'sineClasses_AE_push_5perc_shift_5perc_points_1borders_10k_10NN_advanced'
 #ctx:                                'sineClasses_AE_push_5perc_20NN_insts'
 #ctx:                                'Train_model_3gaussian_no_reg'
 mode:                               ['train']
 multiple_models:                    Null
-dataset:                            'sineClasses'
+dataset:                            'spambase'
 #algorithm:                          './models/trained_models/autoencoder_mnist_784_150_10'
 #algorithm:                          './models/trained_models/autoencoder_mnist'
 #algorithm:                          './models/autoencoder_float_test'
@@ -50,7 +50,7 @@ datasets:
     subsample:                      Null
     num_samples:                    50000
     synthetic_test_samples:         10000
-    scale:                          False
+    scale:                          True
     gaussianClouds:
         #file_path:                  './datasets/synthetic/gaussianClouds/60'
         file_path:                  Null
@@ -98,6 +98,21 @@ datasets:
     mnist:
         file_path:                  Null
           #num_samples:                35000
+        num_anomalies:              0
+    cardio:
+        file_path:                  Null
+        num_anomalies:              0
+    pc3:
+        file_path:                  Null
+        num_anomalies:              0
+    spambase:
+        file_path:                  Null
+        num_anomalies:              0
+    wbc:
+        file_path:                  Null
+        num_anomalies:              0
+    satimage:
+        file_path:                  Null
         num_anomalies:              0
     predictiveMaintenance:
         file_path:                  Null
@@ -156,7 +171,7 @@ algorithms:
         dropout:                    False
         L2Reg:                      0.0000
           #topology:                   [30,15,10,15,30]
-        topology:                   [40,20,10,20,40]
+        topology:                   [57,10,5,10,57]
         bias:                       True
         num_border_points:          5
     deepOcc:

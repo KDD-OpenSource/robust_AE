@@ -72,12 +72,14 @@ class dataset:
             right_index=True,
         )
         joined_df_test.to_csv(path + "/" + self.name + "test.csv")
-        writer = csv.writer(open(path + "/" + self.name + "_Properties.csv", "w"))
-        # add saving the test file
-        for key, val in self.__dict__.items():
-            if key == "_train_data" or key == "labels":
-                continue
-            writer.writerow([key, val])
+        with open(path + "/" + self.name + "_Properties.csv", "w") as csv_file:
+        #writer = csv.writer(open(path + "/" + self.name + "_Properties.csv", "w"))
+            writer = csv.writer(csv_file)
+            # add saving the test file
+            for key, val in self.__dict__.items():
+                if key == "_train_data" or key == "labels":
+                    continue
+                writer.writerow([key, val])
 
     def preprocess(self):
         if self.subsample:
@@ -91,7 +93,9 @@ class dataset:
         train_data = pd.DataFrame(train_data, index=train_index)
         if self.scale == True:
             train_data, scaler = self.scale_data(train_data,
-                    return_scaler=True, scale_type = 'MinMax')
+                    return_scaler=True)
+                    #scale_type = self.scale_type, min_val =
+                    #self.scale_min, max_val = self.scale_max)
         self._train_data = train_data
         test_data = self._test_data.values
         test_data = test_data.astype(np.float32)
@@ -128,12 +132,14 @@ class dataset:
         return res
 
     def scale_data(
-        self, data: pd.DataFrame, min_val=-1, max_val=1, return_scaler=False,
-        scale_type = 'MinMax'
+        self, data: pd.DataFrame,
+        return_scaler=False
+        #, min_val=-1, max_val=1, return_scaler=False,
+        #scale_type = 'MinMax'
     ):
-        if scale_type == 'MinMax':
-            scaler = MinMaxScaler(feature_range=(min_val, max_val))
-        elif scale_type == 'centered': # x - mean(x)/ max_value
+        if self.scale_type == 'MinMax':
+            scaler = MinMaxScaler(feature_range=(self.scale_min, self.scale_max))
+        elif self.scale_type == 'centered': # x - mean(x)/ max_value
             scaler = CenteredMaxAbsScaler()
 
         data_index = data.index
@@ -206,7 +212,9 @@ class dataset:
         # traindata is created as it should follow its distribution
         if self._test_data is None:
             self.load()
-            self.preprocess()
+            # we do not preprocess any more. Preprocessing is done during
+            # training... 
+            # self.preprocess()
         return self._test_data
 
     def get_anom_labels_from_test_labels(self):

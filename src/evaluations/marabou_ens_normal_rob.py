@@ -6,6 +6,7 @@ import pandas as pd
 import json
 import numpy as np
 import os
+import re
 import random
 import tensorflow as tf
 import torch
@@ -34,39 +35,65 @@ class marabou_ens_normal_rob:
 
     def evaluate(self, dataset, algorithm):
         test_data = dataset.test_data()
-        parallel = True
+        parallel = 0.5
         result_dict = {}
         approx_search = False
         pre_test_num_folders = 100
         part_model = None
-        num_folders = 200
-        for _ in range(10):
-            normal_point = test_data[dataset.test_labels ==
-                7].sample(1)
+        num_folders = 100
+        bagging_MNIST = False
+        simon_folder = os.path.join(os.getcwd(),
+                self.cfg['multiple_models'][2:])
+        if 'submodels.json' in os.listdir(os.path.join(simon_folder,
+            'models')) and re.match('.*_\d_.*', self.cfg.ctx):
+            with open(os.path.join(simon_folder, 'models',
+                'submodels.json'), 'r') as jsonfile:
+                submodel_dict = json.load(jsonfile)
+            model_number = list(filter(str.isdigit, self.cfg.ctx
+                ))[0]
+            submodel_dict[str(model_number)] = list(map(lambda x:int(x),
+                submodel_dict[str(model_number)]))
+            part_model = submodel_dict[str(model_number)]
 
-            simon_folder = os.path.join(os.getcwd(),
-                    self.cfg['multiple_models'][2:])
+
+        with open(os.path.join(simon_folder, 'models', 'alltheq.json'), 'r') as json_file:
+            q_values = json.load(json_file)
+        with open(os.path.join(simon_folder, 'models', 'border.json'), 'r') as json_file:
+            border = json.load(json_file)
+        test_model_folders = self.get_test_model_folders(
+                simon_folder, q_values,
+                num_folders=num_folders,part_model=part_model,
+                bagging_MNIST = bagging_MNIST)
+        for _ in range(20):
+            if bagging_MNIST:
+                normal_point = test_data[dataset.test_labels ==
+                    7].sample(1)
+            else: 
+                normal_point = test_data[dataset.test_labels ==
+                    0].sample(1)
+
+
             marabou_options = Marabou.createOptions(timeoutInSeconds=60,
                     verbosity=2, initialTimeout=1, numWorkers=1)
 
             # model info is list of tuples with (model_number, features, q_value) 
-            with open(os.path.join(simon_folder, 'models', 'alltheq.json'), 'r') as json_file:
-                q_values = json.load(json_file)
 
             eps = 0.001
-            start_time = time.time()
             eps_res_dict = {}
-            test_model_folders = self.get_test_model_folders(
-                    simon_folder, q_values, num_folders=num_folders,part_model=part_model)
+         #   test_model_folders = self.get_test_model_folders(
+         #           simon_folder, q_values,
+         #           num_folders=num_folders,part_model=part_model,
+         #           bagging_MNIST = bagging_MNIST)
 
             model_info = []
             largest_errors = []
             res = []
             start_timestamp = time.strftime("%Y-%m-%dT%H:%M:%S")
             if parallel:
-                pool = mp.Pool(int(1 * mp.cpu_count()))
+                pool = mp.Pool(int(parallel * mp.cpu_count()))
                 for onnx_path in test_model_folders:
-                    arg = (normal_point, onnx_path, eps, model_info, q_values)
+                    arg = (normal_point, onnx_path, eps, model_info, q_values,
+                            bagging_MNIST)
                     res.append(pool.apply_async(self.calc_largest_error, args=(arg
                         )))
                 pool.close()
@@ -75,7 +102,7 @@ class marabou_ens_normal_rob:
             else:
                 for onnx_path in test_model_folders:
                     res.append(self.calc_largest_error(normal_point, onnx_path,
-                        eps, model_info, q_values))
+                        eps, model_info, q_values, bagging_MNIST))
                     results = res[0]
             largest_error_dict = dict(map(lambda
             x:(x['id'],x['largest_error']), results))
@@ -84,11 +111,14 @@ class marabou_ens_normal_rob:
 
             eps_res_dict[str(eps)] = {}
             # calc_mean_normal_point
-            eps_res_dict[str(eps)]['mean_input_dict'] = dict(map(lambda x:
-                (x['id'], float(np.mean(x['input']))), results))
+            if bagging_MNIST:
+                eps_res_dict[str(eps)]['mean_input_dict'] = dict(map(lambda x:
+                    (x['id'], float(np.mean(x['input']))), results))
             eps_res_dict[str(eps)]['largest_error_dict'] = largest_error_dict
             eps_res_dict[str(eps)]['ver_largest_error'] = verified_largest_error
-            end_time = time.time()
+            times = dict(map(lambda
+                x:(x['id'],x['calc_time']), results))
+            duration = sum(list(times.values()))
 
             adv_df = pd.DataFrame(columns=range(784))
             res_counter = 0
@@ -99,8 +129,11 @@ class marabou_ens_normal_rob:
                 print(res_counter/num_results)
                 res_counter += 1
                 try:
-                    res_df = pd.DataFrame([result['solution']],
-                            columns=result['features'])
+                    if bagging_MNIST:
+                        res_df = pd.DataFrame([result['solution']],
+                                columns=result['features'])
+                    else:
+                        res_df = pd.DataFrame([result['solution']])
                     res_list.append(res_df)
                 except:
                     pass
@@ -114,7 +147,9 @@ class marabou_ens_normal_rob:
             result_dict[norm_ind] = {
                         'eps': eps,
                         'verified_largest_error': verified_largest_error,
-                        'duration': end_time - start_time
+                        'duration': duration,
+                        'ratio': verified_largest_error/border,
+                        'border': border,
                         }
             self.evaluation.save_json(largest_error_dict,
                     f'largest_error_dict_{norm_ind}')
@@ -122,11 +157,16 @@ class marabou_ens_normal_rob:
                     f'eps_res_dict_{norm_ind}')
         self.evaluation.save_json(result_dict, f'results')
 
-    def calc_largest_error(self, normal_point, onnx_path, eps, model_info, q_values):
+    def calc_largest_error(self, normal_point, onnx_path, eps, model_info,
+            q_values, bagging_MNIST = False):
         marabou_options = Marabou.createOptions(timeoutInSeconds=300)
-        model_info.append(self.get_model_info(onnx_path, q_values))
-        model_input = normal_point[model_info[-1]['features']]
-        model_info[-1]['input'] = list(model_input.values[0])
+        model_info.append(self.get_model_info(onnx_path, q_values,
+            bagging_MNIST=bagging_MNIST))
+        if bagging_MNIST:
+            model_input = normal_point[model_info[-1]['features']]
+            model_info[-1]['input'] = list(model_input.values[0])
+        else:
+            model_input = normal_point
 
         #tf_model_path = os.path.join(simon_folder, folder, 'saved'
         #        )
@@ -148,10 +188,12 @@ class marabou_ens_normal_rob:
         # set outputVar
         # delta is to be in the binary search
         # q is supposed to be fixed by the training procedure
+        start_time = time.time()
         delta = 6
         delta_change = 3
         outputVar = network.outputVars[0][0]
-        while delta_change > 0.00001:
+        accuracy = 0.001
+        while delta_change > accuracy:
             # eq1 = MarabouCore.Equation(MarabouCore.Equation.GE)
             # eq1.addAddend(-1, outputVar)
             # eq1.setScalar(delta-q)
@@ -173,6 +215,7 @@ class marabou_ens_normal_rob:
             # network.disjunctionList = []
             # network.addDisjunctionConstraint(disjunction)
             network.addInequality([outputVar], [1], q-delta)
+            print('before first')
             print(model_info[-1]['id'])
             try:
                 network_solution = network.solve(options=marabou_options,
@@ -180,6 +223,7 @@ class marabou_ens_normal_rob:
             except:
                 pass
             print(model_info[-1]['id'])
+            print('after first')
             network.equList = network.equList[:-1]
             if len(network_solution[0]) > 0:
                 cur_best_solution = network_solution
@@ -189,11 +233,13 @@ class marabou_ens_normal_rob:
             else:
                 # remove inequality
                 network.addInequality([outputVar], [-1], -q-delta)
+                print('before second')
                 try:
                     network_solution = network.solve(options=marabou_options,
                             verbose=False)
                 except:
                     pass
+                print('after second')
                 network.equList = network.equList[:-1]
                 if len(network_solution[0]) > 0:
                     cur_best_solution = network_solution
@@ -203,7 +249,12 @@ class marabou_ens_normal_rob:
                 else:
                     delta = delta - delta_change
                     delta_change = delta_change/2
+
+            ## add safety margin as we do only approximate
+
             print(delta)
+            print(delta_change)
+            print(q-delta)
             print(model_info[-1]['id'])
 
 
@@ -225,7 +276,10 @@ class marabou_ens_normal_rob:
             # print(delta)
 
         #model_info[-1] = model_info[-1] + (delta, )
+        delta = delta + 2*accuracy
         model_info[-1]['largest_error'] = delta
+        end_time = time.time()
+        model_info[-1]['calc_time'] = end_time - start_time
         try:
             solution_point = extract_solution_point(cur_best_solution, network)
             #model_info[-1] += (solution_point[0], )
@@ -235,10 +289,12 @@ class marabou_ens_normal_rob:
         return model_info
 
     def get_test_model_folders(self, simon_folder, q_values, num_folders=None,
-            part_model=None):
+            part_model=None, bagging_MNIST = False):
         simon_folder = os.path.join(simon_folder, 'models')
         all_models = os.listdir(simon_folder)
         all_models.remove('dataset')
+        #min_q = np.quantile(list(q_values.values()), 0.5)
+        min_q = np.quantile(list(q_values.values()), 0.0)
         try:
             all_models.remove('readme.md')
         except:
@@ -247,36 +303,57 @@ class marabou_ens_normal_rob:
             all_models.remove('alltheq.json')
         except:
             pass
+        try:
+            all_models.remove('border.json')
+        except:
+            pass
+        try:
+            all_models.remove('submodels.json')
+        except:
+            pass
         if num_folders is not None:
             rand_models = []
             while len(rand_models) < num_folders:
                 rand_model = random.sample(all_models, 1)[0]
-                if (rand_model not in rand_models and q_values[rand_model] >=
-                    0.1):
-                    rand_models.append(rand_model)
+                if bagging_MNIST:
+                    if (rand_model not in rand_models and q_values[rand_model] >=
+                        0.1):
+                        rand_models.append(rand_model)
+                else:
+                    if (rand_model not in rand_models and q_values[rand_model] >=
+                        min_q):
+                        rand_models.append(rand_model)
         else:
             rand_models = all_models
             #if '0' in rand_models:
                 #rand_models.remove('0')
-        if part_model is not None:
+        if part_model is not None and not isinstance(part_model, list):
             rand_models=[part_model]
         model_folders = []
-        # filter out too small q_values
+
+        models_for_removal = []
         for model in rand_models:
-            if q_values[model] < 0.1:
-                rand_models.remove(model)
+            if q_values[model] <= min_q:
+                models_for_removal.append(model)
+        # TMP
+        rand_models = list(set(rand_models) - set(models_for_removal))
+
 
         for model in rand_models:
             model_folders.append(os.path.join(simon_folder, model, 'model.onnx'))
         return model_folders
 
-    def get_model_info(self, onnx_path, q_values):
+    def get_model_info(self, onnx_path, q_values, bagging_MNIST=False):
         model_path = onnx_path[:onnx_path.rfind('/')]
         model_number = model_path[model_path.rfind('/')+1:]
-        model_features = self.features_of_index(int(model_number), 28*28, 32)
+        # MNIST
+        if bagging_MNIST:
+            model_features = self.features_of_index(int(model_number), 28*28, 32)
         q_value = q_values[model_number]
-        #return (model_number, model_features, q_value)
-        return {'id': model_number, 'features': model_features, 'q': q_value}
+        if bagging_MNIST:
+            return {'id': model_number, 'features': model_features, 'q': q_value}
+        else:
+            return {'id': model_number, 'q': q_value}
 
 
     def features_of_index(self, index, num_feat, bag):

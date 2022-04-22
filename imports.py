@@ -8,6 +8,7 @@ sys.path.append('/home/bboeing/NNLinSubfct/Code/eran_files/ELINA/python_interfac
 sys.path.append('/home/bboeing/NNLinSubfct/Code/eran_files/deepg/code')
 #sys.path.append('/home/bboeing/NNLinSubfct/Code/eran_files/deepg/ERAN/tf_verify')
 sys.path.append('/home/bboeing/NNLinSubfct/Code/eran_files/tf_verify')
+sys.path.append('/home/bboeing/NNLinSubfct/Code/NNet')
 
 
 import numpy as np
@@ -31,6 +32,11 @@ from src.datasets.sineClasses import sineClasses
 from src.datasets.moons_2d import moons_2d
 from src.datasets.parabola import parabola
 from src.datasets.mnist import mnist
+from src.datasets.cardio import cardio
+from src.datasets.pc3 import pc3
+from src.datasets.wbc import wbc
+from src.datasets.spambase import spambase
+from src.datasets.satimage import satimage
 from src.datasets.creditcardFraud import creditcardFraud
 from src.datasets.predictiveMaintenance import predictiveMaintenance
 from src.datasets.ecg5000 import ecg5000
@@ -126,6 +132,10 @@ from src.evaluations.plot_entire_train_set import plot_entire_train_set
 from src.evaluations.save_nn_in_format import save_nn_in_format
 from src.evaluations.marabou_ens_largErr import marabou_ens_largErr
 from src.evaluations.marabou_ens_normal_rob import marabou_ens_normal_rob
+from src.evaluations.marabou_svdd_normal_rob import marabou_svdd_normal_rob
+from src.evaluations.marabou_ens_normal_rob_ae import marabou_ens_normal_rob_ae
+from src.evaluations.marabou_ens_normal_rob_submodels import (
+    marabou_ens_normal_rob_submodels)
 from src.evaluations.marabou_ens_anom_rob import marabou_ens_anom_rob
 from src.evaluations.lirpa_ens_normal_rob import lirpa_ens_normal_rob
 

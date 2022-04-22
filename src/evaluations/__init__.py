@@ -56,6 +56,9 @@ from .code_test_on_trained_model import code_test_on_trained_model
 from .save_nn_in_format import save_nn_in_format
 from .marabou_ens_largErr import marabou_ens_largErr
 from .marabou_ens_normal_rob import marabou_ens_normal_rob
+from .marabou_svdd_normal_rob import marabou_svdd_normal_rob
+from .marabou_ens_normal_rob_ae import marabou_ens_normal_rob_ae
+from .marabou_ens_normal_rob_submodels import marabou_ens_normal_rob_submodels
 from .marabou_ens_anom_rob import marabou_ens_anom_rob
 from .lirpa_ens_normal_rob import lirpa_ens_normal_rob
 
@@ -123,6 +126,9 @@ __all__ = [
     "save_nn_in_format",
     "marabou_ens_largErr",
     "marabou_ens_normal_rob",
+    "marabou_svdd_normal_rob",
+    "marabou_ens_normal_rob_ae",
+    "marabou_ens_normal_rob_submodels",
     "marabou_ens_anom_rob",
     "lirpa_ens_normal_rob",
 ]

@@ -23,7 +23,6 @@ class save_nn_in_format:
         network = self.get_network(algorithm, dataset)
         self.save_marabouQuery(network)
         self.save_nn_txt(algorithm)
-        import pdb; pdb.set_trace()
 
     def get_network(self, algorithm, dataset):
         randomInput = torch.randn(1, algorithm.topology[0])

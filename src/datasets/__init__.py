@@ -6,6 +6,11 @@ from .sineClasses import sineClasses
 from .moons_2d import moons_2d
 from .parabola import parabola
 from .mnist import mnist
+from .cardio import cardio
+from .pc3 import pc3
+from .wbc import wbc
+from .spambase import spambase
+from .satimage import satimage
 from .creditcardFraud import creditcardFraud
 from .predictiveMaintenance import predictiveMaintenance
 from .italyPowerDemand import italyPowerDemand
@@ -33,6 +38,11 @@ __all__ = [
     "moons_2d",
     "parabola",
     "mnist",
+    "cardio",
+    "pc3",
+    "wbc",
+    "spambase",
+    "satimage",
     "creditcardFraud",
     "predictiveMaintenance",
     "ecg5000",

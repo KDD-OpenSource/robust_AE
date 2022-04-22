@@ -77,8 +77,8 @@ class MarabouNetworkTF(MarabouNetwork.MarabouNetwork):
                                 created from either tensorflow versions 1.X or 2.X respectively.
             savedModelTags (list of str, optional): If loading a SavedModel, the user must specify tags used, default is []
         """
-        import pdb; pdb.set_trace()
         # Read tensorflow model
+        import pdb; pdb.set_trace()
         if modelType == "frozen":
             # Read frozen graph protobuf file
             with tf.io.gfile.GFile(filename, "rb") as f:
