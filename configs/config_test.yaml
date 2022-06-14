@@ -2,12 +2,12 @@ repeat_experiments:                 1
 #ctx:                                'remaining_crop_models'
 #ctx:                                'test_robust_stats_moteStrain'
 #ctx:                                'marabou_ens_normal_rob_tot_eps_approx'
-ctx:                                'test_model_whilelist_1'
+ctx:                                '2d_boundaries'
 mode:                               ['test']
   #multiple_models:                    './models/trained_models/autoencoder_tmp'
   #multiple_models:                    './models/trained_models/simon_merged'
   #multiple_models:                    './models/trained_models/simon4'
-multiple_models:                    './models/trained_models/simon_dean_spambase'
+multiple_models:                    './models/trained_models/autoencoder_2d_fctdist_1epoch'
   #multiple_models:                    './models/trained_models/simon_deepsvdd_satimage'
 #multiple_models:                    './models/trained_models/autoencoder_crop_diff_ds'
 #multiple_models:                    Null
@@ -28,7 +28,7 @@ evaluations:                        [
     #'plot_entire_train_set',
     #'save_nn_in_format',
     #'marabou_ens_largErr',
-    'marabou_ens_normal_rob',
+    #'marabou_ens_normal_rob',
     #'marabou_ens_normal_rob_ae',
     #'marabou_svdd_normal_rob',
     #'marabou_ens_normal_rob_submodels',
@@ -64,7 +64,7 @@ evaluations:                        [
     #'singularValuePlots',
     #'closest_linsubfct_plot',
     #'boundary_2d_plot',
-    #'inst_area_2d_plot',
+    'inst_area_2d_plot',
     #'border_dist_2d',
     #'border_dist_sort_plot',
     #'error_border_dist_plot',
@@ -197,6 +197,33 @@ datasets:
         class2:                     15
     moteStrain:
         file_path:                  Null
+    steel_plates_fault:
+        file_path:                  Null
+        num_anomalies:              0
+    qsar_biodeg:
+        file_path:                  Null
+        num_anomalies:              0
+    page_blocks:
+        file_path:                  Null
+        num_anomalies:              0
+    ozone_level_8hr:
+        file_path:                  Null
+        num_anomalies:              0
+    gas_drift:
+        file_path:                  Null
+        num_anomalies:              0
+    har:
+        file_path:                  Null
+        num_anomalies:              0
+    ionosphere:
+        file_path:                  Null
+        num_anomalies:              0
+    satellite:
+        file_path:                  Null
+        num_anomalies:              0
+    segment:
+        file_path:                  Null
+        num_anomalies:              0
     melbournePedestrian:
         file_path:                  Null
     wafer:

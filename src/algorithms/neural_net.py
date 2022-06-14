@@ -1023,7 +1023,7 @@ class linearSubfunction:
         return (
             (abs(self.matrix - other.matrix)).sum()
             + (abs(self.bias - other.bias)).sum()
-        ) < 1
+        ) < 000000000.1
 
     def __key(self):
         return (self.matrix.tobytes(), self.bias.tobytes())

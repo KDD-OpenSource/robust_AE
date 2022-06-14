@@ -35,13 +35,13 @@ class marabou_ens_normal_rob:
 
     def evaluate(self, dataset, algorithm):
         test_data = dataset.test_data()
-        parallel = 0.5
+        parallel = 0.25
         result_dict = {}
         approx_search = False
         pre_test_num_folders = 100
         part_model = None
-        num_folders = 100
-        bagging_MNIST = False
+        MNIST = True
+        num_folders = 1000
         simon_folder = os.path.join(os.getcwd(),
                 self.cfg['multiple_models'][2:])
         if 'submodels.json' in os.listdir(os.path.join(simon_folder,
@@ -62,16 +62,22 @@ class marabou_ens_normal_rob:
             border = json.load(json_file)
         test_model_folders = self.get_test_model_folders(
                 simon_folder, q_values,
-                num_folders=num_folders,part_model=part_model,
-                bagging_MNIST = bagging_MNIST)
+                num_folders=num_folders,part_model=part_model)
         for _ in range(20):
-            if bagging_MNIST:
+            if MNIST:
                 normal_point = test_data[dataset.test_labels ==
                     7].sample(1)
             else: 
                 normal_point = test_data[dataset.test_labels ==
                     0].sample(1)
+            normal_point.columns = normal_point.columns.astype(int)
 
+   #     sample_list = [292,
+   #             732,22,1097,226,190,215,263,827,860,1110,552,214,
+   #             737,934,554,1031,59,144,771
+   #             ]
+   #     for sample_num in sample_list:
+   #         normal_point = pd.DataFrame(test_data.loc[sample_num]).transpose()
 
             marabou_options = Marabou.createOptions(timeoutInSeconds=60,
                     verbosity=2, initialTimeout=1, numWorkers=1)
@@ -82,8 +88,7 @@ class marabou_ens_normal_rob:
             eps_res_dict = {}
          #   test_model_folders = self.get_test_model_folders(
          #           simon_folder, q_values,
-         #           num_folders=num_folders,part_model=part_model,
-         #           bagging_MNIST = bagging_MNIST)
+         #           num_folders=num_folders,part_model=part_model)
 
             model_info = []
             largest_errors = []
@@ -92,8 +97,8 @@ class marabou_ens_normal_rob:
             if parallel:
                 pool = mp.Pool(int(parallel * mp.cpu_count()))
                 for onnx_path in test_model_folders:
-                    arg = (normal_point, onnx_path, eps, model_info, q_values,
-                            bagging_MNIST)
+                    arg = (normal_point, onnx_path, eps, model_info, q_values
+                            )
                     res.append(pool.apply_async(self.calc_largest_error, args=(arg
                         )))
                 pool.close()
@@ -102,7 +107,7 @@ class marabou_ens_normal_rob:
             else:
                 for onnx_path in test_model_folders:
                     res.append(self.calc_largest_error(normal_point, onnx_path,
-                        eps, model_info, q_values, bagging_MNIST))
+                        eps, model_info, q_values))
                     results = res[0]
             largest_error_dict = dict(map(lambda
             x:(x['id'],x['largest_error']), results))
@@ -111,16 +116,16 @@ class marabou_ens_normal_rob:
 
             eps_res_dict[str(eps)] = {}
             # calc_mean_normal_point
-            if bagging_MNIST:
-                eps_res_dict[str(eps)]['mean_input_dict'] = dict(map(lambda x:
-                    (x['id'], float(np.mean(x['input']))), results))
+            #if bagging_MNIST:
+            #    eps_res_dict[str(eps)]['mean_input_dict'] = dict(map(lambda x:
+            #        (x['id'], float(np.mean(x['input']))), results))
             eps_res_dict[str(eps)]['largest_error_dict'] = largest_error_dict
             eps_res_dict[str(eps)]['ver_largest_error'] = verified_largest_error
             times = dict(map(lambda
                 x:(x['id'],x['calc_time']), results))
             duration = sum(list(times.values()))
 
-            adv_df = pd.DataFrame(columns=range(784))
+            adv_df = pd.DataFrame(columns=range(test_data.shape[1]))
             res_counter = 0
             num_results = len(results)
             res_list = []
@@ -129,11 +134,8 @@ class marabou_ens_normal_rob:
                 print(res_counter/num_results)
                 res_counter += 1
                 try:
-                    if bagging_MNIST:
-                        res_df = pd.DataFrame([result['solution']],
-                                columns=result['features'])
-                    else:
-                        res_df = pd.DataFrame([result['solution']])
+                    res_df = pd.DataFrame([result['solution']],
+                            columns=result['features'])
                     res_list.append(res_df)
                 except:
                     pass
@@ -141,6 +143,17 @@ class marabou_ens_normal_rob:
             adv_cand = pd.DataFrame(adv_df.mode().iloc[0]).transpose()
             norm_adv_pair = pd.concat([normal_point, adv_cand])
 
+            mode_dict = {}
+            adv_df_mode = adv_df.mode()
+            tot_models = adv_df.shape[0]
+            for i in adv_df.columns:
+                mode_models = adv_df[adv_df[i] == adv_df_mode[i][0]].shape[0]
+                other_models = (tot_models - adv_df[i].isnull().sum() -
+                        mode_models)
+                mode_dict[i] = mode_models/(mode_models + other_models)
+                #null_models = adv_df[i].isnull().sum()
+
+            import pdb; pdb.set_trace()
 
             norm_ind = str(normal_point.index[0])
             self.evaluation.save_csv(norm_adv_pair, f'norm_adv_pair_{norm_ind}')
@@ -155,29 +168,25 @@ class marabou_ens_normal_rob:
                     f'largest_error_dict_{norm_ind}')
             self.evaluation.save_json(eps_res_dict,
                     f'eps_res_dict_{norm_ind}')
+            self.evaluation.save_json(mode_dict,
+                    f'mode_dict_{norm_ind}')
         self.evaluation.save_json(result_dict, f'results')
 
     def calc_largest_error(self, normal_point, onnx_path, eps, model_info,
-            q_values, bagging_MNIST = False):
+            q_values):
         marabou_options = Marabou.createOptions(timeoutInSeconds=300)
+        network = Marabou.read_onnx(onnx_path)
+        numInputVars = len(network.inputVars[0][0])
         model_info.append(self.get_model_info(onnx_path, q_values,
-            bagging_MNIST=bagging_MNIST))
-        if bagging_MNIST:
-            model_input = normal_point[model_info[-1]['features']]
-            model_info[-1]['input'] = list(model_input.values[0])
-        else:
-            model_input = normal_point
+            numInputVars, normal_point.shape[1]))
+        model_input = normal_point[model_info[-1]['features']]
+        model_info[-1]['input'] = list(model_input.values[0])
 
         #tf_model_path = os.path.join(simon_folder, folder, 'saved'
         #        )
         #tf_model = tf.keras.models.load_model(tf_model_path)
         # tf_model.layers[1].get_weights()[0][0]
-        network = Marabou.read_onnx(onnx_path)
-        numInputVars = len(network.inputVars[0][0])
         q = model_info[-1]['q']
-        if abs(model_input).max().max() == 0:
-            model_info[-1]['largest_error'] = q
-            return model_info
         for ind in range(numInputVars):
             network.setLowerBound(
                 network.inputVars[0][0][ind], model_input.iloc[0, ind] - eps
@@ -194,26 +203,6 @@ class marabou_ens_normal_rob:
         outputVar = network.outputVars[0][0]
         accuracy = 0.001
         while delta_change > accuracy:
-            # eq1 = MarabouCore.Equation(MarabouCore.Equation.GE)
-            # eq1.addAddend(-1, outputVar)
-            # eq1.setScalar(delta-q)
-
-            # eq2 = MarabouCore.Equation(MarabouCore.Equation.GE)
-            # eq2.addAddend(1, outputVar)
-            # eq2.setScalar(delta+q)
-
-
-
-            # eq1 = maraboucore.equation(maraboucore.equation.le)
-            # eq1.addaddend(1, outputvar)
-            # eq1.setscalar(q-delta)
-
-            # eq2 = maraboucore.equation(maraboucore.equation.ge)
-            # eq2.addaddend(1, outputvar)
-            # eq2.setscalar(q+delta)
-            # disjunction = [[eq1], [eq2]]
-            # network.disjunctionList = []
-            # network.addDisjunctionConstraint(disjunction)
             network.addInequality([outputVar], [1], q-delta)
             print('before first')
             print(model_info[-1]['id'])
@@ -289,7 +278,7 @@ class marabou_ens_normal_rob:
         return model_info
 
     def get_test_model_folders(self, simon_folder, q_values, num_folders=None,
-            part_model=None, bagging_MNIST = False):
+            part_model=None):
         simon_folder = os.path.join(simon_folder, 'models')
         all_models = os.listdir(simon_folder)
         all_models.remove('dataset')
@@ -315,20 +304,19 @@ class marabou_ens_normal_rob:
             rand_models = []
             while len(rand_models) < num_folders:
                 rand_model = random.sample(all_models, 1)[0]
-                if bagging_MNIST:
-                    if (rand_model not in rand_models and q_values[rand_model] >=
-                        0.1):
-                        rand_models.append(rand_model)
-                else:
-                    if (rand_model not in rand_models and q_values[rand_model] >=
-                        min_q):
-                        rand_models.append(rand_model)
+                if (rand_model not in rand_models and q_values[rand_model] >=
+                    min_q):
+                    rand_models.append(rand_model)
         else:
             rand_models = all_models
             #if '0' in rand_models:
                 #rand_models.remove('0')
         if part_model is not None and not isinstance(part_model, list):
             rand_models=[part_model]
+        if part_model is not None and isinstance(part_model, list):
+            part_model = list(map(lambda x:str(x), part_model))
+        if part_model is not None:
+            rand_models = part_model
         model_folders = []
 
         models_for_removal = []
@@ -343,17 +331,15 @@ class marabou_ens_normal_rob:
             model_folders.append(os.path.join(simon_folder, model, 'model.onnx'))
         return model_folders
 
-    def get_model_info(self, onnx_path, q_values, bagging_MNIST=False):
+    def get_model_info(self, onnx_path, q_values, num_modelFeatures,
+            dataset_dim):
         model_path = onnx_path[:onnx_path.rfind('/')]
         model_number = model_path[model_path.rfind('/')+1:]
         # MNIST
-        if bagging_MNIST:
-            model_features = self.features_of_index(int(model_number), 28*28, 32)
+        model_features = self.features_of_index(int(model_number), dataset_dim,
+                num_modelFeatures)
         q_value = q_values[model_number]
-        if bagging_MNIST:
-            return {'id': model_number, 'features': model_features, 'q': q_value}
-        else:
-            return {'id': model_number, 'q': q_value}
+        return {'id': model_number, 'features': model_features, 'q': q_value}
 
 
     def features_of_index(self, index, num_feat, bag):

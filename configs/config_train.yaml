@@ -2,13 +2,13 @@ repeat_experiments:                 1
 #ctx:                                'train_crop_3_15'
 #ctx:                                'Code'
 #ctx:                                'train_sineClasses_fcnn'
-ctx:                                'prepare_spambase'
+ctx:                                'autoencoder_2d_fctdist'
   #ctx:                                'sineClasses_AE_push_5perc_shift_5perc_points_1borders_10k_10NN_advanced'
 #ctx:                                'sineClasses_AE_push_5perc_20NN_insts'
 #ctx:                                'Train_model_3gaussian_no_reg'
 mode:                               ['train']
 multiple_models:                    Null
-dataset:                            'spambase'
+dataset:                            'gaussianClouds'
 #algorithm:                          './models/trained_models/autoencoder_mnist_784_150_10'
 #algorithm:                          './models/trained_models/autoencoder_mnist'
 #algorithm:                          './models/autoencoder_float_test'
@@ -50,15 +50,15 @@ datasets:
     subsample:                      Null
     num_samples:                    50000
     synthetic_test_samples:         10000
-    scale:                          True
+    scale:                          False
     gaussianClouds:
-        #file_path:                  './datasets/synthetic/gaussianClouds/60'
-        file_path:                  Null
-        num_clouds:                 2
+        file_path:                  './datasets/synthetic/gaussianClouds/fct_dist_2d'
+          #file_path:                  Null
+        num_clouds:                 1
           #num_samples:                1000
         num_anomalies:              0
-        spacedim:                   30
-        clouddim:                   4
+        spacedim:                   2
+        clouddim:                   2
     uniformClouds:
         #file_path:                  Null
         file_path:                  './datasets/synthetic/uniformClouds/60'
@@ -108,6 +108,33 @@ datasets:
     spambase:
         file_path:                  Null
         num_anomalies:              0
+    steel_plates_fault:
+        file_path:                  Null
+        num_anomalies:              0
+    qsar_biodeg:
+        file_path:                  Null
+        num_anomalies:              0
+    page_blocks:
+        file_path:                  Null
+        num_anomalies:              0
+    ozone_level_8hr:
+        file_path:                  Null
+        num_anomalies:              0
+    gas_drift:
+        file_path:                  Null
+        num_anomalies:              0
+    har:
+        file_path:                  Null
+        num_anomalies:              0
+    ionosphere:
+        file_path:                  Null
+        num_anomalies:              0
+    satellite:
+        file_path:                  Null
+        num_anomalies:              0
+    segment:
+        file_path:                  Null
+        num_anomalies:              0
     wbc:
         file_path:                  Null
         num_anomalies:              0
@@ -151,7 +178,7 @@ datasets:
         file_path:                  Null
 
 algorithms:
-    num_epochs:                     50
+    num_epochs:                     1
     dynamic_epochs:                 False
     lr:                             1e-3
     collect_subfcts:                False
@@ -162,16 +189,19 @@ algorithms:
         denoising:                  0.0
         border_dist:                False
         cross_point_sampling:       False
-        fct_dist:                   [] # ('mat', 'bias', 'relu')
+          #fct_dist:                   ['mat', 'bias'] # ('mat', 'bias', 'relu')
+        fct_dist:                   ['mat', 'bias'] # ('mat', 'bias', 'relu')
         fct_dist_layer:             Null #(can return pre and post relu: 5 to
           #get post relu in middle layer in [24,15,10,15,24])
         lambda_border:              0.001
-        lambda_fct:                 0.001
+        lambda_fct:                 0.0001
+          #lambda_fct:                 0.001
         bias_shift:                 Null
         dropout:                    False
         L2Reg:                      0.0000
           #topology:                   [30,15,10,15,30]
-        topology:                   [57,10,5,10,57]
+          #topology:                   [2,100,100,100,100,100,2]
+        topology:                   [2,15,30,50,30,15,2]
         bias:                       True
         num_border_points:          5
     deepOcc:

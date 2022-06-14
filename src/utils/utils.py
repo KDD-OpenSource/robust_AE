@@ -231,6 +231,7 @@ def load_dataset(cfg):
             clouddim=cfg.datasets.gaussianClouds.clouddim,
             num_clouds=cfg.datasets.gaussianClouds.num_clouds,
             num_samples=cfg.datasets.num_samples,
+            scale=cfg.datasets.scale,
             num_anomalies=cfg.datasets.gaussianClouds.num_anomalies,
             num_testpoints=cfg.datasets.synthetic_test_samples,
         )
@@ -312,6 +313,78 @@ def load_dataset(cfg):
             scale=cfg.datasets.scale,
             num_samples=cfg.datasets.num_samples,
             num_anomalies=cfg.datasets.spambase.num_anomalies,
+        )
+    elif cfg.dataset == "steel_plates_fault":
+        dataset = steel_plates_fault(
+            file_path=cfg.datasets.steel_plates_fault.file_path,
+            subsample=cfg.datasets.subsample,
+            scale=cfg.datasets.scale,
+            num_samples=cfg.datasets.num_samples,
+            num_anomalies=cfg.datasets.steel_plates_fault.num_anomalies,
+        )
+    elif cfg.dataset == "qsar_biodeg":
+        dataset = qsar_biodeg(
+            file_path=cfg.datasets.qsar_biodeg.file_path,
+            subsample=cfg.datasets.subsample,
+            scale=cfg.datasets.scale,
+            num_samples=cfg.datasets.num_samples,
+            num_anomalies=cfg.datasets.qsar_biodeg.num_anomalies,
+        )
+    elif cfg.dataset == "page_blocks":
+        dataset = page_blocks(
+            file_path=cfg.datasets.page_blocks.file_path,
+            subsample=cfg.datasets.subsample,
+            scale=cfg.datasets.scale,
+            num_samples=cfg.datasets.num_samples,
+            num_anomalies=cfg.datasets.page_blocks.num_anomalies,
+        )
+    elif cfg.dataset == "ozone_level_8hr":
+        dataset = ozone_level_8hr(
+            file_path=cfg.datasets.ozone_level_8hr.file_path,
+            subsample=cfg.datasets.subsample,
+            scale=cfg.datasets.scale,
+            num_samples=cfg.datasets.num_samples,
+            num_anomalies=cfg.datasets.ozone_level_8hr.num_anomalies,
+        )
+    elif cfg.dataset == "gas_drift":
+        dataset = gas_drift(
+            file_path=cfg.datasets.gas_drift.file_path,
+            subsample=cfg.datasets.subsample,
+            scale=cfg.datasets.scale,
+            num_samples=cfg.datasets.num_samples,
+            num_anomalies=cfg.datasets.gas_drift.num_anomalies,
+        )
+    elif cfg.dataset == "har":
+        dataset = har(
+            file_path=cfg.datasets.har.file_path,
+            subsample=cfg.datasets.subsample,
+            scale=cfg.datasets.scale,
+            num_samples=cfg.datasets.num_samples,
+            num_anomalies=cfg.datasets.har.num_anomalies,
+        )
+    elif cfg.dataset == "ionosphere":
+        dataset = ionosphere(
+            file_path=cfg.datasets.ionosphere.file_path,
+            subsample=cfg.datasets.subsample,
+            scale=cfg.datasets.scale,
+            num_samples=cfg.datasets.num_samples,
+            num_anomalies=cfg.datasets.ionosphere.num_anomalies,
+        )
+    elif cfg.dataset == "satellite":
+        dataset = satellite(
+            file_path=cfg.datasets.satellite.file_path,
+            subsample=cfg.datasets.subsample,
+            scale=cfg.datasets.scale,
+            num_samples=cfg.datasets.num_samples,
+            num_anomalies=cfg.datasets.satellite.num_anomalies,
+        )
+    elif cfg.dataset == "segment":
+        dataset = segment(
+            file_path=cfg.datasets.segment.file_path,
+            subsample=cfg.datasets.subsample,
+            scale=cfg.datasets.scale,
+            num_samples=cfg.datasets.num_samples,
+            num_anomalies=cfg.datasets.segment.num_anomalies,
         )
     elif cfg.dataset == "satimage":
         dataset = satimage(

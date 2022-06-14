@@ -13,6 +13,7 @@ class gaussianClouds(dataset):
         clouddim: int = 5,
         num_clouds: int = 5,
         num_samples: int = 2000,
+        scale: bool = False,
         num_anomalies: int = 20,
         num_testpoints: int = 1000,
     ):
@@ -23,6 +24,10 @@ class gaussianClouds(dataset):
         self.num_samples = num_samples
         self.num_anomalies = num_anomalies
         self.num_testpoints = num_testpoints
+        self.scale = scale
+        self.scale_type = 'MinMax'
+        self.scale_min = -1
+        self.scale_max = 1
 
     def create(self):
         """

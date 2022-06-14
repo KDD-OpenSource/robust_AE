@@ -34,7 +34,7 @@ class marabou_svdd_normal_rob:
 
     def evaluate(self, dataset, algorithm):
         test_data = dataset.test_data()
-        parallel = 0.5
+        parallel = 0.25
         result_dict = {}
         #robustness_sum = 0
         #truly_verif_sum = 0
@@ -48,8 +48,8 @@ class marabou_svdd_normal_rob:
             simon_folder = os.path.join(os.getcwd(),
                     self.cfg['multiple_models'][2:])
 
-            marabou_options = Marabou.createOptions(timeoutInSeconds=60,
-                    verbosity=2, initialTimeout=1, numWorkers=1)
+            marabou_options = Marabou.createOptions(timeoutInSeconds=600,
+                    verbosity=2, numWorkers=1)
 
             eps = 0.01
 

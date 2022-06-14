@@ -36,6 +36,15 @@ from src.datasets.cardio import cardio
 from src.datasets.pc3 import pc3
 from src.datasets.wbc import wbc
 from src.datasets.spambase import spambase
+from src.datasets.steel_plates_fault import steel_plates_fault
+from src.datasets.qsar_biodeg import qsar_biodeg
+from src.datasets.page_blocks import page_blocks
+from src.datasets.ozone_level_8hr import ozone_level_8hr
+from src.datasets.gas_drift import gas_drift
+from src.datasets.har import har
+from src.datasets.ionosphere import ionosphere
+from src.datasets.satellite import satellite
+from src.datasets.segment import segment
 from src.datasets.satimage import satimage
 from src.datasets.creditcardFraud import creditcardFraud
 from src.datasets.predictiveMaintenance import predictiveMaintenance

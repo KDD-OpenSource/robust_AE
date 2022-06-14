@@ -36,7 +36,7 @@ class marabou_ens_normal_rob_ae:
 
     def evaluate(self, dataset, algorithm):
         test_data = dataset.test_data()
-        parallel = 0.5
+        parallel = 0.25
         result_dict = {}
         approx_search = False
         #pre_test_num_folders = 100
@@ -66,8 +66,8 @@ class marabou_ens_normal_rob_ae:
                 0].sample(1)
 
 
-            marabou_options = Marabou.createOptions(timeoutInSeconds=60,
-                    verbosity=2, initialTimeout=1, numWorkers=1)
+            marabou_options = Marabou.createOptions(timeoutInSeconds=600,
+                    verbosity=2, numWorkers=1)
 
             # model info is list of tuples with (model_number, features, q_value) 
 
@@ -284,11 +284,11 @@ class marabou_ens_normal_rob_ae:
             rand_models = all_models
             #if '0' in rand_models:
                 #rand_models.remove('0')
-        if part_model is not None and isinstance(part_model, list):
-            part_model = list(map(lambda x:str(x), part_model))
         if part_model is not None and not isinstance(part_model, list):
             rand_models=[part_model]
-        elif part_model is not None:
+        if part_model is not None and isinstance(part_model, list):
+            part_model = list(map(lambda x:str(x), part_model))
+        if part_model is not None:
             rand_models = part_model
         model_folders = []
         # filter out too small q_values
@@ -303,7 +303,6 @@ class marabou_ens_normal_rob_ae:
     def get_model_info(self, onnx_path):
         model_path = onnx_path[:onnx_path.rfind('/')]
         model_number = model_path[model_path.rfind('/')+1:]
-        print(model_number)
         ae_div_file = np.load(os.path.join(model_path, 'result.npz'))
         ae_div = float(ae_div_file['div'])
         #model_features = self.features_of_index(int(model_number), 28*28, 32)
