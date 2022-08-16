@@ -1,6 +1,9 @@
 """Util file for main"""
 from imports import *
 
+def get_proj_root():
+    return '/home/bboeing/NNLinSubfct/Code'
+
 
 def exec_cfg(cfg, start_timestamp):
     cur_time_str = time.strftime("%Y-%m-%dT%H:%M:%S")

@@ -51,7 +51,6 @@ class marabou_ens_largErr:
             with open(os.path.join(simon_folder, 'alltheq.json'), 'r') as json_file:
                 q_values = json.load(json_file)
 
-            
             model_info = []
             largest_errors = []
             eps = 0.1

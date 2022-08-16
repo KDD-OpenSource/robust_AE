@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from .dataset import dataset
 from sklearn.datasets import fetch_openml
+from ..utils.utils import get_proj_root
 
 
 class moteStrain(dataset):
@@ -14,6 +15,9 @@ class moteStrain(dataset):
         super().__init__(name, file_path, subsample)
 
     def create(self):
+        import pdb; pdb.set_trace()
+        root = get_proj_root()
+
         dataset_train = pd.read_csv(
             "./datasets/MoteStrain/MoteStrain_TRAIN",
             header=None,
@@ -24,8 +28,7 @@ class moteStrain(dataset):
             header=None,
             delimiter="\t",
         )
-        # electricDevices_data = pd.concat([electricDevices_train,
-        # electricDevices_test], ignore_index=True)
+
         dataset_train, dataset_test = self.rebalance_train_test(
             dataset_train, dataset_test
         )

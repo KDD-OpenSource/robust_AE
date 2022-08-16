@@ -2,13 +2,13 @@ repeat_experiments:                 1
 #ctx:                                'train_crop_3_15'
 #ctx:                                'Code'
 #ctx:                                'train_sineClasses_fcnn'
-ctx:                                'autoencoder_2d_fctdist'
+ctx:                                'autoencoder_moteStrain'
   #ctx:                                'sineClasses_AE_push_5perc_shift_5perc_points_1borders_10k_10NN_advanced'
 #ctx:                                'sineClasses_AE_push_5perc_20NN_insts'
 #ctx:                                'Train_model_3gaussian_no_reg'
 mode:                               ['train']
 multiple_models:                    Null
-dataset:                            'gaussianClouds'
+dataset:                            'moteStrain'
 #algorithm:                          './models/trained_models/autoencoder_mnist_784_150_10'
 #algorithm:                          './models/trained_models/autoencoder_mnist'
 #algorithm:                          './models/autoencoder_float_test'

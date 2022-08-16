@@ -23,7 +23,7 @@ class autoencoder(neural_net):
     def __init__(
         self,
         topology: list,
-        fct_dist: list,
+        fct_dist: list = [],
         fct_dist_layer: int = None,
         train_robust_ae: float = None,
         denoising: float = None,
