@@ -4,6 +4,7 @@ import torch
 import csv
 import pandas as pd
 import numpy as np
+from src.utils.utils import get_proj_root
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.neighbors import NearestNeighbors
@@ -20,6 +21,41 @@ class dataset:
 
     def __str__(self) -> str:
         return self.name
+
+#    def create(self):
+#        root = get_proj_root()
+#        train_file = '/datasets/' + self.name + '/' + self.name + '_TRAIN.csv'
+#        test_file = '/datasets/' + self.name + '/' + self.name + '_TEST.csv'
+#
+#        if hasattr(self, 'delimiter') and hasattr(self, 'header'):
+#            # convention: if you define file_delimiter, you need to define
+#            # header too
+#            dataset_train = pd.read_csv(str(root) + train_file,
+#                    header=self.header, delimiter = self.delimiter)
+#            dataset_test = pd.read_csv(str(root) + test_file, header =
+#                    self.header, delimiter = self.delimiter)
+#        else:
+#            # default
+#            dataset_train = pd.read_csv(str(root) + train_file)
+#            dataset_test = pd.read_csv(str(root) + test_file)
+#
+#        if hasattr(self, 'index_col'):
+#            dataset_train.drop([self.index_col], axis=1, inplace=True)
+#            dataset_test.drop([self.index_col], axis=1, inplace=True)
+#        else:
+#            # default
+#            dataset_train.drop(['Unnamed: 0'], axis=1, inplace=True)
+#            dataset_test.drop(['Unnamed: 0'], axis=1, inplace=True)
+#
+#        dataset_train['label'] = 0
+#        self.train_labels = dataset_train['label']
+#        dataset_train.drop(['label'], inplace=True, axis=1)
+#        self._train_data = dataset_train
+#
+#        self.test_labels = dataset_test['label']
+#        dataset_test.drop(['label'], inplace=True, axis=1)
+#        self._test_data = dataset_test
+
 
     def load(self):
         # note that self.file_path will change when reading from the properties
@@ -213,7 +249,7 @@ class dataset:
         if self._test_data is None:
             self.load()
             # we do not preprocess any more. Preprocessing is done during
-            # training... 
+            # training as it is based on training data's values
             # self.preprocess()
         return self._test_data
 
@@ -222,18 +258,29 @@ class dataset:
         anom_series = (self.test_labels<0).astype(int)
         return anom_series
 
-    def rebalance_train_test(self, dataset_train, dataset_test):
-        # shuffle:
+    def join_and_shuffle(self, dataset_train, dataset_test):
         dataset_train = dataset_train.sample(frac=1)
         dataset_test = dataset_test.sample(frac=1)
-        # concat and divide
-        tot_num_samples = dataset_train.shape[0] + dataset_test.shape[0]
+        dataset = pd.concat([dataset_train, dataset_test])
+        return dataset
+
+    #def rebalance_train_test(self, dataset_train, dataset_test):
+    def balance_split(self, dataset):
+        tot_num_samples = dataset.shape[0]
         train_num_samples = int(tot_num_samples / 2)
         test_num_samples = int(tot_num_samples / 2)
-        df_tot = pd.concat([dataset_train, dataset_test], ignore_index=True)
-        dataset_train = df_tot[:train_num_samples]
-        dataset_test = df_tot[train_num_samples : train_num_samples + test_num_samples]
+        dataset_train = dataset[:train_num_samples]
+        dataset_test = dataset[train_num_samples : train_num_samples + test_num_samples]
         return dataset_train, dataset_test
+
+    def mirror_dataset_frac(self):
+        # function to obtain e.g. a negative sine curve
+        # arguments: value to be mirrored at, fraction of dataset, 'behaviour'
+        # (random/starting from an index etc.)
+        self.train_labels = pd.Series(0, range(int(self.num_samples / 2)))
+        tmp = pd.Series(0, range(int(self.num_samples / 2)))
+        # tmp = pd.Series(1, range(int(self.num_samples/2)))
+        self.train_labels = self.train_labels.append(tmp, ignore_index=True)
 
 class CenteredMaxAbsScaler(BaseEstimator, TransformerMixin):
     def __init__(self):

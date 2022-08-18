@@ -8,7 +8,7 @@ ctx:                                'autoencoder_moteStrain'
 #ctx:                                'Train_model_3gaussian_no_reg'
 mode:                               ['train']
 multiple_models:                    Null
-dataset:                            'moteStrain'
+dataset:                            'wafer'
 #algorithm:                          './models/trained_models/autoencoder_mnist_784_150_10'
 #algorithm:                          './models/trained_models/autoencoder_mnist'
 #algorithm:                          './models/autoencoder_float_test'
@@ -99,6 +99,7 @@ datasets:
         file_path:                  Null
           #num_samples:                35000
         num_anomalies:              0
+        normal_class:               7
     cardio:
         file_path:                  Null
         num_anomalies:              0
@@ -106,6 +107,9 @@ datasets:
         file_path:                  Null
         num_anomalies:              0
     spambase:
+        file_path:                  Null
+        num_anomalies:              0
+    wafer:
         file_path:                  Null
         num_anomalies:              0
     steel_plates_fault:

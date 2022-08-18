@@ -1,8 +1,9 @@
 """Util file for main"""
-from imports import *
+from pathlib import Path
 
 def get_proj_root():
-    return '/home/bboeing/NNLinSubfct/Code'
+    ## attention: this assumes that utils is in a particular folder
+    return Path(__file__).parent.parent.parent
 
 
 def exec_cfg(cfg, start_timestamp):
