@@ -8,7 +8,7 @@ ctx:                                'autoencoder_moteStrain'
 #ctx:                                'Train_model_3gaussian_no_reg'
 mode:                               ['train']
 multiple_models:                    Null
-dataset:                            'wafer'
+dataset:                            'har'
 #algorithm:                          './models/trained_models/autoencoder_mnist_784_150_10'
 #algorithm:                          './models/trained_models/autoencoder_mnist'
 #algorithm:                          './models/autoencoder_float_test'

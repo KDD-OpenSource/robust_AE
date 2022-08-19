@@ -52,6 +52,7 @@ from src.datasets.ecg5000 import ecg5000
 from src.datasets.electricDevices import electricDevices
 from src.datasets.italyPowerDemand import italyPowerDemand
 from src.datasets.proximalPhalanxOutlineCorrect import proximalPhalanxOutlineCorrect
+from src.datasets.phalangesOutlinesCorrect import phalangesOutlinesCorrect
 from src.datasets.sonyAIBORobotSurface1 import sonyAIBORobotSurface1
 from src.datasets.sonyAIBORobotSurface2 import sonyAIBORobotSurface2
 from src.datasets.syntheticControl import syntheticControl

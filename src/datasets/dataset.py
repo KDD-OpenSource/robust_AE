@@ -22,39 +22,40 @@ class dataset:
     def __str__(self) -> str:
         return self.name
 
-#    def create(self):
-#        root = get_proj_root()
-#        train_file = '/datasets/' + self.name + '/' + self.name + '_TRAIN.csv'
-#        test_file = '/datasets/' + self.name + '/' + self.name + '_TEST.csv'
-#
-#        if hasattr(self, 'delimiter') and hasattr(self, 'header'):
-#            # convention: if you define file_delimiter, you need to define
-#            # header too
-#            dataset_train = pd.read_csv(str(root) + train_file,
-#                    header=self.header, delimiter = self.delimiter)
-#            dataset_test = pd.read_csv(str(root) + test_file, header =
-#                    self.header, delimiter = self.delimiter)
-#        else:
-#            # default
-#            dataset_train = pd.read_csv(str(root) + train_file)
-#            dataset_test = pd.read_csv(str(root) + test_file)
-#
-#        if hasattr(self, 'index_col'):
-#            dataset_train.drop([self.index_col], axis=1, inplace=True)
-#            dataset_test.drop([self.index_col], axis=1, inplace=True)
-#        else:
-#            # default
-#            dataset_train.drop(['Unnamed: 0'], axis=1, inplace=True)
-#            dataset_test.drop(['Unnamed: 0'], axis=1, inplace=True)
-#
-#        dataset_train['label'] = 0
-#        self.train_labels = dataset_train['label']
-#        dataset_train.drop(['label'], inplace=True, axis=1)
-#        self._train_data = dataset_train
-#
-#        self.test_labels = dataset_test['label']
-#        dataset_test.drop(['label'], inplace=True, axis=1)
-#        self._test_data = dataset_test
+    def create(self):
+        root = get_proj_root()
+        train_file = '/datasets/' + self.name + '/' + self.name + '_TRAIN.csv'
+        test_file = '/datasets/' + self.name + '/' + self.name + '_TEST.csv'
+
+        dataset_train = pd.read_csv(str(root) + train_file,
+                header = self.header, delimiter = self.delimiter, index_col =
+                self.index_col)
+        dataset_test = pd.read_csv(str(root) + test_file,
+                header = self.header, delimiter = self.delimiter, index_col =
+                self.index_col)
+
+        if hasattr(self, 'balance'):
+            dataset = self.join_and_shuffle(dataset_train, dataset_test)
+            dataset_train, dataset_test = self.balance_split(
+                dataset
+            )
+
+        if self.label_col_train is None:
+            self.train_labels = pd.Series(0, index=dataset_train.index)
+            #dataset_train['label'] = 0
+        else:
+            self.train_labels = dataset_train.loc[:,self.label_col_train]
+            #dataset_train.loc[:,'label'] = dataset_train.loc[:,self.label_col_train]
+            dataset_train = dataset_train.drop([self.label_col_train], axis = 1)
+
+
+        #self.train_labels = dataset_train['label']
+        #dataset_train = dataset_train.drop(['label'], axis=1)
+        self._train_data = dataset_train
+
+        self.test_labels = dataset_test[self.label_col_test]
+        dataset_test = dataset_test.drop([self.label_col_test], axis=1)
+        self._test_data = dataset_test
 
 
     def load(self):

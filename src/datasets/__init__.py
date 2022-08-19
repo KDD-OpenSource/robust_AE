@@ -26,6 +26,7 @@ from .italyPowerDemand import italyPowerDemand
 from .electricDevices import electricDevices
 from .ecg5000 import ecg5000
 from .proximalPhalanxOutlineCorrect import proximalPhalanxOutlineCorrect
+from .phalangesOutlinesCorrect import phalangesOutlinesCorrect
 from .sonyAIBORobotSurface1 import sonyAIBORobotSurface1
 from .sonyAIBORobotSurface2 import sonyAIBORobotSurface2
 from .syntheticControl import syntheticControl
@@ -65,6 +66,7 @@ __all__ = [
     "predictiveMaintenance",
     "ecg5000",
     "proximalPhalanxOutlineCorrect",
+    "phalangesOutlinesCorrect",
     "sonyAIBORobotSurface1",
     "sonyAIBORobotSurface2",
     "syntheticControl",

@@ -13,6 +13,7 @@ class test_moteStrain(unittest.TestCase):
         train_label = dataset.train_labels
         test_data = dataset.test_data()
         test_label = dataset.test_labels
+        import pdb; pdb.set_trace()
 
         self.assertEqual(train_label.shape[0], train_data.shape[0])
         self.assertEqual(test_label.shape[0], test_data.shape[0])
