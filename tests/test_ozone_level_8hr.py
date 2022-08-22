@@ -1,12 +1,12 @@
 import unittest
 
 
-from src.datasets.wafer import wafer
+from src.datasets.ozone_level_8hr import ozone_level_8hr
 
 
-class test_wafer(unittest.TestCase):
+class test_ozone_level_8hr(unittest.TestCase):
     def test_data_shapes(self):
-        dataset = wafer()
+        dataset = ozone_level_8hr()
         dataset.create()
 
         train_data = dataset.train_data()

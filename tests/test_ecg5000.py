@@ -1,12 +1,12 @@
 import unittest
 
 
-from src.datasets.wafer import wafer
+from src.datasets.ecg5000 import ecg5000
 
 
-class test_wafer(unittest.TestCase):
+class test_ecg5000(unittest.TestCase):
     def test_data_shapes(self):
-        dataset = wafer()
+        dataset = ecg5000()
         dataset.create()
 
         train_data = dataset.train_data()

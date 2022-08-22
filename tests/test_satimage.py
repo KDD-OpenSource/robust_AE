@@ -1,12 +1,12 @@
 import unittest
 
 
-from src.datasets.wafer import wafer
+from src.datasets.satimage import satimage
 
 
-class test_wafer(unittest.TestCase):
+class test_satimage(unittest.TestCase):
     def test_data_shapes(self):
-        dataset = wafer()
+        dataset = satimage()
         dataset.create()
 
         train_data = dataset.train_data()

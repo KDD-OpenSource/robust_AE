@@ -1,3 +1,4 @@
+# to be regarded as non-maintained legacy code
 import numpy as np
 import pandas as pd
 from .dataset import dataset

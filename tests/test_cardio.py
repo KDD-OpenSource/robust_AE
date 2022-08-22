@@ -1,12 +1,12 @@
 import unittest
 
 
-from src.datasets.wafer import wafer
+from src.datasets.cardio import cardio
 
 
-class test_wafer(unittest.TestCase):
+class test_cardio(unittest.TestCase):
     def test_data_shapes(self):
-        dataset = wafer()
+        dataset = cardio()
         dataset.create()
 
         train_data = dataset.train_data()

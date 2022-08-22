@@ -1,12 +1,12 @@
 import unittest
 
 
-from src.datasets.wafer import wafer
+from src.datasets.electricDevices import electricDevices
 
 
-class test_wafer(unittest.TestCase):
+class test_electricDevices(unittest.TestCase):
     def test_data_shapes(self):
-        dataset = wafer()
+        dataset = electricDevices()
         dataset.create()
 
         train_data = dataset.train_data()

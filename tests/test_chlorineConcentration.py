@@ -1,12 +1,12 @@
 import unittest
 
 
-from src.datasets.wafer import wafer
+from src.datasets.chlorineConcentration import chlorineConcentration
 
 
-class test_wafer(unittest.TestCase):
+class test_chlorineConcentration(unittest.TestCase):
     def test_data_shapes(self):
-        dataset = wafer()
+        dataset = chlorineConcentration()
         dataset.create()
 
         train_data = dataset.train_data()

@@ -1,12 +1,12 @@
 import unittest
 
 
-from src.datasets.wafer import wafer
+from src.datasets.chinatown import chinatown
 
 
-class test_wafer(unittest.TestCase):
+class test_chinatown(unittest.TestCase):
     def test_data_shapes(self):
-        dataset = wafer()
+        dataset = chinatown()
         dataset.create()
 
         train_data = dataset.train_data()

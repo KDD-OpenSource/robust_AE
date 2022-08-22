@@ -1,12 +1,12 @@
 import unittest
 
 
-from src.datasets.wafer import wafer
+from src.datasets.syntheticControl import syntheticControl
 
 
-class test_wafer(unittest.TestCase):
+class test_syntheticControl(unittest.TestCase):
     def test_data_shapes(self):
-        dataset = wafer()
+        dataset = syntheticControl()
         dataset.create()
 
         train_data = dataset.train_data()

@@ -1,12 +1,12 @@
 import unittest
 
 
-from src.datasets.wafer import wafer
+from src.datasets.ionosphere import ionosphere
 
 
-class test_wafer(unittest.TestCase):
+class test_ionosphere(unittest.TestCase):
     def test_data_shapes(self):
-        dataset = wafer()
+        dataset = ionosphere()
         dataset.create()
 
         train_data = dataset.train_data()

@@ -1,12 +1,12 @@
 import unittest
 
 
-from src.datasets.wafer import wafer
+from src.datasets.italyPowerDemand import italyPowerDemand
 
 
-class test_wafer(unittest.TestCase):
+class test_italyPowerDemand(unittest.TestCase):
     def test_data_shapes(self):
-        dataset = wafer()
+        dataset = italyPowerDemand()
         dataset.create()
 
         train_data = dataset.train_data()

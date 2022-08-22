@@ -1,12 +1,12 @@
 import unittest
 
 
-from src.datasets.wafer import wafer
+from src.datasets.melbournePedestrian import melbournePedestrian
 
 
-class test_wafer(unittest.TestCase):
+class test_melbournePedestrian(unittest.TestCase):
     def test_data_shapes(self):
-        dataset = wafer()
+        dataset = melbournePedestrian()
         dataset.create()
 
         train_data = dataset.train_data()

@@ -1,12 +1,12 @@
 import unittest
 
 
-from src.datasets.wafer import wafer
+from src.datasets.pc3 import pc3
 
 
-class test_wafer(unittest.TestCase):
+class test_pc3(unittest.TestCase):
     def test_data_shapes(self):
-        dataset = wafer()
+        dataset = pc3()
         dataset.create()
 
         train_data = dataset.train_data()
