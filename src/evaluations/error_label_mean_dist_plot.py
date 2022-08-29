@@ -14,14 +14,14 @@ class error_label_mean_dist_plot:
         self.evaluation = eval_inst
 
     def evaluate(self, dataset, algorithm):
-        dataset.calc_dist_to_label_mean(subset="test")
+        dists_to_label_mean = dataset.calc_dists_to_label_mean(subset="test")
         #        sample_dist_pairs = algorithm.assign_border_dists(algorithm.module,
         #                dataset.test_data())
         errors = algorithm.calc_errors(algorithm.module, dataset.test_data())
         joined_df = pd.concat(
             [
                 pd.DataFrame(
-                    dataset.dists_to_label_mean, columns=["dists_to_label_mean"]
+                    dists_to_label_mean, columns=["dists_to_label_mean"]
                 ),
                 pd.DataFrame(errors, columns=["errors"]),
             ],

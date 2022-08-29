@@ -23,7 +23,7 @@ def main():
     else:
         for cfg in cfgs:
             exec_cfg(cfg, start_timestamp)
-#
-#
+
+
 if __name__ == "__main__":
     main()

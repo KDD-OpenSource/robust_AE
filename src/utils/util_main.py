@@ -20,7 +20,6 @@ def exec_cfg(cfg, start_timestamp):
         )
 
     for repetition in range(cfg.repeat_experiments):
-        check_cfg_consistency(cfg)
         if cfg.repeat_experiments > 1:
             dataset, algorithm, eval_inst, evals = load_objects_cfgs(
                 cfg, base_folder=base_folder, exp_run=str(repetition)
@@ -29,6 +28,7 @@ def exec_cfg(cfg, start_timestamp):
             dataset, algorithm, eval_inst, evals = load_objects_cfgs(
                 cfg, base_folder=base_folder
             )
+
         if "train" in cfg.mode:
             init_logging(eval_inst.get_run_folder())
             logger = logging.getLogger(__name__)
@@ -165,7 +165,7 @@ def read_cfg(cfg):
                 model_list.remove(blocked)
             except:
                 pass
-        
+
         for _ in range(len(model_list) - 1):
             cfgs.append(copy.deepcopy(cfgs[0]))
         for cfg, model_folder in zip(cfgs, model_list):
@@ -189,13 +189,6 @@ def read_cfg(cfg):
             except:
                 pass
     return cfgs
-
-
-def check_cfg_consistency(cfg):
-    pass
-    # check data dim = input dim
-    # check if for each evaluation linsubfctcount is required
-    # if no train, then you must have a load field
 
 
 def load_objects_cfgs(cfg, base_folder, exp_run=None):
@@ -503,6 +496,7 @@ def load_dataset(cfg):
 
 def load_algorithm(cfg):
     if "/" in cfg.algorithm:
+        # means that it is a path to an already trained one
         if "autoencoder" in cfg.algorithm:
             algorithm = autoencoder(
                 topology=[2, 1, 2],
