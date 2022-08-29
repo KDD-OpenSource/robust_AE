@@ -1,4 +1,4 @@
-"""Util file for main"""
+"""Util file for rest of code"""
 from pathlib import Path
 
 def get_proj_root():

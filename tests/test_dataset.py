@@ -3,12 +3,12 @@ import numpy as np
 
 
 from src.datasets.dataset import dataset
-from src.datasets.cardio import cardio
+from src.datasets.har import har
 
 
 class test_dataset(unittest.TestCase):
     def test_create_float(self):
-        dataset_card = cardio()
+        dataset_card = har()
         train_data = dataset_card.train_data()
         test_data = dataset_card.test_data()
         train_labels = dataset_card.train_labels
@@ -42,7 +42,7 @@ class test_dataset(unittest.TestCase):
         self.assertEqual(train_data.shape[1], test_data.shape[1])
 
     def test_save_datashapes(self):
-        dataset_card = cardio()
+        dataset_card = har()
         train_data = dataset_card.train_data()
         train_label = dataset_card.train_labels
         test_data = dataset_card.test_data()
@@ -67,7 +67,7 @@ class test_dataset(unittest.TestCase):
             train_label).values)))
 
     def test_preprocess(self):
-        dataset_card = cardio(subsample = 100)
+        dataset_card = har(subsample = 100)
         dataset_card.scale_min = -1
         dataset_card.scale_max = 1
         train_data = dataset_card.train_data()
@@ -78,7 +78,7 @@ class test_dataset(unittest.TestCase):
         self.assertTrue(abs(train_data.max().max() - 1) < 0.00001)
 
     def test_calc_dists_to_label_mean(self):
-        dataset_card = cardio()
+        dataset_card = har()
         dists_to_label_mean = dataset_card.calc_dists_to_label_mean(subset =
                 'train')
 

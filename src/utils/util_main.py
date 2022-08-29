@@ -1,8 +1,8 @@
 """Util file for main"""
 from src.utils.imports import *
 
-def get_proj_root():
-    return '/home/bboeing/NNLinSubfct/Code'
+#def get_proj_root():
+    #return '/home/bboeing/NNLinSubfct/Code'
 
 
 def exec_cfg(cfg, start_timestamp):
@@ -58,85 +58,6 @@ def exec_cfg(cfg, start_timestamp):
                 evaluation.evaluate(dataset, algorithm)
     cfg.to_json(filename=os.path.join(eval_inst.run_folder, "cfg.json"))
     print(f"Config {cfg.ctx} is done")
-
-
-## has to be reimplemented (made general; the loss function is for AEs only)
-#def param_cross_val(cfg, num_times=20, test_split=0.3):
-#    parallel = True
-#    results = []
-#    param_lower_bound = cfg.algorithms.validation.range[0]
-#    param_upper_bound = cfg.algorithms.validation.range[1]
-#    if parallel:
-#        pool = mp.Pool(int(mp.cpu_count() / 2))
-#        for param_value in np.linspace(param_lower_bound, param_upper_bound, 20):
-#            results.append(
-#                (
-#                    param_value,
-#                    pool.apply_async(
-#                        calc_fixed_param,
-#                        args=((param_value, cfg, num_times, test_split)),
-#                    ),
-#                )
-#            )
-#        pool.close()
-#        pool.join()
-#        results_df = pd.DataFrame(
-#            map(lambda x: (x[0], x[1].get()[0], x[1].get()[1], x[1].get()[2]), results),
-#            columns=["param", "error_mean", "gaussian_mean", "gaussian_var"],
-#        )
-#    else:
-#        for param_value in np.linspace(param_lower_bound, param_upper_bound, 2):
-#            results.append(
-#                (param_value, calc_fixed_param(param_value, cfg, num_times, test_split))
-#            )
-#        results_df = pd.DataFrame(
-#            map(lambda x: (x[0], x[1][0], x[1][1], x[1][2]), results),
-#            columns=["param", "error_mean", "gaussian_mean", "gaussian_var"],
-#        )
-#
-#    # find largest mean with smallest var (not just largest mean)
-#    max_gaussian_mean = results_df.loc[results_df["gaussian_mean"].idxmax()]
-#    return (
-#        max_gaussian_mean["param"],
-#        max_gaussian_mean["error_mean"],
-#        max_gaussian_mean["gaussian_mean"],
-#        max_gaussian_mean["gaussian_var"],
-#        results_df,
-#    )
-#
-#
-#def calc_fixed_param(param_value, cfg, num_times, test_split):
-#    parameter = cfg.algorithms.validation.parameter
-#    dataset = load_dataset(cfg)
-#    X = dataset.train_data()
-#
-#    algorithm = load_algorithm(cfg)
-#    algorithm.__dict__[parameter] = param_value
-#    split = ShuffleSplit(n_splits=num_times, train_size=1 - test_split)
-#    # self.__dict__[parameter] = param_value
-#    mean_error_list = []
-#    gaussian_nb_list = []
-#    for train_ds, test_ds in split.split(X):
-#        algorithm.fit(X.loc[train_ds])
-#        res = algorithm.predict(X.loc[test_ds])
-#        mean_error = ((X.loc[test_ds] - res) ** 2).sum(axis=1).mean()
-#        gnb_acc_latent = algorithm.calc_naive_bayes(
-#            X.loc[train_ds],
-#            X.loc[test_ds],
-#            dataset.train_labels[train_ds],
-#            dataset.train_labels[test_ds],
-#        )
-#        gaussian_nb_list.append(gnb_acc_latent)
-#        mean_error_list.append(mean_error)
-#        algorithm.module.apply(reset_weights)
-#    param_error_mean = np.array(mean_error_list).mean()
-#    gaussian_acc_mean = np.array(gaussian_nb_list).mean()
-#    gaussian_acc_var = np.var(np.array(gaussian_nb_list))
-#    print(f"Param_value: {param_value}")
-#    print(f"Gaussian: {gaussian_acc_mean}")
-#    print(f"GaussianVar: {gaussian_acc_var}")
-#    return param_error_mean, gaussian_acc_mean, gaussian_acc_var
-
 
 def load_cfgs():
     cfgs = []
@@ -195,14 +116,17 @@ def load_objects_cfgs(cfg, base_folder, exp_run=None):
     try:
         dataset = load_dataset(cfg)
     except:
+        print('No dataset loaded.\n')
         dataset = None
     try:
         algorithm = load_algorithm(cfg)
     except:
+        print('No algorithm loaded.\n')
         algorithm = None
     try:
         eval_inst, evals = load_evals(cfg, base_folder, exp_run)
     except:
+        print('No evaluations loaded.\n')
         eval_inst, evals = None, None
     return dataset, algorithm, eval_inst, evals
 
