@@ -75,17 +75,16 @@ def read_cfg(cfg):
     cfgs = []
     cfgs.append(Box(config(os.path.join(os.getcwd(), cfg)).config_dict))
     if cfgs[-1].multiple_models is not None:
-        subfolder_blocklist = ['remaining_models']
-
+        #subfolder_blocklist = ['remaining_models']
         model_containing_folder = cfgs[-1].multiple_models
         model_list = os.listdir(model_containing_folder)
-        for blocked in subfolder_blocklist:
-            try:
-                model_list.remove(blocked)
-            except:
-                pass
-
-        import pdb; pdb.set_trace()
+#        for blocked in subfolder_blocklist:
+#            try:
+#                model_list.remove(blocked)
+#            except:
+#                pass
+#
+#        import pdb; pdb.set_trace()
         for _ in range(len(model_list) - 1):
             cfgs.append(copy.deepcopy(cfgs[0]))
         for cfg, model_folder in zip(cfgs, model_list):
@@ -94,6 +93,7 @@ def read_cfg(cfg):
             cfg.ctx = cfg.ctx + "_" + model_path[model_path.rfind("/") + 1 :]
             dataset_path = model_path + "/dataset"
             try:
+                import pdb; pdb.set_trace()
                 data_properties = list(
                     filter(lambda x: "Properties" in x, os.listdir(dataset_path))
                 )[0]
@@ -128,7 +128,7 @@ def load_objects_cfgs(cfg, base_folder, exp_run=None):
 
 
 def load_dataset(cfg):
-    elif cfg.dataset == "sineNoise":
+    if cfg.dataset == "sineNoise":
         dataset = sineNoise(
             file_path=cfg.datasets.sineNoise.file_path,
             subsample=cfg.datasets.subsample,

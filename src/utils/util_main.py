@@ -165,6 +165,15 @@ def load_dataset(cfg):
             num_anomalies=cfg.datasets.sineNoise.num_anomalies,
             num_testpoints=cfg.datasets.synthetic_test_samples,
         )
+    elif cfg.dataset == "uniform_2D":
+        dataset = uniform_2D(
+            file_path=cfg.datasets.uniform_2D.file_path,
+            subsample=cfg.datasets.subsample,
+            scale=False,
+            num_samples=cfg.datasets.num_samples,
+            num_anomalies=cfg.datasets.uniform_2D.num_anomalies,
+            num_testpoints=cfg.datasets.synthetic_test_samples,
+        )
     elif cfg.dataset == "sineClasses":
         dataset = sineClasses(
             file_path=cfg.datasets.sineClasses.file_path,

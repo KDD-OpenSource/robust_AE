@@ -7,7 +7,7 @@ mode:                               ['test']
   #multiple_models:                    './models/trained_models/autoencoder_tmp'
   #multiple_models:                    './models/trained_models/simon_merged'
   #multiple_models:                    './models/trained_models/simon4'
-multiple_models:                    './models/trained_models/autoencoder_2d_fctdist_1epoch'
+multiple_models:                    './models/trained_models/simon_mnist'
   #multiple_models:                    './models/trained_models/simon_deepsvdd_satimage'
 #multiple_models:                    './models/trained_models/autoencoder_crop_diff_ds'
 #multiple_models:                    Null

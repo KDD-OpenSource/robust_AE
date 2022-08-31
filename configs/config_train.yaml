@@ -2,13 +2,13 @@ repeat_experiments:                 1
 #ctx:                                'train_crop_3_15'
 #ctx:                                'Code'
 #ctx:                                'train_sineClasses_fcnn'
-ctx:                                'autoencoder_moteStrain'
+ctx:                                'autoencoder_uniform_2D'
   #ctx:                                'sineClasses_AE_push_5perc_shift_5perc_points_1borders_10k_10NN_advanced'
 #ctx:                                'sineClasses_AE_push_5perc_20NN_insts'
 #ctx:                                'Train_model_3gaussian_no_reg'
 mode:                               ['train']
 multiple_models:                    Null
-dataset:                            'har'
+dataset:                            'uniform_2D'
 #algorithm:                          './models/trained_models/autoencoder_mnist_784_150_10'
 #algorithm:                          './models/trained_models/autoencoder_mnist'
 #algorithm:                          './models/autoencoder_float_test'
@@ -48,7 +48,7 @@ evaluations:                        [
 
 datasets:
     subsample:                      Null
-    num_samples:                    50000
+    num_samples:                    100
     synthetic_test_samples:         10000
     scale:                          False
     gaussianClouds:
@@ -74,6 +74,10 @@ datasets:
           #num_samples:                1000
         num_anomalies:              0
         spacedim:                   30
+    uniform_2D:
+        #file_path:                  './datasets/synthetic/sineNoise/60'
+        file_path:                  Null
+        num_anomalies:              0
     sineClasses:
       #file_path:                  './datasets/synthetic/sineClasses/30'
         file_path:                  Null
@@ -194,7 +198,7 @@ algorithms:
         border_dist:                False
         cross_point_sampling:       False
           #fct_dist:                   ['mat', 'bias'] # ('mat', 'bias', 'relu')
-        fct_dist:                   ['mat', 'bias'] # ('mat', 'bias', 'relu')
+        fct_dist:                   [] # ('mat', 'bias', 'relu')
         fct_dist_layer:             Null #(can return pre and post relu: 5 to
           #get post relu in middle layer in [24,15,10,15,24])
         lambda_border:              0.001

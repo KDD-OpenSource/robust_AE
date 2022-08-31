@@ -28,6 +28,7 @@ from box import Box
 from src.datasets.gaussianClouds import gaussianClouds
 from src.datasets.uniformClouds import uniformClouds
 from src.datasets.sineNoise import sineNoise
+from src.datasets.uniform_2D import uniform_2D
 from src.datasets.sineClasses import sineClasses
 from src.datasets.moons_2d import moons_2d
 from src.datasets.parabola import parabola
