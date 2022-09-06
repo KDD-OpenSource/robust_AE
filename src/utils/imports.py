@@ -91,6 +91,7 @@ from src.evaluations.ad_box_creator import ad_box_creator
 from src.evaluations.singularValuePlots import singularValuePlots
 from src.evaluations.closest_linsubfct_plot import closest_linsubfct_plot
 from src.evaluations.boundary_2d_plot import boundary_2d_plot
+from src.evaluations.relu_visualization import relu_visualization
 from src.evaluations.inst_area_2d_plot import inst_area_2d_plot
 from src.evaluations.border_dist_2d import border_dist_2d
 from src.evaluations.border_dist_sort_plot import border_dist_sort_plot

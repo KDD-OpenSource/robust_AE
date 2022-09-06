@@ -1,7 +1,7 @@
 import time
 import multiprocessing as mp
-from src.utils.util_main import exec_cfg
-from src.utils.util_main import load_cfgs
+from src.utils.util_main_ref import exec_cfg
+from src.utils.util_main_ref import load_cfgs
 
 
 import torch.nn as nn

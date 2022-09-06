@@ -8,7 +8,7 @@ def get_proj_root():
 
 def exec_cfg(cfg, start_timestamp):
     cur_time_str = time.strftime("%Y-%m-%dT%H:%M:%S")
-    if cfg.repeat_experiments > 1:
+    if cfg.repeat_eval > 1:
         base_folder = cur_time_str
     else:
         base_folder = None
@@ -20,9 +20,9 @@ def exec_cfg(cfg, start_timestamp):
             + cfg.multiple_models[cfg.multiple_models.rfind("/") + 1 :]
         )
 
-    for repetition in range(cfg.repeat_experiments):
+    for repetition in range(cfg.repeat_eval):
         check_cfg_consistency(cfg)
-        if cfg.repeat_experiments > 1:
+        if cfg.repeat_eval > 1:
             dataset, algorithm, eval_inst, evals = load_objects_cfgs(
                 cfg, base_folder=base_folder, exp_run=str(repetition)
             )

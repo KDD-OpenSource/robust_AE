@@ -110,7 +110,8 @@ class dataset:
 
 
     def preprocess(self):
-        import pdb; pdb.set_trace()
+        self._train_data = self._train_data.astype(np.float32)
+        self._test_data = self._test_data.astype(np.float32)
         if self.subsample:
             self._train_data = self._train_data.sample(self.subsample)
             self.train_labels = self.train_labels[self._train_data.index]
@@ -118,13 +119,12 @@ class dataset:
         if self.scale == True:
             train_data, scaler = self.scale_train_data(self._train_data,
                     return_scaler=True)
-        self._train_data = train_data
-        if self.scale == True:
+            self._train_data = train_data
             test_data = pd.DataFrame(
                     scaler.transform(self._test_data),
                     columns=self._test_data.columns,
                     index=self._test_data.index)
-        self._test_data = test_data
+            self._test_data = test_data
 
     def kth_nearest_neighbor_dist(self, k):
         # delete for code publication of submission?

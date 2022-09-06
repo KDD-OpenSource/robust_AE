@@ -7,7 +7,7 @@ ctx:                                'autoencoder_uniform_2D'
 #ctx:                                'sineClasses_AE_push_5perc_20NN_insts'
 #ctx:                                'Train_model_3gaussian_no_reg'
 mode:                               ['train']
-multiple_models:                    Null
+test_models:                        Null
 dataset:                            'uniform_2D'
 #algorithm:                          './models/trained_models/autoencoder_mnist_784_150_10'
 #algorithm:                          './models/trained_models/autoencoder_mnist'
@@ -48,7 +48,7 @@ evaluations:                        [
 
 datasets:
     subsample:                      Null
-    num_samples:                    100
+    num_samples:                    1
     synthetic_test_samples:         10000
     scale:                          False
     gaussianClouds:

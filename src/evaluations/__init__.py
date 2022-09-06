@@ -15,6 +15,7 @@ from .mse_test import mse_test
 from .singularValuePlots import singularValuePlots
 from .closest_linsubfct_plot import closest_linsubfct_plot
 from .boundary_2d_plot import boundary_2d_plot
+from .relu_visualization import relu_visualization
 from .inst_area_2d_plot import inst_area_2d_plot
 from .border_dist_2d import border_dist_2d
 from .border_dist_sort_plot import border_dist_sort_plot
@@ -84,6 +85,7 @@ __all__ = [
     "singularValuePlots",
     "closest_linsubfct_plot",
     "boundary_2d_plot",
+    "relu_visualization",
     "inst_area_2d_plot",
     "border_dist_2d",
     "border_dist_sort_plot",

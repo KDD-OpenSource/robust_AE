@@ -2,59 +2,49 @@
 from src.utils.imports_ref import *
 import sys
 import os
+import time
+import json
 
 def exec_cfg(cfg, start_timestamp):
     cur_time_str = time.strftime("%Y-%m-%dT%H:%M:%S")
-    if cfg.repeat_experiments > 1:
+    if cfg.repeat_eval > 1:
         base_folder = cur_time_str
     else:
         base_folder = None
-    if cfg.multiple_models != None:
+    if cfg.test_models != None:
         base_folder = (
             cur_time_str
             + "/"
             + cfg.ctx[: cfg.ctx.find("2021")]
-            + cfg.multiple_models[cfg.multiple_models.rfind("/") + 1 :]
+            + cfg.test_models[cfg.test_models.rfind("/") + 1 :]
         )
 
-    for repetition in range(cfg.repeat_experiments):
-        if cfg.repeat_experiments > 1:
-            dataset, algorithm, eval_inst, evals = load_objects_cfgs(
-                cfg, base_folder=base_folder, exp_run=str(repetition)
+    for repetition in range(cfg.repeat_eval):
+        if cfg.repeat_eval > 1:
+            dataset, algorithm, run_inst, eval_inst, evals = load_objects_cfgs(
+                cfg, base_folder=base_folder, run_number=str(repetition)
             )
         else:
-            dataset, algorithm, eval_inst, evals = load_objects_cfgs(
+            dataset, algorithm, run_inst, eval_inst, evals = load_objects_cfgs(
                 cfg, base_folder=base_folder
             )
 
         if "train" in cfg.mode:
-            init_logging(eval_inst.get_run_folder())
+            init_logging(run_inst.get_run_folder())
             logger = logging.getLogger(__name__)
-            algorithm.fit(dataset, eval_inst.get_run_folder(), logger)
-            algorithm.save(eval_inst.get_run_folder())
-            dataset.save(os.path.join(eval_inst.get_run_folder(), "dataset"))
+            algorithm.fit(dataset, run_inst.get_run_folder(), logger)
+            algorithm.save(run_inst.get_run_folder())
+            dataset.save(os.path.join(run_inst.get_run_folder(), "dataset"))
 
             dataset.save(
                 os.path.join(
                     "./models/trained_models/", algorithm.name, "subfolder/dataset"
                 )
             )
-        if "opt_param" in cfg.mode:
-            best_param, best_mean, best_gaussian, best_var, result_df = param_cross_val(
-                cfg
-            )
-            res_dict = {}
-            res_dict["param"] = cfg.algorithms.validation.parameter
-            res_dict["value"] = best_param
-            res_dict["error_mean"] = best_mean.astype(np.float64)
-            res_dict["gaussian_mean"] = best_gaussian.astype(np.float64)
-            res_dict["gaussian_var"] = best_gaussian.astype(np.float64)
-            eval_inst.save_json(res_dict, "parameter_opt")
-            eval_inst.save_csv(result_df, "parameter_all")
         if "test" in cfg.mode:
             for evaluation in evals:
                 evaluation.evaluate(dataset, algorithm)
-    cfg.to_json(filename=os.path.join(eval_inst.run_folder, "cfg.json"))
+    cfg.to_json(filename=os.path.join(run_inst.run_folder, "cfg.json"))
     print(f"Config {cfg.ctx} is done")
 
 def load_cfgs():
@@ -74,17 +64,10 @@ def load_cfgs():
 def read_cfg(cfg):
     cfgs = []
     cfgs.append(Box(config(os.path.join(os.getcwd(), cfg)).config_dict))
-    if cfgs[-1].multiple_models is not None:
-        #subfolder_blocklist = ['remaining_models']
-        model_containing_folder = cfgs[-1].multiple_models
+    if cfgs[-1].test_models is not None:
+        # allows to load multiple models for testing
+        model_containing_folder = cfgs[-1].test_models
         model_list = os.listdir(model_containing_folder)
-#        for blocked in subfolder_blocklist:
-#            try:
-#                model_list.remove(blocked)
-#            except:
-#                pass
-#
-#        import pdb; pdb.set_trace()
         for _ in range(len(model_list) - 1):
             cfgs.append(copy.deepcopy(cfgs[0]))
         for cfg, model_folder in zip(cfgs, model_list):
@@ -93,15 +76,12 @@ def read_cfg(cfg):
             cfg.ctx = cfg.ctx + "_" + model_path[model_path.rfind("/") + 1 :]
             dataset_path = model_path + "/dataset"
             try:
-                import pdb; pdb.set_trace()
                 data_properties = list(
-                    filter(lambda x: "Properties" in x, os.listdir(dataset_path))
+                    filter(lambda x: "properties" in x, os.listdir(dataset_path))
                 )[0]
-                with open(os.path.join(dataset_path, data_properties)) as csvfile:
-                    reader = csv.reader(csvfile)
-                    for row in reader:
-                        if row[0] == "name":
-                            cfg.dataset = row[1]
+                with open(os.path.join(dataset_path, data_properties)) as file:
+                    ds_dict = json.load(file)
+                    cfg.dataset = ds_dict['name']
                 dataset_type = cfg.dataset
                 for cfg_dataset in cfg.datasets.items():
                     if cfg_dataset[0] in dataset_type:
@@ -111,7 +91,9 @@ def read_cfg(cfg):
     return cfgs
 
 
-def load_objects_cfgs(cfg, base_folder, exp_run=None):
+def load_objects_cfgs(cfg, base_folder, run_number=None):
+    run_inst = exp_run(base_folder)
+    run_inst.make_run_folder(ctx=cfg.ctx, run_number=run_number)
     try:
         dataset = load_dataset(cfg)
     except:
@@ -121,10 +103,11 @@ def load_objects_cfgs(cfg, base_folder, exp_run=None):
     except:
         algorithm = None
     try:
-        eval_inst, evals = load_evals(cfg, base_folder, exp_run)
+        eval_inst, evals = load_evals(cfg, base_folder, run_number)
+        eval_inst.run_folder = run_inst.run_folder
     except:
         eval_inst, evals = None, None
-    return dataset, algorithm, eval_inst, evals
+    return dataset, algorithm, run_inst, eval_inst, evals
 
 
 def load_dataset(cfg):
@@ -250,6 +233,7 @@ def load_algorithm(cfg):
     if "/" in cfg.algorithm:
         # means that it is a path to an already trained one
         if "autoencoder" in cfg.algorithm:
+            # create a dummy autoencoder
             algorithm = autoencoder(
                 topology=[2, 1, 2],
                 fct_dist=cfg.algorithms.autoencoder.fct_dist,
@@ -259,6 +243,7 @@ def load_algorithm(cfg):
             algorithm.load(cfg.algorithm)
     else:
         if cfg.algorithm == "autoencoder":
+            # create autoencoder according to specifications in config file
             algorithm = autoencoder(
                 train_robust_ae=cfg.algorithms.autoencoder.train_robust_ae,
                 denoising=cfg.algorithms.autoencoder.denoising,
@@ -285,9 +270,10 @@ def load_algorithm(cfg):
     return algorithm
 
 
-def load_evals(cfg, base_folder=None, exp_run=None):
-    eval_inst = evaluation(base_folder)
-    eval_inst.make_run_folder(ctx=cfg.ctx, exp_run=exp_run)
+def load_evals(cfg, base_folder=None, run_number=None):
+    #eval_inst = evaluation(base_folder)
+    #run_inst = exp_run(base_folder)
+    #eval_inst.make_run_folder(ctx=cfg.ctx, run_number=run_number)
     evals = []
     if "marabou_ens_normal_rob" in cfg.evaluations:
         evals.append(marabou_ens_normal_rob(eval_inst=eval_inst, cfg=cfg))
@@ -310,6 +296,7 @@ def load_evals(cfg, base_folder=None, exp_run=None):
     if "downstream_rf" in cfg.evaluations:
         evals.append(downstream_rf(eval_inst=eval_inst))
     return eval_inst, evals
+
 
 if __name__ == "__main__":
     main()

@@ -7,7 +7,7 @@ from src.utils.imports import *
 
 def exec_cfg(cfg, start_timestamp):
     cur_time_str = time.strftime("%Y-%m-%dT%H:%M:%S")
-    if cfg.repeat_experiments > 1:
+    if cfg.repeat_eval > 1:
         base_folder = cur_time_str
     else:
         base_folder = None
@@ -19,8 +19,8 @@ def exec_cfg(cfg, start_timestamp):
             + cfg.multiple_models[cfg.multiple_models.rfind("/") + 1 :]
         )
 
-    for repetition in range(cfg.repeat_experiments):
-        if cfg.repeat_experiments > 1:
+    for repetition in range(cfg.repeat_eval):
+        if cfg.repeat_eval > 1:
             dataset, algorithm, eval_inst, evals = load_objects_cfgs(
                 cfg, base_folder=base_folder, exp_run=str(repetition)
             )
@@ -96,7 +96,7 @@ def read_cfg(cfg):
             dataset_path = model_path + "/dataset"
             try:
                 data_properties = list(
-                    filter(lambda x: "Properties" in x, os.listdir(dataset_path))
+                    filter(lambda x: "properties" in x, os.listdir(dataset_path))
                 )[0]
                 with open(os.path.join(dataset_path, data_properties)) as csvfile:
                     reader = csv.reader(csvfile)
@@ -539,6 +539,8 @@ def load_evals(cfg, base_folder=None, exp_run=None):
         evals.append(closest_linsubfct_plot(eval_inst=eval_inst))
     if "boundary_2d_plot" in cfg.evaluations:
         evals.append(boundary_2d_plot(eval_inst=eval_inst))
+    if "relu_visualization" in cfg.evaluations:
+        evals.append(relu_visualization(eval_inst=eval_inst))
     if "inst_area_2d_plot" in cfg.evaluations:
         evals.append(inst_area_2d_plot(eval_inst=eval_inst))
     if "border_dist_2d" in cfg.evaluations:
