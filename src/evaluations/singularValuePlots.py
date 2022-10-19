@@ -4,16 +4,14 @@ import numpy as np
 from .evaluation import evaluation
 
 
-class singularValuePlots:
+class singularValuePlots(evaluation):
     def __init__(
         self,
-        eval_inst: evaluation,
         name: str = "singularValuePlots",
     ):
         self.name = name
-        self.evaluation = eval_inst
 
-    def evaluate(self, dataset, algorithm):
+    def evaluate(self, dataset, algorithm, run_inst):
         functions = algorithm.lin_sub_fct_Counters[-1]
         svds = []
         for function in functions:
@@ -26,7 +24,8 @@ class singularValuePlots:
             plt.ylim(ymin, ymax)
             plt.title(f"Numpoints: {num_points}")
             plt.plot(svds[ind][1])
-            self.evaluation.save_figure(
+            self.save_figure(
+                run_inst,
                 fig,
                 f"plot_{num_points}_{ind}",
                 subfolder="svd_plots",

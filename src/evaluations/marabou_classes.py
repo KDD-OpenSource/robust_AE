@@ -13,15 +13,12 @@ from itertools import combinations
 from .evaluation import evaluation
 
 
-class marabou_classes:
-    def __init__(
-        self, eval_inst: evaluation, name: str = "marabou_classes", num_eps_steps=30
-    ):
+class marabou_classes(evaluation):
+    def __init__(self, name: str = "marabou_classes", num_eps_steps=30):
         self.name = name
-        self.evaluation = eval_inst
         self.num_eps_steps = num_eps_steps
 
-    def evaluate(self, dataset, algorithm):
+    def evaluate(self, dataset, algorithm, run_inst):
         # LOAD GENERAL MODEL
         # model one network but with 2 inputs (like a small batch).
         # -> simulates two networks
@@ -155,15 +152,17 @@ class marabou_classes:
                 f"""Total Runtime: {sum(durations)}
                     """
             )
-            self.evaluation.save_figure(
-                fig, "marabou_classes_" + str(label1) + "_" + str(label2)
+            self.save_figure(
+                run_inst, fig, "marabou_classes_" + str(label1) + "_" + str(label2)
             )
             result_df = pd.DataFrame(
                 np.array([epsilons, sat_list, durations, times]).transpose(),
                 columns=["epsilons", "sat_list", "durations", "times"],
             )
-            self.evaluation.save_csv(
-                result_df, "marabou_classes_" + str(label1) + "_" + str(label2)
+            self.save_csv(
+                run_inst,
+                result_df,
+                "marabou_classes_" + str(label1) + "_" + str(label2),
             )
             plt.close("all")
 

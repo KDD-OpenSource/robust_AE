@@ -7,12 +7,11 @@ from sklearn.metrics import adjusted_rand_score
 from .evaluation import evaluation
 
 
-class downstream_kmeans:
-    def __init__(self, eval_inst: evaluation, name: str = "downstream_kmeans"):
+class downstream_kmeans(evaluation):
+    def __init__(self, name: str = "downstream_kmeans"):
         self.name = name
-        self.evaluation = eval_inst
 
-    def evaluate(self, dataset, algorithm):
+    def evaluate(self, dataset, algorithm, run_inst):
         # import pdb; pdb.set_trace()
         latent_repr = algorithm.extract_latent(dataset.test_data())
         num_clusters = len(dataset.test_labels.unique())
@@ -31,6 +30,6 @@ class downstream_kmeans:
         result_dict["orig_latent"] = adj_rand_ind_orig_latent
         result_dict["label_orig"] = adj_rand_ind_label_orig
         result_dict["label_latent"] = adj_rand_ind_label_latent
-        self.evaluation.save_json(result_dict, "adj_rand_index")
+        self.save_json(run_inst, result_dict, "adj_rand_index")
         # additional metrics could be evaluated
         # for instance one could calculate calculate

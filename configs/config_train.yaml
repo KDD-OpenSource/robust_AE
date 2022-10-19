@@ -1,14 +1,14 @@
-repeat_experiments:                 1
+repeat_experiment:                  2
 #ctx:                                'train_crop_3_15'
 #ctx:                                'Code'
 #ctx:                                'train_sineClasses_fcnn'
-ctx:                                'autoencoder_2d_fctdist'
+ctx:                                'autoencoder_uniform_2D'
   #ctx:                                'sineClasses_AE_push_5perc_shift_5perc_points_1borders_10k_10NN_advanced'
 #ctx:                                'sineClasses_AE_push_5perc_20NN_insts'
 #ctx:                                'Train_model_3gaussian_no_reg'
 mode:                               ['train']
-multiple_models:                    Null
-dataset:                            'gaussianClouds'
+test_models:                        Null
+dataset:                            'sineNoise'
 #algorithm:                          './models/trained_models/autoencoder_mnist_784_150_10'
 #algorithm:                          './models/trained_models/autoencoder_mnist'
 #algorithm:                          './models/autoencoder_float_test'
@@ -48,7 +48,7 @@ evaluations:                        [
 
 datasets:
     subsample:                      Null
-    num_samples:                    50000
+    num_samples:                    1
     synthetic_test_samples:         10000
     scale:                          False
     gaussianClouds:
@@ -73,7 +73,11 @@ datasets:
         file_path:                  Null
           #num_samples:                1000
         num_anomalies:              0
-        spacedim:                   30
+        spacedim:                   2
+    uniform_2D:
+        #file_path:                  './datasets/synthetic/sineNoise/60'
+        file_path:                  Null
+        num_anomalies:              0
     sineClasses:
       #file_path:                  './datasets/synthetic/sineClasses/30'
         file_path:                  Null
@@ -99,6 +103,7 @@ datasets:
         file_path:                  Null
           #num_samples:                35000
         num_anomalies:              0
+        normal_class:               7
     cardio:
         file_path:                  Null
         num_anomalies:              0
@@ -106,6 +111,9 @@ datasets:
         file_path:                  Null
         num_anomalies:              0
     spambase:
+        file_path:                  Null
+        num_anomalies:              0
+    wafer:
         file_path:                  Null
         num_anomalies:              0
     steel_plates_fault:
@@ -185,22 +193,15 @@ algorithms:
     save_interm_models:             False
     push_factor:                    0.1
     autoencoder:
-        train_robust_ae:            0.0
+        robust_ae:                  0.0
         denoising:                  0.0
         border_dist:                False
-        cross_point_sampling:       False
           #fct_dist:                   ['mat', 'bias'] # ('mat', 'bias', 'relu')
-        fct_dist:                   ['mat', 'bias'] # ('mat', 'bias', 'relu')
-        fct_dist_layer:             Null #(can return pre and post relu: 5 to
-          #get post relu in middle layer in [24,15,10,15,24])
+        fct_dist:                   [] # ('mat', 'bias', 'relu')
         lambda_border:              0.001
         lambda_fct:                 0.0001
-          #lambda_fct:                 0.001
-        bias_shift:                 Null
         dropout:                    False
         L2Reg:                      0.0000
-          #topology:                   [30,15,10,15,30]
-          #topology:                   [2,100,100,100,100,100,2]
         topology:                   [2,15,30,50,30,15,2]
         bias:                       True
         num_border_points:          5

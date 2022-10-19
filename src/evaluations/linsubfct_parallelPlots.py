@@ -5,18 +5,16 @@ import pandas as pd
 from .evaluation import evaluation
 
 
-class linsubfct_parallelPlots:
+class linsubfct_parallelPlots(evaluation):
     def __init__(
         self,
-        eval_inst: evaluation,
         name: str = "linsubfct_parallelPlots",
         num_plots: int = 20,
     ):
         self.name = name
-        self.evaluation = eval_inst
         self.num_plots = num_plots
 
-    def evaluate(self, dataset, algorithm):
+    def evaluate(self, dataset, algorithm, run_inst):
         input_points = dataset.test_data()
         output_points = algorithm.predict(input_points)
         ymax = pd.DataFrame([input_points.max(), output_points.max()]).max().max()
@@ -31,7 +29,8 @@ class linsubfct_parallelPlots:
                     plt.ylim(ymin, ymax)
                     plt.plot(input_point, color="blue")
                     plt.plot(output_point, color="orange")
-                    self.evaluation.save_figure(
+                    self.save_figure(
+                        run_inst,
                         fig,
                         f"plot_{function}"[:20] + "_" + str(ctr),
                         subfolder="linsubfuncs",
@@ -49,7 +48,8 @@ class linsubfct_parallelPlots:
                     plt.ylim(ymin, ymax)
                     plt.plot(function_points[ind], color="blue")
                     plt.plot(output_point, color="orange")
-                    self.evaluation.save_figure(
+                    self.save_figure(
+                        run_inst,
                         fig,
                         f"plot_{function}"[:20] + "_" + str(ind),
                         subfolder="linsubfuncs",

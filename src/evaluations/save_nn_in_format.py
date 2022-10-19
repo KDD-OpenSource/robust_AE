@@ -13,13 +13,11 @@ from .evaluation import evaluation
 from ..algorithms.neural_net import smallest_k_dist_loss
 
 
-class save_nn_in_format:
-    def __init__(self, eval_inst: evaluation, name: str =
-            "save_nn_in_format"):
+class save_nn_in_format(evaluation):
+    def __init__(self, name: str = "save_nn_in_format"):
         self.name = name
-        self.evaluation = eval_inst
 
-    def evaluate(self, dataset, algorithm):
+    def evaluate(self, dataset, algorithm, run_inst):
         network = self.get_network(algorithm, dataset)
         self.save_marabouQuery(network)
         self.save_nn_txt(algorithm)
@@ -42,30 +40,26 @@ class save_nn_in_format:
         )
         onnx_path = os.path.join(onnx_folder, "saved_algorithm.onnx")
         onnx_outputName = str(2 * len(algorithm.module.get_neural_net()) + 1)
-        network = Marabou.read_onnx(onnx_path, outputName = onnx_outputName
-        )
+        network = Marabou.read_onnx(onnx_path, outputName=onnx_outputName)
         return network
 
     def save_marabouQuery(self, network):
-        network.saveQuery(os.path.join(self.evaluation.run_folder, 'alg_query'))
+        network.saveQuery(os.path.join(self.evaluation.run_folder, "alg_query"))
 
     def save_nn_txt(self, algorithm):
         nnet = algorithm.module.get_neural_net()
-        architecture = list(map(lambda x: x.strip(),
-            str(nnet).split('\n')))[1:-1]
-        nnet_file = os.path.join(self.evaluation.run_folder,
-                'neural_net_file.txt')
-        with open(nnet_file, 'w') as file:
+        architecture = list(map(lambda x: x.strip(), str(nnet).split("\n")))[1:-1]
+        nnet_file = os.path.join(self.evaluation.run_folder, "neural_net_file.txt")
+        with open(nnet_file, "w") as file:
             for line in architecture:
                 file.write(line)
-                file.write('\n')
+                file.write("\n")
 
             for layer in nnet:
                 if isinstance(layer, nn.Linear):
                     weights = layer.weight.detach().numpy()
                     bias = layer.bias.detach().numpy()
                     file.write(str(weights))
-                    file.write('\n')
+                    file.write("\n")
                     file.write(str(bias))
-                    file.write('\n')
-
+                    file.write("\n")

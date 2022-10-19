@@ -6,12 +6,11 @@ import pandas as pd
 from .evaluation import evaluation
 
 
-class image_lrp:
-    def __init__(self, eval_inst: evaluation, name: str = "image_lrp"):
+class image_lrp(evaluation):
+    def __init__(self, name: str = "image_lrp"):
         self.name = name
-        self.evaluation = eval_inst
 
-    def evaluate(self, dataset, algorithm):
+    def evaluate(self, dataset, algorithm, run_inst):
         images = dataset.test_data().sample(100)
         reconstructions = algorithm.predict(images)
         ctr = 0
@@ -33,6 +32,6 @@ class image_lrp:
                 f"""Relevance of image: {relevance_image}, Relevance
                 of bias: {relevance_bias}"""
             )
-            self.evaluation.save_figure(fig, f"plot_mnist_sample_lrp_{ctr}")
+            self.save_figure(run_inst, fig, f"plot_mnist_sample_lrp_{ctr}")
             plt.close("all")
             ctr += 1

@@ -8,14 +8,11 @@ from itertools import combinations
 from .evaluation import evaluation
 
 
-class mnist_interpolation_func_diffs_pairs:
-    def __init__(
-        self, eval_inst: evaluation, name: str = "mnist_interpolation_func_diffs_pairs"
-    ):
+class mnist_interpolation_func_diffs_pairs(evaluation):
+    def __init__(self, name: str = "mnist_interpolation_func_diffs_pairs"):
         self.name = name
-        self.evaluation = eval_inst
 
-    def evaluate(self, dataset, algorithm):
+    def evaluate(self, dataset, algorithm, run_inst):
         dataset.test_data()
         samples = pd.DataFrame()
 
@@ -119,7 +116,8 @@ class mnist_interpolation_func_diffs_pairs:
                     f"""Relevance of image: {relevance_image}, Relevance
                     of bias: {relevance_bias}, Dist to Prev: {dist}"""
                 )
-                self.evaluation.save_figure(
+                self.save_figure(
+                    run_inst,
                     fig,
                     f"plot_interpolations_lrp_feature_bias_imp_{ctr}",
                     subfolder=f"{label_from}_{label_to}",
@@ -171,8 +169,11 @@ class mnist_interpolation_func_diffs_pairs:
                     Variance seq_func_dist {interp_func_df['seq_func_dist'].var()}
                     """
             )
-            self.evaluation.save_figure(
-                fig, "interp_func_dist_plot", subfolder=f"{label_from}_{label_to}"
+            self.save_figure(
+                run_inst,
+                fig,
+                "interp_func_dist_plot",
+                subfolder=f"{label_from}_{label_to}",
             )
             plt.close("all")
         # plot interpolations

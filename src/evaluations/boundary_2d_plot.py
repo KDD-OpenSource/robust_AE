@@ -7,15 +7,12 @@ import pandas as pd
 from .evaluation import evaluation
 
 
-class boundary_2d_plot:
-    def __init__(
-        self, eval_inst: evaluation, name: str = "boundary_2d_plot", num_points=20000
-    ):
+class boundary_2d_plot(evaluation):
+    def __init__(self, name: str = "boundary_2d_plot", num_points=20000):
         self.name = name
-        self.evaluation = eval_inst
         self.num_points = num_points
 
-    def evaluate(self, dataset, algorithm):
+    def evaluate(self, dataset, algorithm, run_inst):
         input_dim = algorithm.topology[0]
         if input_dim != 2:
             raise Exception("cannot plot in 2d unless input dim is 2d too")
@@ -90,6 +87,6 @@ class boundary_2d_plot:
         plt.scatter(x_points[5:], y_points[5:], color="blue", s=200)
 
         # save figure
-        self.evaluation.save_figure(fig, "scatter_2d_boundaries")
+        self.save_figure(run_inst, fig, "scatter_2d_boundaries")
         plt.close("all")
         area_fcts = algorithm.get_fct_area(algorithm.module, inst)

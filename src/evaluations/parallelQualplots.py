@@ -5,16 +5,13 @@ import pandas as pd
 from .evaluation import evaluation
 
 
-class parallelQualplots:
-    def __init__(
-        self, eval_inst: evaluation, name: str = "parallelQualplot", num_plots: int = 20
-    ):
+class parallelQualplots(evaluation):
+    def __init__(self, name: str = "parallelQualplot", num_plots: int = 20):
         self.name = name
-        self.evaluation = eval_inst
         self.num_plots = num_plots
         self.plots = []
 
-    def evaluate(self, dataset, algorithm):
+    def evaluate(self, dataset, algorithm, run_inst):
         # input_points: pd.DataFrame,
         # output_points: pd.DataFrame):
         # sample indices
@@ -46,7 +43,7 @@ class parallelQualplots:
                     f"""MSE: {mean_squared_error}; Dist_to_mean:
                         {dist_to_mean}"""
                 )
-                self.evaluation.save_figure(
-                    fig, "parallelPlot_" + str(label) + "_" + str(ind)
+                self.save_figure(
+                    run_inst, fig, "parallelPlot_" + str(label) + "_" + str(ind)
                 )
                 plt.close("all")

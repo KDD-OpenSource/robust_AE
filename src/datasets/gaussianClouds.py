@@ -25,7 +25,7 @@ class gaussianClouds(dataset):
         self.num_anomalies = num_anomalies
         self.num_testpoints = num_testpoints
         self.scale = scale
-        self.scale_type = 'MinMax'
+        self.scale_type = "MinMax"
         self.scale_min = -1
         self.scale_max = 1
 

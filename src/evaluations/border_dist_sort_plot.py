@@ -7,12 +7,11 @@ import pandas as pd
 from .evaluation import evaluation
 
 
-class border_dist_sort_plot:
-    def __init__(self, eval_inst: evaluation, name: str = "border_dist_sort_plot"):
+class border_dist_sort_plot(evaluation):
+    def __init__(self, name: str = "border_dist_sort_plot"):
         self.name = name
-        self.evaluation = eval_inst
 
-    def evaluate(self, dataset, algorithm):
+    def evaluate(self, dataset, algorithm, run_inst):
         sample_dist_pairs = algorithm.assign_border_dists(
             algorithm.module, dataset.test_data()
         )
@@ -26,5 +25,5 @@ class border_dist_sort_plot:
         pdb.set_trace()
         # plot without the extreme values (90% ?quantile?)
         # save figure
-        self.evaluation.save_figure(fig, "dist_plot")
+        self.save_figure(run_inst, fig, "dist_plot")
         plt.close("all")

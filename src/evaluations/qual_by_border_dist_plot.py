@@ -8,12 +8,11 @@ import pandas as pd
 from .evaluation import evaluation
 
 
-class qual_by_border_dist_plot:
-    def __init__(self, eval_inst: evaluation, name: str = "qual_by_border_dist_plot"):
+class qual_by_border_dist_plot(evaluation):
+    def __init__(self, name: str = "qual_by_border_dist_plot"):
         self.name = name
-        self.evaluation = eval_inst
 
-    def evaluate(self, dataset, algorithm):
+    def evaluate(self, dataset, algorithm, run_inst):
         sample_dist_pairs = algorithm.assign_border_dists(
             algorithm.module, dataset.test_data()
         )
@@ -57,7 +56,7 @@ class qual_by_border_dist_plot:
             axs[3].set_title("Lin_Func_Feature_Imp")
             axs[4].imshow(lin_func_bias_imp, cmap="gray")
             axs[4].set_title("Lin_Func_Bias_Imp")
-            self.evaluation.save_figure(fig, f"plot_mnist_sample_largest_dist{ctr}")
+            self.save_figure(run_inst, fig, f"plot_mnist_sample_largest_dist{ctr}")
             plt.close("all")
             ctr += 1
 
@@ -94,7 +93,7 @@ class qual_by_border_dist_plot:
             axs[3].set_title("Lin_Func_Feature_Imp")
             axs[4].imshow(lin_func_bias_imp, cmap="gray")
             axs[4].set_title("Lin_Func_Bias_Imp")
-            self.evaluation.save_figure(fig, f"plot_mnist_sample_mid_dist{ctr}")
+            self.save_figure(run_inst, fig, f"plot_mnist_sample_mid_dist{ctr}")
             plt.close("all")
             ctr += 1
 
@@ -129,6 +128,6 @@ class qual_by_border_dist_plot:
             axs[3].set_title("Lin_Func_Feature_Imp")
             axs[4].imshow(lin_func_bias_imp, cmap="gray")
             axs[4].set_title("Lin_Func_Bias_Imp")
-            self.evaluation.save_figure(fig, f"plot_mnist_sample_smallest_dist{ctr}")
+            self.save_figure(run_inst, fig, f"plot_mnist_sample_smallest_dist{ctr}")
             plt.close("all")
             ctr += 1

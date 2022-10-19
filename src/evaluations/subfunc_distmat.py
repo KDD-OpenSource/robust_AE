@@ -6,16 +6,14 @@ from itertools import product
 from .evaluation import evaluation
 
 
-class subfunc_distmat:
+class subfunc_distmat(evaluation):
     def __init__(
         self,
-        eval_inst: evaluation,
         name: str = "subfunc_distmat",
     ):
         self.name = name
-        self.evaluation = eval_inst
 
-    def evaluate(self, dataset, algorithm):
+    def evaluate(self, dataset, algorithm, run_inst):
         # sample indices
         last_epoch = len(algorithm.lin_sub_fct_Counters)
         linsubfct_final = algorithm.lin_sub_fct_Counters[last_epoch - 1]
@@ -35,9 +33,9 @@ class subfunc_distmat:
             bias_dist[func_ind_1][func_ind_2] = self.calc_bias_dist(
                 func1.bias, func2.bias
             )
-        self.evaluation.save_csv(tot_dist, f"tot_dist_epoch_{last_epoch}")
-        self.evaluation.save_csv(mat_dist, f"mat_dist_epoch_{last_epoch}")
-        self.evaluation.save_csv(bias_dist, f"bias_dist_epoch_{last_epoch}")
+        self.save_csv(run_inst, tot_dist, f"tot_dist_epoch_{last_epoch}")
+        self.save_csv(run_inst, mat_dist, f"mat_dist_epoch_{last_epoch}")
+        self.save_csv(run_inst, bias_dist, f"bias_dist_epoch_{last_epoch}")
 
     def calc_func_dist(self, func1, func2):
         mat_dist = self.calc_mat_dist(func1.matrix, func2.matrix)

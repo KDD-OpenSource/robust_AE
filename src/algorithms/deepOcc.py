@@ -30,11 +30,16 @@ class deepOcc(neural_net):
         batch_size: int = 20,
         lr: float = 1e-3,
         seed: int = None,
-        save_interm_models = False,
+        save_interm_models=False,
     ):
-        super().__init__(name=name, num_epochs=num_epochs,
-                batch_size=batch_size, lr=lr, seed=seed,
-                save_interm_models=save_interm_models)
+        super().__init__(
+            name=name,
+            num_epochs=num_epochs,
+            batch_size=batch_size,
+            lr=lr,
+            seed=seed,
+            save_interm_models=save_interm_models,
+        )
         self.topology = topology
         self.center = None
         self.dropout = dropout
@@ -57,11 +62,11 @@ class deepOcc(neural_net):
             i = 0
             data_len = len(data_loader)
             for inst_batch in data_loader:
-                center_batch = self.center.repeat(inst_batch.size()[0],1)
+                center_batch = self.center.repeat(inst_batch.size()[0], 1)
                 output = self.module(inst_batch)[0]
                 i = i + 1
                 # probably center.repeat(output.size[0])
-                #import pdb; pdb.set_trace()
+                # import pdb; pdb.set_trace()
                 # TODO: test with MSELoss(reduction='sum') because then it is
                 # consistent wrt the anom_score calculation
                 loss = nn.MSELoss()(output, center_batch)
@@ -73,7 +78,7 @@ class deepOcc(neural_net):
             duration = epoch_end - epoch_start
             self.set_anom_radius(self.module, X)
             if run_folder and self.save_interm_models:
-                self.save(run_folder, subfolder=f'Epochs/Epoch_{epoch}')
+                self.save(run_folder, subfolder=f"Epochs/Epoch_{epoch}")
             else:
                 self.save(run_folder)
             if logger:
@@ -106,7 +111,6 @@ class deepOcc(neural_net):
         outputs = pd.DataFrame(outputs, index=X.index)
         return outputs
 
-
     def load(self, path):
         model_details = torch.load(os.path.join(path, "model_detailed.pth"))
 
@@ -133,8 +137,9 @@ class deepOcc(neural_net):
         for inst_batch in data_loader:
             for inst in inst_batch:
                 output = neural_net_mod(inst)[0]
-                anomalyScore = np.sqrt(nn.MSELoss(reduction='sum')(self.center,
-                    output).detach().numpy())
+                anomalyScore = np.sqrt(
+                    nn.MSELoss(reduction="sum")(self.center, output).detach().numpy()
+                )
                 sample_anomalyScore_pairs.append((inst, anomalyScore))
         return sample_anomalyScore_pairs
 
@@ -143,30 +148,29 @@ class deepOcc(neural_net):
         ctr = 0
         data_len = X.shape[0]
         for ind in X.index:
-            #print(ctr/data_len)
+            # print(ctr/data_len)
             ctr += 1
             inst = torch.tensor(X.loc[ind])
             output = neural_net_mod(inst)[0]
-            anomalyScore = np.sqrt(nn.MSELoss(reduction='sum')(self.center,
-                output).detach().numpy())
+            anomalyScore = np.sqrt(
+                nn.MSELoss(reduction="sum")(self.center, output).detach().numpy()
+            )
             anomalyScores.loc[ind] = anomalyScore
         return anomalyScores
 
     def set_anom_radius(self, neural_net_mod, X):
-        anomalyScores_fast = np.sqrt(((self.predict(X) -
-            self.center)**2).sum(axis=1))
+        anomalyScores_fast = np.sqrt(((self.predict(X) - self.center) ** 2).sum(axis=1))
         # anomalyScores = self.calc_anomalyScores(neural_net_mod, X)
         self.anom_radius = np.quantile(anomalyScores_fast, self.anom_quantile)
 
     def calc_frac_to_border(self, output_sample):
         border_point = self.calc_border_point(output_sample)
-        border_length = np.linalg.norm(border_point.values[0] -
-                self.center.numpy())
-        output_sample_length = np.linalg.norm(output_sample.values[0] -
-                self.center.numpy())
-        frac = output_sample_length/border_length
+        border_length = np.linalg.norm(border_point.values[0] - self.center.numpy())
+        output_sample_length = np.linalg.norm(
+            output_sample.values[0] - self.center.numpy()
+        )
+        frac = output_sample_length / border_length
         return frac
-
 
     def calc_border_point(self, point):
         center = self.center.numpy()
@@ -175,21 +179,23 @@ class deepOcc(neural_net):
         anom_radius = self.anom_radius
         diff = point - center
         diff_length = np.sqrt(np.square(diff).sum())
-        border_point = center + anom_radius*(diff/diff_length)
+        border_point = center + anom_radius * (diff / diff_length)
         return pd.DataFrame(border_point).transpose()
 
     def check_anomalous(self, sample):
         output_sample = self.predict(sample)
         loss = np.sqrt(
-                nn.MSELoss(reduction='sum')(torch.tensor(output_sample.values[0]),
-            self.center))
+            nn.MSELoss(reduction="sum")(
+                torch.tensor(output_sample.values[0]), self.center
+            )
+        )
         return loss > self.anom_radius
 
     def pred_anom_labels(self, X):
-        anomaly_scores = self.calc_anomalyScores(self.module,
-                X)
+        anomaly_scores = self.calc_anomalyScores(self.module, X)
         pred_anom_labels = (anomaly_scores > self.anom_radius).astype(int)
         return pred_anom_labels
+
 
 class deepOccModule(nn.Module):
     def __init__(self, topology: list, center: list, dropout: float = 0.0):
@@ -198,7 +204,11 @@ class deepOccModule(nn.Module):
         if dropout:
             nn_layers = np.array(
                 [
-                    [nn.Linear(int(a), int(b), bias=False), nn.ReLU(), nn.Dropout(dropout)]
+                    [
+                        nn.Linear(int(a), int(b), bias=False),
+                        nn.ReLU(),
+                        nn.Dropout(dropout),
+                    ]
                     for a, b in layers.reshape(-1, 2)
                 ]
             ).flatten()[:-2]
@@ -226,6 +236,7 @@ class deepOccModule(nn.Module):
         self._neural_net = IntermediateSequential(*new_layers)
 
 
-def reset_weights(layer):
-    if isinstance(layer, nn.Linear):
-        layer.reset_parameters()
+# deletable because the function is implemented in neural_net.py
+#def reset_weights(layer):
+#    if isinstance(layer, nn.Linear):
+#        layer.reset_parameters()

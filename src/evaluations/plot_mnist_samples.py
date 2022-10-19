@@ -6,12 +6,11 @@ import pandas as pd
 from .evaluation import evaluation
 
 
-class plot_mnist_samples:
-    def __init__(self, eval_inst: evaluation, name: str = "plot_mnist_samples"):
+class plot_mnist_samples(evaluation):
+    def __init__(self, name: str = "plot_mnist_samples"):
         self.name = name
-        self.evaluation = eval_inst
 
-    def evaluate(self, dataset, algorithm):
+    def evaluate(self, dataset, algorithm, run_inst):
         images = dataset.test_data().sample(10)
         reconstructions = algorithm.predict(images)
         ctr = 0
@@ -21,6 +20,6 @@ class plot_mnist_samples:
             reconstr_resh = reconstr.reshape(28, 28)
             axs[0].imshow(image_resh, cmap="gray")
             axs[1].imshow(reconstr_resh, cmap="gray")
-            self.evaluation.save_figure(fig, f"plot_mnist_sample_{ctr}")
+            self.save_figure(run_inst, fig, f"plot_mnist_sample_{ctr}")
             plt.close("all")
             ctr += 1

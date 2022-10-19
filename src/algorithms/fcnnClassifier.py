@@ -29,11 +29,16 @@ class fcnnClassifier(neural_net):
         batch_size: int = 20,
         lr: float = 1e-3,
         seed: int = None,
-        save_interm_models = False,
+        save_interm_models=False,
     ):
-        super().__init__(name=name, num_epochs=num_epochs,
-                batch_size=batch_size, lr=lr, seed=seed,
-                save_interm_models=save_interm_models)
+        super().__init__(
+            name=name,
+            num_epochs=num_epochs,
+            batch_size=batch_size,
+            lr=lr,
+            seed=seed,
+            save_interm_models=save_interm_models,
+        )
         self.topology = topology
         self.dropout = dropout
         self.L2Reg = L2Reg
@@ -47,11 +52,11 @@ class fcnnClassifier(neural_net):
             num_workers=0,
             dataset=joined_trained_data.values,
             batch_size=self.batch_size,
-            shuffle = True,
+            shuffle=True,
             drop_last=True,
             pin_memory=True,
         )
-        #data_loader = self.get_data_loader(X)
+        # data_loader = self.get_data_loader(X)
         optimizer = torch.optim.Adam(
             params=self.module.parameters(), lr=self.lr, weight_decay=self.L2Reg
         )
@@ -63,9 +68,9 @@ class fcnnClassifier(neural_net):
             i = 0
             data_len = len(data_loader)
             for inst_batch in data_loader:
-                #train_batch = inst_batch
-                train_batch = inst_batch[:,:-1]
-                label_batch = inst_batch[:,-1]
+                # train_batch = inst_batch
+                train_batch = inst_batch[:, :-1]
+                label_batch = inst_batch[:, -1]
                 output = self.module(train_batch)[0]
                 i = i + 1
                 loss = loss_type(output, label_batch.long())
@@ -76,7 +81,7 @@ class fcnnClassifier(neural_net):
             epoch_end = datetime.datetime.now()
             duration = epoch_end - epoch_start
             if run_folder and self.save_interm_models:
-                self.save(run_folder, subfolder=f'Epochs/Epoch_{epoch}')
+                self.save(run_folder, subfolder=f"Epochs/Epoch_{epoch}")
             else:
                 self.save(run_folder)
             if logger:
@@ -99,10 +104,9 @@ class fcnnClassifier(neural_net):
             outputs.append(self.module(inst_batch)[0].detach().numpy())
         outputs = np.vstack(outputs)
         outputs = pd.DataFrame(outputs, index=X.index)
-        outputs['pred_label'] = outputs.idxmax(axis=1)
+        outputs["pred_label"] = outputs.idxmax(axis=1)
         # change to return max labels...
         return outputs
-
 
     def load(self, path):
         model_details = torch.load(os.path.join(path, "model_detailed.pth"))
@@ -123,7 +127,11 @@ class fcnnClassifierModule(nn.Module):
         if dropout:
             nn_layers = np.array(
                 [
-                    [nn.Linear(int(a), int(b), bias=False), nn.ReLU(), nn.Dropout(dropout)]
+                    [
+                        nn.Linear(int(a), int(b), bias=False),
+                        nn.ReLU(),
+                        nn.Dropout(dropout),
+                    ]
                     for a, b in layers.reshape(-1, 2)
                 ]
             ).flatten()[:-2]
@@ -151,6 +159,7 @@ class fcnnClassifierModule(nn.Module):
         self._neural_net = IntermediateSequential(*new_layers)
 
 
-def reset_weights(layer):
-    if isinstance(layer, nn.Linear):
-        layer.reset_parameters()
+# deletable because the function is implemented in neural_net.py
+#def reset_weights(layer):
+#    if isinstance(layer, nn.Linear):
+#        layer.reset_parameters()

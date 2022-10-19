@@ -2,6 +2,7 @@ from .dataset import dataset
 from .gaussianClouds import gaussianClouds
 from .uniformClouds import uniformClouds
 from .sineNoise import sineNoise
+from .uniform_2D import uniform_2D
 from .sineClasses import sineClasses
 from .moons_2d import moons_2d
 from .parabola import parabola
@@ -26,6 +27,7 @@ from .italyPowerDemand import italyPowerDemand
 from .electricDevices import electricDevices
 from .ecg5000 import ecg5000
 from .proximalPhalanxOutlineCorrect import proximalPhalanxOutlineCorrect
+from .phalangesOutlinesCorrect import phalangesOutlinesCorrect
 from .sonyAIBORobotSurface1 import sonyAIBORobotSurface1
 from .sonyAIBORobotSurface2 import sonyAIBORobotSurface2
 from .syntheticControl import syntheticControl
@@ -43,6 +45,7 @@ __all__ = [
     "gaussianClouds",
     "uniformClouds",
     "sineNoise",
+    "uniform_2D",
     "sineClasses",
     "moons_2d",
     "parabola",
@@ -65,6 +68,7 @@ __all__ = [
     "predictiveMaintenance",
     "ecg5000",
     "proximalPhalanxOutlineCorrect",
+    "phalangesOutlinesCorrect",
     "sonyAIBORobotSurface1",
     "sonyAIBORobotSurface2",
     "syntheticControl",

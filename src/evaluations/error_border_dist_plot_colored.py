@@ -8,14 +8,11 @@ import pandas as pd
 from .evaluation import evaluation
 
 
-class error_border_dist_plot_colored:
-    def __init__(
-        self, eval_inst: evaluation, name: str = "error_border_dist_plot_colored"
-    ):
+class error_border_dist_plot_colored(evaluation):
+    def __init__(self, name: str = "error_border_dist_plot_colored"):
         self.name = name
-        self.evaluation = eval_inst
 
-    def evaluate(self, dataset, algorithm):
+    def evaluate(self, dataset, algorithm, run_inst):
         sample_dist_pairs = algorithm.assign_border_dists(
             algorithm.module, dataset.test_data()
         )
@@ -64,5 +61,5 @@ class error_border_dist_plot_colored:
             plt.plot(df_subset.index, df_subset["error"].values, color="red")
 
         # save figure
-        self.evaluation.save_figure(fig, "error_border_dist_plot_colored")
+        self.save_figure(run_inst, fig, "error_border_dist_plot_colored")
         plt.close("all")

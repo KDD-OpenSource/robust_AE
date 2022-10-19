@@ -9,13 +9,12 @@ from mpl_toolkits.mplot3d import Axes3D
 from .evaluation import evaluation
 
 
-class tsne_latent:
-    def __init__(self, eval_inst: evaluation, name: str = "tsne_latent", tsne_dim=2):
+class tsne_latent(evaluation):
+    def __init__(self, name: str = "tsne_latent", tsne_dim=2):
         self.name = name
-        self.evaluation = eval_inst
         self.tsne_dim = tsne_dim
 
-    def evaluate(self, dataset, algorithm):
+    def evaluate(self, dataset, algorithm, run_inst):
         # import pdb; pdb.set_trace()
         latent_repr = algorithm.extract_latent(dataset.test_data())
         if self.tsne_dim == 2:
@@ -33,7 +32,7 @@ class tsne_latent:
             # plt.legend()
             # plt.title(f'''MSE: {mean_squared_error}; Dist_to_mean:
             # {dist_to_mean}''')
-            self.evaluation.save_figure(fig, "tsne_latent_2d")
+            self.save_figure(run_inst, fig, "tsne_latent_2d")
             plt.close("all")
         if self.tsne_dim == 3:
             tsne = TSNE(n_components=3, random_state=0)
@@ -54,7 +53,7 @@ class tsne_latent:
                 writer=animation.PillowWriter(fps=20),
             )
             # figure.savefig(os.path.join(self.run_folder, name))
-            # self.evaluation.save_figure(fig, "tsne_latent_3d")
+            # self.save_figure(run_inst, fig, "tsne_latent_3d")
             plt.close("all")
 
 

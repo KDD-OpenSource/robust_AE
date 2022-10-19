@@ -5,15 +5,12 @@ import pandas as pd
 from .evaluation import evaluation
 
 
-class linSub_unifPoints:
-    def __init__(
-        self, eval_inst: evaluation, name: str = "linSub_unifPoints", num_points=100
-    ):
+class linSub_unifPoints(evaluation):
+    def __init__(self, name: str = "linSub_unifPoints", num_points=100):
         self.name = name
-        self.evaluation = eval_inst
         self.num_points = num_points
 
-    def evaluate(self, dataset, algorithm):
+    def evaluate(self, dataset, algorithm, run_inst):
         # sample indices
         input_dim = algorithm.topology[0]
         randPoints = pd.DataFrame(
@@ -24,5 +21,5 @@ class linSub_unifPoints:
         fctIndices = range(len(linsubfctCtr))
         values = list(map(lambda x: x[1], linsubfctCtr))
         plt.bar(fctIndices, values)
-        self.evaluation.save_figure(fig, "unifPoints_fctbarplot")
+        self.save_figure(run_inst, fig, "unifPoints_fctbarplot")
         plt.close("all")

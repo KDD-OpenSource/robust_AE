@@ -5,12 +5,11 @@ import pandas as pd
 from .evaluation import evaluation
 
 
-class linSubfctBarplots:
-    def __init__(self, eval_inst: evaluation, name: str = "linSubfctBarplots"):
+class linSubfctBarplots(evaluation):
+    def __init__(self, name: str = "linSubfctBarplots"):
         self.name = name
-        self.evaluation = eval_inst
 
-    def evaluate(self, dataset, algorithm):
+    def evaluate(self, dataset, algorithm, run_inst):
         # sample indices
         import pdb
 
@@ -21,5 +20,5 @@ class linSubfctBarplots:
             fctIndices = range(len(linSubfctDist[ind]))
             values = list(map(lambda x: x[1], linSubfctDist[ind]))
             plt.bar(fctIndices, values)
-            self.evaluation.save_figure(fig, "barplot_" + str(ind))
+            self.save_figure(run_inst, fig, "barplot_" + str(ind))
             plt.close("all")
