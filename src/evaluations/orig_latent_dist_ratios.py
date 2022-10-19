@@ -8,12 +8,11 @@ from scipy.spatial.distance import pdist
 from .evaluation import evaluation
 
 
-class orig_latent_dist_ratios:
-    def __init__(self, eval_inst: evaluation, name: str = "orig_latent_dist_ratios"):
+class orig_latent_dist_ratios(evaluation):
+    def __init__(self, name: str = "orig_latent_dist_ratios"):
         self.name = name
-        self.evaluation = eval_inst
 
-    def evaluate(self, dataset, algorithm):
+    def evaluate(self, dataset, algorithm, run_inst):
         latent_repr = algorithm.extract_latent(dataset.test_data())
         orig_dists = pdist(dataset.test_data(), mse_dist)
         latent_dists = pdist(latent_repr, mse_dist)
@@ -28,7 +27,7 @@ class orig_latent_dist_ratios:
 
         # plot without the extreme values (90% ?quantile?)
         # save figure
-        self.evaluation.save_figure(fig, "orig_latent_dist_ratios")
+        self.save_figure(run_inst, fig, "orig_latent_dist_ratios")
         plt.close("all")
 
 

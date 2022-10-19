@@ -17,7 +17,7 @@ class crop(dataset):
     ):
         # note that in a previous git version there exists old code to create two classes
         super().__init__(name, file_path, subsample)
-        self.delimiter = '\t'
+        self.delimiter = "\t"
         self.header = None
         self.index_col = None
         self.label_col_train = 0

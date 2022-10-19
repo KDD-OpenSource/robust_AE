@@ -13,49 +13,46 @@ from itertools import combinations
 from .evaluation import evaluation
 
 
-class deepoc_adv_marabou_borderpoint:
+class deepoc_adv_marabou_borderpoint(evaluation):
     def __init__(
         self,
-        eval_inst: evaluation,
         name: str = "deepoc_adv_marabou_borderpoint",
         # accuracy wrt distance in input space
         accuracy=0.0001,
     ):
         self.name = name
-        self.evaluation = eval_inst
         self.accuracy = accuracy
 
-    # general plan: 
+    # general plan:
     # take random input point (-> mean? a set of? etc.)
     # calculate image
     # calculate border point (we need R for this, where to get this?)
     # find preimage
 
     # def calc_border_point(self, point, algorithm):
-        # center = algorithm.center.numpy()
-        # point = point.values[0]
-        # anom_radius = algorithm.anom_radius
-        # diff = point - center
-        # diff_length = np.sqrt(np.square(diff).sum())
-        # border_point = center + anom_radius*(diff/diff_length)
-        # return pd.DataFrame(border_point).transpose()
+    # center = algorithm.center.numpy()
+    # point = point.values[0]
+    # anom_radius = algorithm.anom_radius
+    # diff = point - center
+    # diff_length = np.sqrt(np.square(diff).sum())
+    # border_point = center + anom_radius*(diff/diff_length)
+    # return pd.DataFrame(border_point).transpose()
 
     def get_samples(self, dataset, sampling_method: str, num_points=None):
-        if sampling_method == 'random_points':
+        if sampling_method == "random_points":
             sample_list = []
             for point in range(num_points):
-                sample = dataset.test_data().sample(1, random_state = point)
+                sample = dataset.test_data().sample(1, random_state=point)
                 sample_list.append(sample)
             return sample_list
         else:
-            raise Exception('could not return points as no method was specified')
+            raise Exception("could not return points as no method was specified")
 
     def find_closest_preimage(self, input_sample, border_point, network):
         # add output constraints
         for ind, output_value in enumerate(border_point.values[0]):
             outputVar = network.outputVars[0][ind]
             network.addEquality([outputVar], [1], output_value)
-
 
         # bin_search over input_sample
         marabou_options = Marabou.createOptions(timeoutInSeconds=300)
@@ -87,7 +84,7 @@ class deepoc_adv_marabou_borderpoint:
                     np.array(extr_solution[1]) - border_point.values[0]
                 ).max()
                 # found solution
-                if (diff_input < eps + self.accuracy):
+                if diff_input < eps + self.accuracy:
                     eps = eps - eps_change
                 else:
                     eps = eps + eps_change
@@ -97,12 +94,12 @@ class deepoc_adv_marabou_borderpoint:
                 found_closest_eps = True
             eps_change = eps_change / 2
         if solution is not None:
-            closest_preimage = pd.DataFrame(extract_solution_point(solution,
-                network)[0]).transpose()
+            closest_preimage = pd.DataFrame(
+                extract_solution_point(solution, network)[0]
+            ).transpose()
             return eps, closest_preimage
         else:
             return None, None
-
 
     def get_network(self, algorithm, dataset):
         randomInput = torch.randn(1, algorithm.topology[0])
@@ -132,23 +129,26 @@ class deepoc_adv_marabou_borderpoint:
         )
         return network
 
-    def evaluate(self, dataset, algorithm):
+    def evaluate(self, dataset, algorithm, run_inst):
         collapsing = test_for_collapsing(dataset, algorithm)
         network = self.get_network(algorithm, dataset)
-        samples = self.get_samples(dataset, 'random_points', num_points=100)
+        samples = self.get_samples(dataset, "random_points", num_points=100)
         result_dict = {}
-        for i,input_sample in enumerate(samples):
+        for i, input_sample in enumerate(samples):
             output_sample = algorithm.predict(input_sample)
             sample_border_point = algorithm.calc_border_point(output_sample)
-            dist, closest_preimage = self.find_closest_preimage(input_sample,
-                    sample_border_point, network)
+            dist, closest_preimage = self.find_closest_preimage(
+                input_sample, sample_border_point, network
+            )
             if closest_preimage is not None:
-                result_dict[i] = (list(input_sample.iloc[0]),
-                        list(closest_preimage.iloc[0]), dist)
-            else: 
+                result_dict[i] = (
+                    list(input_sample.iloc[0]),
+                    list(closest_preimage.iloc[0]),
+                    dist,
+                )
+            else:
                 result_dict[i] = (list(input_sample.iloc[0]), closest_preimage, dist)
-        self.evaluation.save_json(result_dict, "deepoc_adv_marabou_borderpoint")
-
+        self.save_json(run_inst, result_dict, "deepoc_adv_marabou_borderpoint")
 
 
 def test_for_collapsing(dataset, algorithm):
@@ -157,6 +157,7 @@ def test_for_collapsing(dataset, algorithm):
         return True
     else:
         return False
+
 
 def extract_solution_point(solution, network):
     solution = solution[0]
@@ -169,7 +170,6 @@ def extract_solution_point(solution, network):
         outputpoint1.append(solution[ind1])
 
     return inputpoint1, outputpoint1
-
 
 
 def extract_solution_stats(solution):

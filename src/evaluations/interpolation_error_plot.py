@@ -7,12 +7,11 @@ from itertools import combinations
 from .evaluation import evaluation
 
 
-class interpolation_error_plot:
-    def __init__(self, eval_inst: evaluation, name: str = "interpolation_error_plot"):
+class interpolation_error_plot(evaluation):
+    def __init__(self, name: str = "interpolation_error_plot"):
         self.name = name
-        self.evaluation = eval_inst
 
-    def evaluate(self, dataset, algorithm):
+    def evaluate(self, dataset, algorithm, run_inst):
         dataset.test_data()
         # Code for particular instances
         #        insts = pd.DataFrame()
@@ -67,8 +66,9 @@ class interpolation_error_plot:
         plt.plot(error_mean1, label="error_reconstr_label1")
         plt.plot(error_mean2, label="error_reconstr_label2")
         plt.legend()
-        self.evaluation.save_figure(fig, "interpolation_errors", subfolder=subfolder)
-        self.evaluation.save_csv(
+        self.save_figure(run_inst, fig, "interpolation_errors", subfolder=subfolder)
+        self.save_csv(
+            run_inst,
             pd.DataFrame(interp_errors, columns=["interp_errors"]),
             "interpolation_errors",
             subfolder=subfolder,

@@ -7,12 +7,11 @@ from itertools import combinations
 from .evaluation import evaluation
 
 
-class mse_test:
-    def __init__(self, eval_inst: evaluation, name: str = "mse_test"):
+class mse_test(evaluation):
+    def __init__(self, name: str = "mse_test"):
         self.name = name
-        self.evaluation = eval_inst
 
-    def evaluate(self, dataset, algorithm):
+    def evaluate(self, dataset, algorithm, run_inst):
         dataset.test_data()
         test_labels = []
         label_error = []
@@ -41,7 +40,7 @@ class mse_test:
         for label in label_mean_tuples:
             result_dict[str(label[0])] = label[1]
 
-        self.evaluation.save_json(result_dict, "label_error")
+        self.save_json(run_inst, result_dict, "label_error")
         result_dict_tot = {}
         result_dict_tot["total_error_test_ds"] = tot_error.astype(np.float64)
-        self.evaluation.save_json(result_dict_tot, "tot_error")
+        self.save_json(run_inst, result_dict_tot, "tot_error")

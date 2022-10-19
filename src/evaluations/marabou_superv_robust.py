@@ -15,24 +15,23 @@ from .evaluation import evaluation
 # sat means there is an 'advers attack' -> it is not robust
 # unsat means there is no advers attack -> it is robust
 
-class marabou_superv_robust:
+
+class marabou_superv_robust(evaluation):
     def __init__(
         self,
-        eval_inst: evaluation,
         name: str = "marabou_superv_robust",
-        eps_range=[0.0,1],
-        num_steps = 50,
-        num_samples = 20,
-        singular_class_sample = 0,
+        eps_range=[0.0, 1],
+        num_steps=50,
+        num_samples=20,
+        singular_class_sample=0,
     ):
         self.name = name
-        self.evaluation = eval_inst
         self.eps_range = eps_range
         self.num_steps = num_steps
         self.num_samples = num_samples
         self.singular_class_sample = singular_class_sample
 
-    def evaluate(self, dataset, algorithm):
+    def evaluate(self, dataset, algorithm, run_inst):
         network = self.get_network(algorithm, dataset)
         self.algorithm = algorithm
 
@@ -41,17 +40,19 @@ class marabou_superv_robust:
             while len(samples) < self.num_samples:
                 cand = dataset.test_data().sample(1)
                 cand_pred = algorithm.predict(cand)
-                if ((dataset.test_labels[cand_pred.index] ==
-                    cand_pred['pred_label']).values and
-                    cand_pred['pred_label'].values[0] ==
-                    self.singular_class_sample):
+                if (
+                    dataset.test_labels[cand_pred.index] == cand_pred["pred_label"]
+                ).values and cand_pred["pred_label"].values[
+                    0
+                ] == self.singular_class_sample:
                     samples.append(cand)
         else:
             while len(samples) < self.num_samples:
                 cand = dataset.test_data().sample(1)
                 cand_pred = algorithm.predict(cand)
-                if (dataset.test_labels[cand_pred.index] ==
-                    cand_pred['pred_label']).values:
+                if (
+                    dataset.test_labels[cand_pred.index] == cand_pred["pred_label"]
+                ).values:
                     samples.append(cand)
 
         result_dict = {}
@@ -60,41 +61,42 @@ class marabou_superv_robust:
             solutions = self.check_sample(sample, network, pred)
             aggr_solutions = self.aggregate_sample(solutions)
             result_dict[f"sample_{sample_num}"] = aggr_solutions
-            self.plot_and_save_surrounding_fcts(result_dict, sample, network,
-                    algorithm, sample_num)
-        self.evaluation.save_json(result_dict, "results_marabou_superv_robust")
+            self.plot_and_save_surrounding_fcts(
+                result_dict, sample, network, algorithm, sample_num
+            )
+        self.save_json(run_inst, result_dict, "results_marabou_superv_robust")
 
         if self.num_samples == 1:
             self.save_singular_sample(solutions)
 
     def save_singular_sample(self, solutions):
         index = list(solutions.keys())
-        col1 = list(map(lambda x:len(x[0])>0, list(solutions.values())))
-        col2 = list(map(lambda x:x[1].getTotalTime(), list(solutions.values())))
-        res_df = pd.DataFrame(np.array([col1, col2]).transpose(), index=index,
-                columns = ['sat', 'runtime'])
-        self.evaluation.save_csv(res_df, "singular_sample")
+        col1 = list(map(lambda x: len(x[0]) > 0, list(solutions.values())))
+        col2 = list(map(lambda x: x[1].getTotalTime(), list(solutions.values())))
+        res_df = pd.DataFrame(
+            np.array([col1, col2]).transpose(), index=index, columns=["sat", "runtime"]
+        )
+        self.save_csv(run_inst, res_df, "singular_sample")
 
     def aggregate_sample(self, solutions):
-        total_runtime = sum(list(map(lambda x: x[1].getTotalTime(),
-            solutions.values())))
-        tot_sat_sol = sum(list(map(lambda x:len(x[0])>0,
-            solutions.values())))
-        tot_unsat_sol = sum(list(map(lambda x:len(x[0])==0,
-            solutions.values())))
+        total_runtime = sum(
+            list(map(lambda x: x[1].getTotalTime(), solutions.values()))
+        )
+        tot_sat_sol = sum(list(map(lambda x: len(x[0]) > 0, solutions.values())))
+        tot_unsat_sol = sum(list(map(lambda x: len(x[0]) == 0, solutions.values())))
         res_dict = {}
-        res_dict['tot_runtime'] = total_runtime
-        res_dict['tot_sat_sol'] = tot_sat_sol
-        res_dict['tot_unsat_sol'] = tot_unsat_sol
+        res_dict["tot_runtime"] = total_runtime
+        res_dict["tot_sat_sol"] = tot_sat_sol
+        res_dict["tot_unsat_sol"] = tot_unsat_sol
         return res_dict
 
     def check_sample(self, sample, network, pred_tot):
-        pred = pred_tot['pred_label']
+        pred = pred_tot["pred_label"]
         marabou_options = Marabou.createOptions(timeoutInSeconds=300)
         res_dict = {}
-        for eps in np.linspace(self.eps_range[0],self.eps_range[1],self.num_steps):
-            lower_bounds = (sample.values - eps).clip(-1,1)
-            upper_bounds = (sample.values + eps).clip(-1,1)
+        for eps in np.linspace(self.eps_range[0], self.eps_range[1], self.num_steps):
+            lower_bounds = (sample.values - eps).clip(-1, 1)
+            upper_bounds = (sample.values + eps).clip(-1, 1)
             for ind in range(sample.shape[1]):
                 network.setLowerBound(
                     network.inputVars[0][0][ind], lower_bounds[0][ind]
@@ -121,13 +123,11 @@ class marabou_superv_robust:
 
         return res_dict
 
-
     def plot_and_save_surrounding_fcts(
         self, result_dict, input_sample, network, algorithm, key
     ):
         # clip samples at -1,1
         # sample within largest eps range
-
 
         samples = np.random.uniform(
             low=(input_sample - self.eps_range[1]).values,
@@ -139,13 +139,16 @@ class marabou_superv_robust:
         fig, ax = plt.subplots(1, 1, figsize=(20, 10))
         fct_indices = range(len(sorted_distr))
         ax.bar(fct_indices, sorted_distr)
-        self.evaluation.save_figure(fig, f"surrounding_fcts_distr_{key}")
-        self.evaluation.save_csv(
+        self.save_figure(run_inst, fig, f"surrounding_fcts_distr_{key}")
+        self.save_csv(
+            run_inst,
             pd.DataFrame(sorted_distr),
             f"surrounding_fcts_distr_{key}",
             subfolder=f"results_robust_{key}",
         )
-        result_dict["sample_" + str(key)].update({"surrounding_fcts": len(sorted_distr)})
+        result_dict["sample_" + str(key)].update(
+            {"surrounding_fcts": len(sorted_distr)}
+        )
 
     def get_network(self, algorithm, dataset):
         randomInput = torch.randn(1, algorithm.topology[0])

@@ -8,21 +8,18 @@ import pandas as pd
 from .evaluation import evaluation
 
 
-class error_label_mean_dist_plot:
-    def __init__(self, eval_inst: evaluation, name: str = "error_label_mean_dist_plot"):
+class error_label_mean_dist_plot(evaluation):
+    def __init__(self, name: str = "error_label_mean_dist_plot"):
         self.name = name
-        self.evaluation = eval_inst
 
-    def evaluate(self, dataset, algorithm):
+    def evaluate(self, dataset, algorithm, run_inst):
         dists_to_label_mean = dataset.calc_dists_to_label_mean(subset="test")
         #        sample_dist_pairs = algorithm.assign_border_dists(algorithm.module,
         #                dataset.test_data())
         errors = algorithm.calc_errors(algorithm.module, dataset.test_data())
         joined_df = pd.concat(
             [
-                pd.DataFrame(
-                    dists_to_label_mean, columns=["dists_to_label_mean"]
-                ),
+                pd.DataFrame(dists_to_label_mean, columns=["dists_to_label_mean"]),
                 pd.DataFrame(errors, columns=["errors"]),
             ],
             axis=1,
@@ -47,7 +44,7 @@ class error_label_mean_dist_plot:
         plt.ylim(0.0001, 10)
         plt.legend()
 
-        self.evaluation.save_csv(df_sorted, "error_label_mean_dist_data")
+        self.save_csv(run_inst, df_sorted, "error_label_mean_dist_data")
         # save figure
-        self.evaluation.save_figure(fig, "error_label_mean_dist_plot")
+        self.save_figure(run_inst, fig, "error_label_mean_dist_plot")
         plt.close("all")

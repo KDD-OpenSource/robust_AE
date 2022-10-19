@@ -8,12 +8,11 @@ import pandas as pd
 from .evaluation import evaluation
 
 
-class bias_feature_imp:
-    def __init__(self, eval_inst: evaluation, name: str = "bias_feature_imp"):
+class bias_feature_imp(evaluation):
+    def __init__(self, name: str = "bias_feature_imp"):
         self.name = name
-        self.evaluation = eval_inst
 
-    def evaluate(self, dataset, algorithm):
+    def evaluate(self, dataset, algorithm, run_inst):
         imp_results = algorithm.assign_bias_feature_imps(
             algorithm.module, dataset.test_data()
         )
@@ -49,15 +48,15 @@ class bias_feature_imp:
                 df_subset.index,
                 df_subset["feature_imp"].values,
                 color="green",
-                #label=f"feature_imp_{color}",
+                # label=f"feature_imp_{color}",
             )
             plt.plot(
                 df_subset.index,
                 df_subset["bias_imp"].values,
                 color="red",
-                #label=f"bias_imp_{color}",
+                # label=f"bias_imp_{color}",
             )
         plt.legend()
         # save figure
-        self.evaluation.save_figure(fig, "bias_feature_imp_plot")
+        self.save_figure(run_inst, fig, "bias_feature_imp_plot")
         plt.close("all")

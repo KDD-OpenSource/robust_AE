@@ -17,43 +17,47 @@ import onnx
 from .evaluation import evaluation
 
 
-class lirpa_ens_normal_rob:
+class lirpa_ens_normal_rob(evaluation):
     def __init__(
         self,
-        eval_inst: evaluation,
         name: str = "lirpa_ens_normal_rob",
         num_eps_steps=100,
         delta=0.1,
-        cfg = None,
+        cfg=None,
     ):
         self.name = name
-        self.evaluation = eval_inst
         self.num_eps_steps = num_eps_steps
         self.desired_delta = delta
         self.cfg = cfg
 
-    def evaluate(self, dataset, algorithm):
-        import pdb; pdb.set_trace()
-        simon_folder = os.path.join(os.getcwd(),
-                self.cfg['multiple_models'][2:])
-        merged_model = onnx.load(os.path.join(simon_folder, 'models',
-            'merged.onnx'))
+    def evaluate(self, dataset, algorithm, run_inst):
+        import pdb
+
+        pdb.set_trace()
+        simon_folder = os.path.join(os.getcwd(), self.cfg["multiple_models"][2:])
+        merged_model = onnx.load(os.path.join(simon_folder, "models", "merged.onnx"))
         torch_model = ConvertModel(merged_model)
-        import pdb; pdb.set_trace()
-        input_tensor = torch.zeros(1,784)
+        import pdb
+
+        pdb.set_trace()
+        input_tensor = torch.zeros(1, 784)
 
         test_data = dataset.test_data()
-        normal_point = torch.tensor(test_data[dataset.test_labels ==
-            7].sample(1).values)
-        import pdb; pdb.set_trace()
+        normal_point = torch.tensor(
+            test_data[dataset.test_labels == 7].sample(1).values
+        )
+        import pdb
+
+        pdb.set_trace()
         ptb = PerturbationLpNorm(norm=np.inf, eps=0.1)
         my_input = BoundedTensor(normal_point, ptb)
 
         lirpa_model = BoundedModule(torch_model, my_input)
         pred = lirpa_model(normal_point)
         lb, ub = lirpa_model.compute_bounds(x=(my_input,), method="CROWN")
-        import pdb; pdb.set_trace()
+        import pdb
 
+        pdb.set_trace()
 
 
 #        test_data = dataset.test_data()
@@ -87,7 +91,7 @@ class lirpa_ens_normal_rob:
 #            #test_model_folders = self.get_test_model_folders(simon_folder)
 #            marabou_options = Marabou.createOptions(timeoutInSeconds=60)
 #
-#            # model info is list of tuples with (model_number, features, q_value) 
+#            # model info is list of tuples with (model_number, features, q_value)
 #            with open(os.path.join(simon_folder, 'models', 'alltheq.json'), 'r') as json_file:
 #                q_values = json.load(json_file)
 #
@@ -163,15 +167,15 @@ class lirpa_ens_normal_rob:
 #            adv_cand = pd.DataFrame(adv_df.mode().iloc[0]).transpose()
 #            norm_adv_pair = pd.concat([normal_point, adv_cand])
 #            norm_ind = str(normal_point.index[0])
-#            self.evaluation.save_csv(norm_adv_pair, f'norm_adv_pair_{norm_ind}')
+#            self.save_csv(run_inst, norm_adv_pair, f'norm_adv_pair_{norm_ind}')
 #            result_dict[norm_ind] = {
 #                        'eps': eps,
 #                        'verified_largest_error': verified_largest_error,
 #                        'duration': end_time - start_time
 #                        }
-#            self.evaluation.save_json(eps_res_dict,
+#            self.save_json(run_inst, eps_res_dict,
 #                    f'eps_res_dict_{norm_ind}')
-#        self.evaluation.save_json(result_dict, f'results')
+#        self.save_json(run_inst, result_dict, f'results')
 #
 #    def calc_largest_error(self, normal_point, onnx_path, eps, model_info, q_values):
 #        marabou_options = Marabou.createOptions(timeoutInSeconds=300)
@@ -320,7 +324,7 @@ class lirpa_ens_normal_rob:
 #        # sample is a df with one row
 #        return (sample - sample.mean().mean())/255
 #
-#def extract_solution_point(solution, network):
+# def extract_solution_point(solution, network):
 #    solution = solution[0]
 #    inputpoint1 = []
 #    for ind1 in network.inputVars[0][0]:
@@ -334,4 +338,4 @@ class lirpa_ens_normal_rob:
 #
 ## TODO:  richtige features (mit Simons skript), parallelisieren, MNIST mit
 ## normalisierung reintun (was gibt x - mean(x)/ 255 -> sollte zwischen [-1,1]
-## liegen -> damit macht eine eps skala sinn...) 
+## liegen -> damit macht eine eps skala sinn...)

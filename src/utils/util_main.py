@@ -1,13 +1,13 @@
 """Util file for main"""
 from src.utils.imports import *
 
-#def get_proj_root():
-    #return '/home/bboeing/NNLinSubfct/Code'
+# def get_proj_root():
+# return '/home/bboeing/NNLinSubfct/Code'
 
 
 def exec_cfg(cfg, start_timestamp):
     cur_time_str = time.strftime("%Y-%m-%dT%H:%M:%S")
-    if cfg.repeat_eval > 1:
+    if cfg.repeat_experiment > 1:
         base_folder = cur_time_str
     else:
         base_folder = None
@@ -19,8 +19,8 @@ def exec_cfg(cfg, start_timestamp):
             + cfg.multiple_models[cfg.multiple_models.rfind("/") + 1 :]
         )
 
-    for repetition in range(cfg.repeat_eval):
-        if cfg.repeat_eval > 1:
+    for repetition in range(cfg.repeat_experiment):
+        if cfg.repeat_experiment > 1:
             dataset, algorithm, eval_inst, evals = load_objects_cfgs(
                 cfg, base_folder=base_folder, exp_run=str(repetition)
             )
@@ -59,6 +59,7 @@ def exec_cfg(cfg, start_timestamp):
     cfg.to_json(filename=os.path.join(eval_inst.run_folder, "cfg.json"))
     print(f"Config {cfg.ctx} is done")
 
+
 def load_cfgs():
     cfgs = []
     for arg in sys.argv[1:]:
@@ -77,7 +78,7 @@ def read_cfg(cfg):
     cfgs = []
     cfgs.append(Box(config(os.path.join(os.getcwd(), cfg)).config_dict))
     if cfgs[-1].multiple_models is not None:
-        subfolder_blocklist = ['remaining_models']
+        subfolder_blocklist = ["remaining_models"]
 
         model_containing_folder = cfgs[-1].multiple_models
         model_list = os.listdir(model_containing_folder)
@@ -116,17 +117,17 @@ def load_objects_cfgs(cfg, base_folder, exp_run=None):
     try:
         dataset = load_dataset(cfg)
     except:
-        print('No dataset loaded.\n')
+        print("No dataset loaded.\n")
         dataset = None
     try:
         algorithm = load_algorithm(cfg)
     except:
-        print('No algorithm loaded.\n')
+        print("No algorithm loaded.\n")
         algorithm = None
     try:
         eval_inst, evals = load_evals(cfg, base_folder, exp_run)
     except:
-        print('No evaluations loaded.\n')
+        print("No evaluations loaded.\n")
         eval_inst, evals = None, None
     return dataset, algorithm, eval_inst, evals
 
@@ -440,12 +441,12 @@ def load_algorithm(cfg):
             algorithm.load(cfg.algorithm)
         if "deepOcc" in cfg.algorithm:
             algorithm = deepOcc(
-                topology=[3,2,1],
+                topology=[3, 2, 1],
             )
             algorithm.load(cfg.algorithm)
         if "fcnnClassifier" in cfg.algorithm:
             algorithm = fcnnClassifier(
-                topology=[3,2,1],
+                topology=[3, 2, 1],
             )
             algorithm.load(cfg.algorithm)
     else:
@@ -473,19 +474,19 @@ def load_algorithm(cfg):
             )
         elif cfg.algorithm == "deepOcc":
             algorithm = deepOcc(
-                topology = cfg.algorithms.deepOcc.topology,
+                topology=cfg.algorithms.deepOcc.topology,
                 L2Reg=cfg.algorithms.deepOcc.L2Reg,
                 anom_quantile=cfg.algorithms.deepOcc.anom_quantile,
-                dropout =cfg.algorithms.deepOcc.dropout ,
+                dropout=cfg.algorithms.deepOcc.dropout,
                 num_epochs=cfg.algorithms.num_epochs,
                 lr=cfg.algorithms.lr,
                 save_interm_models=cfg.algorithms.save_interm_models,
             )
         elif cfg.algorithm == "fcnnClassifier":
             algorithm = fcnnClassifier(
-                topology = cfg.algorithms.fcnnClassifier.topology,
+                topology=cfg.algorithms.fcnnClassifier.topology,
                 L2Reg=cfg.algorithms.fcnnClassifier.L2Reg,
-                dropout =cfg.algorithms.fcnnClassifier.dropout ,
+                dropout=cfg.algorithms.fcnnClassifier.dropout,
                 num_epochs=cfg.algorithms.num_epochs,
                 lr=cfg.algorithms.lr,
                 save_interm_models=cfg.algorithms.save_interm_models,
@@ -530,9 +531,9 @@ def load_evals(cfg, base_folder=None, exp_run=None):
     if "anomaly_score_samples" in cfg.evaluations:
         evals.append(anomaly_score_samples(eval_inst=eval_inst))
     if "anomaly_quantile_radius" in cfg.evaluations:
-       evals.append(anomaly_quantile_radius(eval_inst=eval_inst))
+        evals.append(anomaly_quantile_radius(eval_inst=eval_inst))
     if "ad_box_creator" in cfg.evaluations:
-       evals.append(ad_box_creator(eval_inst=eval_inst))
+        evals.append(ad_box_creator(eval_inst=eval_inst))
     if "singularValuePlots" in cfg.evaluations:
         evals.append(singularValuePlots(eval_inst=eval_inst))
     if "closest_linsubfct_plot" in cfg.evaluations:

@@ -17,5 +17,5 @@ class sonyAIBORobotSurface2(dataset):
         self.label_col_train = 0
         self.index_col = None
         self.header = None
-        self.delimiter = '\t'
+        self.delimiter = "\t"
         self.label_col_test = 0

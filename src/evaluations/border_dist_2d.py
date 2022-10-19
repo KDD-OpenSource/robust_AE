@@ -7,12 +7,11 @@ import pandas as pd
 from .evaluation import evaluation
 
 
-class border_dist_2d:
-    def __init__(self, eval_inst: evaluation, name: str = "border_dist_2d"):
+class border_dist_2d(evaluation):
+    def __init__(self, name: str = "border_dist_2d"):
         self.name = name
-        self.evaluation = eval_inst
 
-    def evaluate(self, dataset, algorithm):
+    def evaluate(self, dataset, algorithm, run_inst):
         input_dim = algorithm.topology[0]
         if input_dim != 2:
             raise Exception("cannot plot in 2d unless input dim is 2d too")
@@ -26,5 +25,5 @@ class border_dist_2d:
         fig = plt.figure(figsize=[20, 20])
         plt.scatter(joined[0], joined[1], c=joined[2], alpha=0.5, cmap="Greens")
         # save figure
-        self.evaluation.save_figure(fig, "border_dist_2d")
+        self.save_figure(run_inst, fig, "border_dist_2d")
         plt.close("all")

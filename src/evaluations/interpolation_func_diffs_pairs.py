@@ -7,12 +7,11 @@ from itertools import combinations
 from .evaluation import evaluation
 
 
-class interpolation_func_diffs_pairs:
-    def __init__(self, eval_inst: evaluation, name: str = "interpolation_func_diffs"):
+class interpolation_func_diffs_pairs(evaluation):
+    def __init__(self, name: str = "interpolation_func_diffs"):
         self.name = name
-        self.evaluation = eval_inst
 
-    def evaluate(self, dataset, algorithm):
+    def evaluate(self, dataset, algorithm, run_inst):
         dataset.test_data()
         # Code for particular instances
         #        insts = pd.DataFrame()
@@ -138,7 +137,8 @@ class interpolation_func_diffs_pairs:
                 f"""Relevance of Orig: {relevance_orig}, Relevance
                 of bias: {relevance_bias}, Dist to Prev: {dist}"""
             )
-            self.evaluation.save_figure(
+            self.save_figure(
+                run_inst,
                 fig,
                 f"plot_interpolations_lrp_feature_bias_imp_{ctr}",
                 subfolder=subfolder,
@@ -147,8 +147,8 @@ class interpolation_func_diffs_pairs:
                 np.stack([orig, reconstr]).transpose(), columns=["orig", "recon"]
             )
 
-            self.evaluation.save_csv(
-                res_df, f"plot_interpolations_{ctr}", subfolder=subfolder
+            self.save_csv(
+                run_inst, res_df, f"plot_interpolations_{ctr}", subfolder=subfolder
             )
             plt.close("all")
             ctr += 1
@@ -174,9 +174,12 @@ class interpolation_func_diffs_pairs:
         # plt.plot(interp_func_df.index, interp_func_df['sign_sum_weighted'].values, color =
         #'y', label='sign_sum_weighted')
         plt.legend()
-        self.evaluation.save_figure(fig, "interp_func_dist_plot", subfolder=subfolder)
-        self.evaluation.save_csv(
-            interp_func_df["seq_func_dist"], "interp_func_dist", subfolder=subfolder
+        self.save_figure(run_inst, fig, "interp_func_dist_plot", subfolder=subfolder)
+        self.save_csv(
+            run_inst,
+            interp_func_df["seq_func_dist"],
+            "interp_func_dist",
+            subfolder=subfolder,
         )
         plt.close("all")
         # plot interpolations

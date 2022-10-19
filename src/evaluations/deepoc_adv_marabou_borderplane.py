@@ -15,16 +15,14 @@ from sklearn.metrics.pairwise import cosine_similarity
 from .evaluation import evaluation
 
 
-class deepoc_adv_marabou_borderplane:
+class deepoc_adv_marabou_borderplane(evaluation):
     def __init__(
         self,
-        eval_inst: evaluation,
         name: str = "deepoc_adv_marabou_borderplane",
         # accuracy wrt distance in input space
         accuracy=0.0001,
     ):
         self.name = name
-        self.evaluation = eval_inst
         self.accuracy = accuracy
 
     def calc_border_point(self, point, algorithm):
@@ -34,28 +32,26 @@ class deepoc_adv_marabou_borderplane:
         anom_radius = algorithm.anom_radius
         diff = point - center
         diff_length = np.sqrt(np.square(diff).sum())
-        border_point = center + anom_radius*(diff/diff_length)
+        border_point = center + anom_radius * (diff / diff_length)
         return pd.DataFrame(border_point).transpose()
 
     def get_samples(self, dataset, sampling_method: str, num_points=None):
-        if sampling_method == 'random_points':
+        if sampling_method == "random_points":
             sample_list = []
             for point in range(num_points):
-                sample = dataset.test_data().sample(1, random_state = point)
+                sample = dataset.test_data().sample(1, random_state=point)
                 sample_list.append(sample)
             return sample_list
         else:
-            raise Exception('could not return points as no method was specified')
+            raise Exception("could not return points as no method was specified")
 
-    def find_closest_preimage(self, input_sample, border_point, network,
-            algorithm):
+    def find_closest_preimage(self, input_sample, border_point, network, algorithm):
         # add output constraints
         # calculate normal vector
         dir_vect = algorithm.center.numpy() - border_point.values[0]
-        normal_vect = dir_vect/np.linalg.norm(dir_vect)
+        normal_vect = dir_vect / np.linalg.norm(dir_vect)
         border_plane_bias = np.dot(normal_vect, border_point.values[0])
-        network.addEquality(network.outputVars[0], normal_vect,
-                border_plane_bias)
+        network.addEquality(network.outputVars[0], normal_vect, border_plane_bias)
 
         # bin_search over input_sample
         marabou_options = Marabou.createOptions(timeoutInSeconds=300)
@@ -80,9 +76,9 @@ class deepoc_adv_marabou_borderplane:
             if len(network_solution[0]) > 0:
                 extr_solution = extract_solution_point(network_solution, network)
                 solution = network_solution
-                #print(np.sqrt(nn.MSELoss(reduction='sum')(torch.tensor(algorithm.center),
-                    #torch.tensor(extr_solution[1]))).tolist())
-                #print(algorithm.check_anomalous(pd.DataFrame(extr_solution[0]).transpose()))
+                # print(np.sqrt(nn.MSELoss(reduction='sum')(torch.tensor(algorithm.center),
+                # torch.tensor(extr_solution[1]))).tolist())
+                # print(algorithm.check_anomalous(pd.DataFrame(extr_solution[0]).transpose()))
                 diff_input = abs(
                     np.array(extr_solution[0]) - input_sample.values[0]
                 ).max()
@@ -90,7 +86,7 @@ class deepoc_adv_marabou_borderplane:
                     np.array(extr_solution[1]) - border_point.values[0]
                 ).max()
                 # found solution
-                if (diff_input < eps + self.accuracy):
+                if diff_input < eps + self.accuracy:
                     eps = eps - eps_change
                 else:
                     eps = eps + eps_change
@@ -100,15 +96,15 @@ class deepoc_adv_marabou_borderplane:
                 found_closest_eps = True
             eps_change = eps_change / 2
         if solution is not None:
-            closest_preimage = pd.DataFrame(extract_solution_point(solution,
-                network)[0]).transpose()
+            closest_preimage = pd.DataFrame(
+                extract_solution_point(solution, network)[0]
+            ).transpose()
             diff = closest_preimage.values - input_sample.values
             L_infty_dist = abs(diff).max()
-            L2_dist = ((diff**2).sum())/input_sample.shape[1]
+            L2_dist = ((diff**2).sum()) / input_sample.shape[1]
             return closest_preimage, L2_dist, L_infty_dist
         else:
-            raise Exception('Method has not found a solution')
-
+            raise Exception("Method has not found a solution")
 
     def get_network(self, algorithm, dataset):
         randomInput = torch.randn(1, algorithm.topology[0])
@@ -144,40 +140,43 @@ class deepoc_adv_marabou_borderplane:
         adv_attack_im = algorithm.predict(adv_attack).values[0]
         border_point_center = border_point - algorithm.center.numpy()
         adv_attack_im_center = adv_attack_im - algorithm.center.numpy()
-        cos_sim = cosine_similarity(border_point_center[np.newaxis],
-                adv_attack_im_center[np.newaxis]).astype(np.float64)[0][0]
+        cos_sim = cosine_similarity(
+            border_point_center[np.newaxis], adv_attack_im_center[np.newaxis]
+        ).astype(np.float64)[0][0]
         return cos_sim
 
-    def evaluate(self, dataset, algorithm):
+    def evaluate(self, dataset, algorithm, run_inst):
         collapsing = test_for_collapsing(dataset, algorithm)
         network = self.get_network(algorithm, dataset)
-        samples = self.get_samples(dataset, 'random_points', num_points=100)
+        samples = self.get_samples(dataset, "random_points", num_points=100)
         result_dict = {}
         result_dict_stats = {}
-        for i,input_sample in enumerate(samples):
+        for i, input_sample in enumerate(samples):
             output_sample = algorithm.predict(input_sample)
             sample_border_point = algorithm.calc_border_point(output_sample)
-            sample_frac = algorithm.calc_frac_to_border(
-                    output_sample).astype(np.float64)
-            adv_attack, L2_dist, L_infty_dist = self.find_closest_preimage(input_sample,
-                    sample_border_point, network, algorithm)
+            sample_frac = algorithm.calc_frac_to_border(output_sample).astype(
+                np.float64
+            )
+            adv_attack, L2_dist, L_infty_dist = self.find_closest_preimage(
+                input_sample, sample_border_point, network, algorithm
+            )
             check_anomaly = algorithm.check_anomalous(adv_attack).tolist()
             cos_sim = self.calc_cosine_sim(input_sample, adv_attack, algorithm)
             result_dict[i] = {
-                    'input_sample': list(input_sample.iloc[0]),
-                    'adv_attack' : list(adv_attack.iloc[0]),
-                    }
+                "input_sample": list(input_sample.iloc[0]),
+                "adv_attack": list(adv_attack.iloc[0]),
+            }
             result_dict_stats[i] = {
-                    'L2_dist' : L2_dist,
-                    'L_infty_dist' : L_infty_dist,
-                    'cos_sim' : cos_sim,
-                    'sample_frac' : sample_frac,
-                    'check_anomalous' : check_anomaly 
-                    }
-        self.evaluation.save_json(result_dict, "deepoc_adv_marabou_borderplane")
-        self.evaluation.save_json(result_dict_stats,
-                "deepoc_adv_marabou_borderplane_stats")
-
+                "L2_dist": L2_dist,
+                "L_infty_dist": L_infty_dist,
+                "cos_sim": cos_sim,
+                "sample_frac": sample_frac,
+                "check_anomalous": check_anomaly,
+            }
+        self.save_json(run_inst, result_dict, "deepoc_adv_marabou_borderplane")
+        self.save_json(
+            run_inst, result_dict_stats, "deepoc_adv_marabou_borderplane_stats"
+        )
 
 
 def test_for_collapsing(dataset, algorithm):
@@ -186,6 +185,7 @@ def test_for_collapsing(dataset, algorithm):
         return True
     else:
         return False
+
 
 def extract_solution_point(solution, network):
     solution = solution[0]
@@ -198,7 +198,6 @@ def extract_solution_point(solution, network):
         outputpoint1.append(solution[ind1])
 
     return inputpoint1, outputpoint1
-
 
 
 def extract_solution_stats(solution):

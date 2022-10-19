@@ -12,10 +12,10 @@ class uniform_2D(dataset):
         file_path: str = None,
         subsample: int = None,
         scale: bool = False,
-        x_min = 0,
-        x_max = 1,
-        y_min = 0,
-        y_max = 1,
+        x_min=0,
+        x_max=1,
+        y_min=0,
+        y_max=1,
         num_samples: int = 10000,
         num_anomalies: int = 0,
         num_testpoints: int = 0,
@@ -34,12 +34,22 @@ class uniform_2D(dataset):
         creates a cloud of points that are uniformly distributed in 2D between
         the given limits
         """
-        data = pd.DataFrame(np.random.uniform([self.x_min, self.y_min],
-            [self.x_max, self.y_max], size=(self.num_samples, 2)))
+        data = pd.DataFrame(
+            np.random.uniform(
+                [self.x_min, self.y_min],
+                [self.x_max, self.y_max],
+                size=(self.num_samples, 2),
+            )
+        )
         self._train_data = data
         self.train_labels = pd.Series(0, range(self.num_samples))
 
-        test_data = pd.DataFrame(np.random.uniform([self.x_min, self.y_min],
-            [self.x_max, self.y_max], size=(self.num_testpoints, 2)))
+        test_data = pd.DataFrame(
+            np.random.uniform(
+                [self.x_min, self.y_min],
+                [self.x_max, self.y_max],
+                size=(self.num_testpoints, 2),
+            )
+        )
         self._test_data = test_data
         self.test_labels = pd.Series(0, range(self.num_testpoints))

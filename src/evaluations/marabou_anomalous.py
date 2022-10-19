@@ -16,20 +16,18 @@ from .evaluation import evaluation
 # (anomaly is given by a randomly sampled point)
 
 
-class marabou_anomalous:
+class marabou_anomalous(evaluation):
     def __init__(
         self,
-        eval_inst: evaluation,
         name: str = "marabou_anomalous",
         num_eps_steps=100,
         eps=0.1,
     ):
         self.name = name
-        self.evaluation = eval_inst
         self.num_eps_steps = num_eps_steps
         self.eps = eps
 
-    def evaluate(self, dataset, algorithm):
+    def evaluate(self, dataset, algorithm, run_inst):
         randomInput = torch.randn(1, algorithm.topology[0])
         run_folder = self.evaluation.run_folder[
             self.evaluation.run_folder.rfind("202") :
@@ -143,36 +141,40 @@ class marabou_anomalous:
                         have a non_anomaly"""
                 )
                 ax[1].legend()
-                self.evaluation.save_figure(fig, f"marabou_anomalous_{num_anomaly}")
+                self.save_figure(run_inst, fig, f"marabou_anomalous_{num_anomaly}")
                 result_dict["anomaly"] = {
                     "calc_time": tot_time,
                     "dist_within_non_anomaly": self.eps,
                     "dist_to_anomaly": delta,
                 }
 
-                self.evaluation.save_csv(
+                self.save_csv(
+                    run_inst,
                     input_sample,
                     "input_sample",
                     subfolder=f"results_anomaly_{num_anomaly}",
                 )
-                self.evaluation.save_csv(
+                self.save_csv(
+                    run_inst,
                     output_sample,
                     "output_sample",
                     subfolder=f"results_anomaly_{num_anomaly}",
                 )
-                self.evaluation.save_csv(
+                self.save_csv(
+                    run_inst,
                     pd.DataFrame(extr_solution[0]),
                     "input_solution",
                     subfolder=f"results_anomaly_{num_anomaly}",
                 )
-                self.evaluation.save_csv(
+                self.save_csv(
+                    run_inst,
                     pd.DataFrame(extr_solution[1]),
                     "output_solution",
                     subfolder=f"results_anomaly_{num_anomaly}",
                 )
 
-            self.evaluation.save_json(
-                result_dict, f"results_marabou_anomalous_{num_anomaly}"
+            self.save_json(
+                run_inst, result_dict, f"results_marabou_anomalous_{num_anomaly}"
             )
 
 

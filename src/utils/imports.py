@@ -4,11 +4,11 @@ import copy
 import time
 import sys
 
-sys.path.append('/home/bboeing/NNLinSubfct/Code/eran_files/ELINA/python_interface')
-sys.path.append('/home/bboeing/NNLinSubfct/Code/eran_files/deepg/code')
-#sys.path.append('/home/bboeing/NNLinSubfct/Code/eran_files/deepg/ERAN/tf_verify')
-sys.path.append('/home/bboeing/NNLinSubfct/Code/eran_files/tf_verify')
-sys.path.append('/home/bboeing/NNLinSubfct/Code/NNet')
+sys.path.append("/home/bboeing/NNLinSubfct/Code/eran_files/ELINA/python_interface")
+sys.path.append("/home/bboeing/NNLinSubfct/Code/eran_files/deepg/code")
+# sys.path.append('/home/bboeing/NNLinSubfct/Code/eran_files/deepg/ERAN/tf_verify')
+sys.path.append("/home/bboeing/NNLinSubfct/Code/eran_files/tf_verify")
+sys.path.append("/home/bboeing/NNLinSubfct/Code/NNet")
 
 
 import numpy as np
@@ -16,9 +16,10 @@ import pandas as pd
 import torch
 import torch.nn as nn
 import logging
-#import onnx
-#from onnx2pytorch import ConvertModel
-#from pytorch2keras.converter import pytorch_to_keras
+
+# import onnx
+# from onnx2pytorch import ConvertModel
+# from pytorch2keras.converter import pytorch_to_keras
 from sklearn.model_selection import ShuffleSplit
 from sklearn.naive_bayes import GaussianNB
 from sklearn.metrics import accuracy_score
@@ -115,11 +116,12 @@ from src.evaluations.marabou_anomalous import marabou_anomalous
 from src.evaluations.marabou_largest_error import marabou_largest_error
 from src.evaluations.marabou_superv_robust import marabou_superv_robust
 from src.evaluations.deepoc_adv_marabou_borderpoint import (
-    deepoc_adv_marabou_borderpoint)
+    deepoc_adv_marabou_borderpoint,
+)
 from src.evaluations.deepoc_adv_marabou_borderplane import (
-    deepoc_adv_marabou_borderplane)
-from src.evaluations.deepoc_adv_derivative import (
-    deepoc_adv_derivative)
+    deepoc_adv_marabou_borderplane,
+)
+from src.evaluations.deepoc_adv_derivative import deepoc_adv_derivative
 from src.evaluations.fct_change_by_border_dist_qual import (
     fct_change_by_border_dist_qual,
 )
@@ -147,12 +149,11 @@ from src.evaluations.marabou_ens_normal_rob import marabou_ens_normal_rob
 from src.evaluations.marabou_svdd_normal_rob import marabou_svdd_normal_rob
 from src.evaluations.marabou_ens_normal_rob_ae import marabou_ens_normal_rob_ae
 from src.evaluations.marabou_ens_normal_rob_submodels import (
-    marabou_ens_normal_rob_submodels)
+    marabou_ens_normal_rob_submodels,
+)
 from src.evaluations.marabou_ens_anom_rob import marabou_ens_anom_rob
 from src.evaluations.lirpa_ens_normal_rob import lirpa_ens_normal_rob
 
 
-
-from src.evaluations.evaluation import evaluation
 from src.utils.config import config, init_logging
-
+from src.evaluations.evaluation import evaluation

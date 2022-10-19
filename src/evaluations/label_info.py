@@ -7,12 +7,11 @@ from itertools import combinations
 from .evaluation import evaluation
 
 
-class label_info:
-    def __init__(self, eval_inst: evaluation, name: str = "label_info"):
+class label_info(evaluation):
+    def __init__(self, name: str = "label_info"):
         self.name = name
-        self.evaluation = eval_inst
 
-    def evaluate(self, dataset, algorithm):
+    def evaluate(self, dataset, algorithm, run_inst):
         dataset.test_data()
         test_labels = []
         means = []
@@ -51,6 +50,6 @@ class label_info:
                 np.sqrt(((mean1 - mean2) ** 2).sum(axis=1)).values[0].astype(np.float64)
             )
             result_dict[str(label1) + "_" + str(label2)] = mean_dist
-        self.evaluation.save_json(result_dict, "label_mean_dist")
-        self.evaluation.save_json(dict(label_var_tuples_dims), "label_vars_dims")
-        self.evaluation.save_json(dict(label_var_tuples_aggr), "label_vars_aggr")
+        self.save_json(run_inst, result_dict, "label_mean_dist")
+        self.save_json(run_inst, dict(label_var_tuples_dims), "label_vars_dims")
+        self.save_json(run_inst, dict(label_var_tuples_aggr), "label_vars_aggr")

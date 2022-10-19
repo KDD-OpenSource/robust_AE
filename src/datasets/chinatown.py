@@ -12,11 +12,13 @@ class chinatown(dataset):
         subsample: int = None,
     ):
         super().__init__(name, file_path, subsample)
-        self.delimiter = '\t'
+        self.delimiter = "\t"
         self.header = None
         self.index_col = None
         self.label_col_train = 0
         self.label_col_test = 0
+
+
 #
 #    def create(self):
 #        dataset_train = pd.read_csv(

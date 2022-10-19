@@ -1,38 +1,37 @@
 """Util file for main"""
 from src.utils.imports_ref import *
 import sys
+import logging
+import copy
 import os
 import time
 import json
 
+
 def exec_cfg(cfg, start_timestamp):
     cur_time_str = time.strftime("%Y-%m-%dT%H:%M:%S")
-    if cfg.repeat_eval > 1:
+    base_folder = None
+    if cfg.repeat_experiment > 1:
         base_folder = cur_time_str
-    else:
-        base_folder = None
     if cfg.test_models != None:
         base_folder = (
-            cur_time_str
-            + "/"
-            + cfg.ctx[: cfg.ctx.find("2021")]
-            + cfg.test_models[cfg.test_models.rfind("/") + 1 :]
+            cur_time_str + "/" + cfg.test_models[cfg.test_models.rfind("/") + 1 :]
         )
 
-    for repetition in range(cfg.repeat_eval):
-        if cfg.repeat_eval > 1:
-            dataset, algorithm, run_inst, eval_inst, evals = load_objects_cfgs(
+    for repetition in range(cfg.repeat_experiment):
+        if cfg.repeat_experiment > 1:
+            run_inst, dataset, algorithm, evals = load_objects_cfgs(
                 cfg, base_folder=base_folder, run_number=str(repetition)
             )
         else:
-            dataset, algorithm, run_inst, eval_inst, evals = load_objects_cfgs(
+            run_inst, dataset, algorithm, evals = load_objects_cfgs(
                 cfg, base_folder=base_folder
             )
 
         if "train" in cfg.mode:
             init_logging(run_inst.get_run_folder())
             logger = logging.getLogger(__name__)
-            algorithm.fit(dataset, run_inst.get_run_folder(), logger)
+            algorithm.fit(dataset.train_data(), run_inst.get_run_folder(), logger)
             algorithm.save(run_inst.get_run_folder())
             dataset.save(os.path.join(run_inst.get_run_folder(), "dataset"))
 
@@ -43,9 +42,10 @@ def exec_cfg(cfg, start_timestamp):
             )
         if "test" in cfg.mode:
             for evaluation in evals:
-                evaluation.evaluate(dataset, algorithm)
+                evaluation.evaluate(dataset, algorithm, run_inst)
     cfg.to_json(filename=os.path.join(run_inst.run_folder, "cfg.json"))
     print(f"Config {cfg.ctx} is done")
+
 
 def load_cfgs():
     cfgs = []
@@ -81,7 +81,7 @@ def read_cfg(cfg):
                 )[0]
                 with open(os.path.join(dataset_path, data_properties)) as file:
                     ds_dict = json.load(file)
-                    cfg.dataset = ds_dict['name']
+                    cfg.dataset = ds_dict["name"]
                 dataset_type = cfg.dataset
                 for cfg_dataset in cfg.datasets.items():
                     if cfg_dataset[0] in dataset_type:
@@ -103,11 +103,10 @@ def load_objects_cfgs(cfg, base_folder, run_number=None):
     except:
         algorithm = None
     try:
-        eval_inst, evals = load_evals(cfg, base_folder, run_number)
-        eval_inst.run_folder = run_inst.run_folder
+        evals = load_evals(cfg, base_folder, run_number)
     except:
-        eval_inst, evals = None, None
-    return dataset, algorithm, run_inst, eval_inst, evals
+        evals = None
+    return run_inst, dataset, algorithm, evals
 
 
 def load_dataset(cfg):
@@ -245,25 +244,20 @@ def load_algorithm(cfg):
         if cfg.algorithm == "autoencoder":
             # create autoencoder according to specifications in config file
             algorithm = autoencoder(
-                train_robust_ae=cfg.algorithms.autoencoder.train_robust_ae,
-                denoising=cfg.algorithms.autoencoder.denoising,
-                fct_dist=cfg.algorithms.autoencoder.fct_dist,
-                fct_dist_layer=cfg.algorithms.autoencoder.fct_dist_layer,
-                border_dist=cfg.algorithms.autoencoder.border_dist,
-                cross_point_sampling=cfg.algorithms.autoencoder.cross_point_sampling,
-                lambda_border=cfg.algorithms.autoencoder.lambda_border,
-                lambda_fct=cfg.algorithms.autoencoder.lambda_fct,
                 topology=cfg.algorithms.autoencoder.topology,
-                num_epochs=cfg.algorithms.num_epochs,
-                dynamic_epochs=cfg.algorithms.dynamic_epochs,
-                lr=cfg.algorithms.lr,
-                collect_subfcts=cfg.algorithms.collect_subfcts,
-                bias_shift=cfg.algorithms.autoencoder.bias_shift,
-                push_factor=cfg.algorithms.push_factor,
+                bias=cfg.algorithms.autoencoder.bias,
+                fct_dist=cfg.algorithms.autoencoder.fct_dist,
+                lambda_fct=cfg.algorithms.autoencoder.lambda_fct,
+                robust_ae=cfg.algorithms.autoencoder.robust_ae,
+                denoising=cfg.algorithms.autoencoder.denoising,
+                border_dist=cfg.algorithms.autoencoder.border_dist,
+                lambda_border=cfg.algorithms.autoencoder.lambda_border,
+                penal_dist=cfg.algorithms.autoencoder.penal_dist,
+                num_border_points=cfg.algorithms.autoencoder.num_border_points,
                 dropout=cfg.algorithms.autoencoder.dropout,
                 L2Reg=cfg.algorithms.autoencoder.L2Reg,
-                num_border_points=cfg.algorithms.autoencoder.num_border_points,
-                save_interm_models=cfg.algorithms.save_interm_models,
+                num_epochs=cfg.algorithms.num_epochs,
+                lr=cfg.algorithms.lr,
             )
         else:
             raise Exception("Could not load algorithm")
@@ -271,9 +265,6 @@ def load_algorithm(cfg):
 
 
 def load_evals(cfg, base_folder=None, run_number=None):
-    #eval_inst = evaluation(base_folder)
-    #run_inst = exp_run(base_folder)
-    #eval_inst.make_run_folder(ctx=cfg.ctx, run_number=run_number)
     evals = []
     if "marabou_ens_normal_rob" in cfg.evaluations:
         evals.append(marabou_ens_normal_rob(eval_inst=eval_inst, cfg=cfg))
@@ -288,14 +279,14 @@ def load_evals(cfg, base_folder=None, run_number=None):
     if "marabou_largest_error" in cfg.evaluations:
         evals.append(marabou_largest_error(eval_inst=eval_inst))
     if "inst_area_2d_plot" in cfg.evaluations:
-        evals.append(inst_area_2d_plot(eval_inst=eval_inst))
+        evals.append(inst_area_2d_plot())
     if "downstream_naiveBayes" in cfg.evaluations:
         evals.append(downstream_naiveBayes(eval_inst=eval_inst))
     if "downstream_knn" in cfg.evaluations:
         evals.append(downstream_knn(eval_inst=eval_inst))
     if "downstream_rf" in cfg.evaluations:
         evals.append(downstream_rf(eval_inst=eval_inst))
-    return eval_inst, evals
+    return evals
 
 
 if __name__ == "__main__":

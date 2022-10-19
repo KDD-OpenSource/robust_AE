@@ -10,14 +10,11 @@ from .evaluation import evaluation
 # for images
 
 
-class fct_change_by_border_dist_qual:
-    def __init__(
-        self, eval_inst: evaluation, name: str = "fct_change_by_border_dist_qual"
-    ):
+class fct_change_by_border_dist_qual(evaluation):
+    def __init__(self, name: str = "fct_change_by_border_dist_qual"):
         self.name = name
-        self.evaluation = eval_inst
 
-    def evaluate(self, dataset, algorithm):
+    def evaluate(self, dataset, algorithm, run_inst):
         sample_dist_pairs = algorithm.assign_most_far_border_dists(
             algorithm.module, dataset.test_data()
         )
@@ -195,8 +192,8 @@ class fct_change_by_border_dist_qual:
             axs[2, 4].set_title("AC_Lin_func_applied_no_bias_diff")
             axs[2, 5].imshow(bias_fct_diff, cmap="gray", vmin=vmin_bias, vmax=vmax_bias)
             axs[2, 5].set_title("bias_fct_diff")
-            self.evaluation.save_figure(
-                fig, f"plot_mnist_sample_largest_dist_withAC{ctr}"
+            self.save_figure(
+                run_inst, fig, f"plot_mnist_sample_largest_dist_withAC{ctr}"
             )
             plt.close("all")
             ctr += 1
@@ -366,7 +363,7 @@ class fct_change_by_border_dist_qual:
             axs[2, 4].set_title("AC_Lin_func_applied_no_bias_diff")
             axs[2, 5].imshow(bias_fct_diff, cmap="gray", vmin=vmin_bias, vmax=vmax_bias)
             axs[2, 5].set_title("bias_fct_diff")
-            self.evaluation.save_figure(fig, f"plot_mnist_sample_mid_dist_withAC{ctr}")
+            self.save_figure(run_inst, fig, f"plot_mnist_sample_mid_dist_withAC{ctr}")
             plt.close("all")
             ctr += 1
 
@@ -535,8 +532,8 @@ class fct_change_by_border_dist_qual:
             axs[2, 4].set_title("AC_Lin_func_applied_no_bias_diff")
             axs[2, 5].imshow(bias_fct_diff, cmap="gray", vmin=vmin_bias, vmax=vmax_bias)
             axs[2, 5].set_title("bias_fct_diff")
-            self.evaluation.save_figure(
-                fig, f"plot_mnist_sample_smallest_dist_withAC{ctr}"
+            self.save_figure(
+                run_inst, fig, f"plot_mnist_sample_smallest_dist_withAC{ctr}"
             )
             plt.close("all")
             ctr += 1

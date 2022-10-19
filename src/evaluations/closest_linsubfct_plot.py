@@ -6,12 +6,11 @@ import pandas as pd
 from .evaluation import evaluation
 
 
-class closest_linsubfct_plot:
-    def __init__(self, eval_inst: evaluation, name: str = "closest_linsubfct_plot"):
+class closest_linsubfct_plot(evaluation):
+    def __init__(self, name: str = "closest_linsubfct_plot"):
         self.name = name
-        self.evaluation = eval_inst
 
-    def evaluate(self, dataset, algorithm):
+    def evaluate(self, dataset, algorithm, run_inst):
         # sample indices
         # linSubfctDist = algorithm.lin_sub_fct_Counters
         dists = []
@@ -30,7 +29,7 @@ class closest_linsubfct_plot:
         dists.sort()
         fig = plt.figure()
         plt.plot(dists)
-        self.evaluation.save_figure(fig, "closest_bound_dist_plot")
+        self.save_figure(run_inst, fig, "closest_bound_dist_plot")
         plt.close("all")
 
 
@@ -42,5 +41,5 @@ class closest_linsubfct_plot:
 #            # import pdb; pdb.set_trace()
 #            plt.bar(fctIndices, values)
 #            # plt.plot(output_points.iloc[ind,:])
-#            self.evaluation.save_figure(fig, "barplot_" + str(ind))
+#            self.save_figure(run_inst, fig, "barplot_" + str(ind))
 #            plt.close("all")

@@ -12,7 +12,7 @@ class electricDevices(dataset):
         subsample: int = None,
     ):
         super().__init__(name, file_path, subsample)
-        self.delimiter = ','
+        self.delimiter = ","
         self.header = None
         self.index_col = None
         self.label_col_train = 0
