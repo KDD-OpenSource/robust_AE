@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import patch
 
 
-from src.utils.util_main_ref import *
+from src.utils.util_main import *
 
 
 class test_utils_main(unittest.TestCase):
