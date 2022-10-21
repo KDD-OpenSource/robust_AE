@@ -32,6 +32,5 @@ from src.evaluations.marabou_ens_normal_rob_ae import marabou_ens_normal_rob_ae
 
 
 from src.evaluations.evaluation import evaluation
-import logging
 from src.utils.config import config, init_logging
 from src.utils.exp_run import exp_run
