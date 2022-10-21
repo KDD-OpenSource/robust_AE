@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 
-class evaluation(evaluation):
+class evaluation:
     def __init__(self, base_folder=None):
         pass
 

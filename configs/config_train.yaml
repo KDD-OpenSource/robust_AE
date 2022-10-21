@@ -1,4 +1,4 @@
-repeat_experiment:                  2
+repeat_experiment:                  1
 #ctx:                                'train_crop_3_15'
 #ctx:                                'Code'
 #ctx:                                'train_sineClasses_fcnn'
@@ -48,7 +48,7 @@ evaluations:                        [
 
 datasets:
     subsample:                      Null
-    num_samples:                    1
+    num_samples:                    1000
     synthetic_test_samples:         10000
     scale:                          False
     gaussianClouds:
@@ -186,7 +186,7 @@ datasets:
         file_path:                  Null
 
 algorithms:
-    num_epochs:                     1
+    num_epochs:                     5
     dynamic_epochs:                 False
     lr:                             1e-3
     collect_subfcts:                False
@@ -195,11 +195,12 @@ algorithms:
     autoencoder:
         robust_ae:                  0.0
         denoising:                  0.0
-        border_dist:                False
           #fct_dist:                   ['mat', 'bias'] # ('mat', 'bias', 'relu')
         fct_dist:                   [] # ('mat', 'bias', 'relu')
-        lambda_border:              0.001
         lambda_fct:                 0.0001
+        border_dist:                False
+        lambda_border:              0.001
+        penal_dist:                 Null
         dropout:                    False
         L2Reg:                      0.0000
         topology:                   [2,15,30,50,30,15,2]

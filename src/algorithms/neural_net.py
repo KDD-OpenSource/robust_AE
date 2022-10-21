@@ -235,8 +235,12 @@ class smallest_k_dist_loss(nn.Module):
         for inst in inputs:
             if self.fct_dist:
                 fct_dist = self.smallest_k_fctdist(module, inst)
+            else:
+                fct_dist = 0
             if self.border_dist:
                 border_dist = self.smallest_k_borderdist(module, inst)
+            else:
+                border_dist = 0
             border_dist_sum += border_dist
             fct_dist_sum += fct_dist
         return border_dist_sum, fct_dist_sum
