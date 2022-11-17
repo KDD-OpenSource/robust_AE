@@ -25,10 +25,11 @@ class marabou_largest_error(evaluation):
     ):
         self.name = name
         self.eps = eps
+        self.surrounding_margin = 0.1
 
     def evaluate(self, dataset, algorithm, run_inst):
         collapsing = test_for_collapsing(dataset, algorithm)
-        network = self.get_marabou_network(algorithm, dataset)
+        network = self.get_marabou_network(algorithm, dataset, run_inst)
         label_means = dataset.calc_label_means(subset="test")
         result_dict = {}
         for key in label_means.keys():
@@ -40,6 +41,7 @@ class marabou_largest_error(evaluation):
             )
 
             self.plot_and_save(
+                run_inst,
                 result_dict,
                 key,
                 solution,
@@ -52,7 +54,7 @@ class marabou_largest_error(evaluation):
                 collapsing,
             )
             self.plot_and_save_surrounding_fcts(
-                result_dict, input_sample, algorithm, key
+                run_inst, result_dict, input_sample, algorithm, key
             )
         self.save_json(run_inst, result_dict, "results_marabou_largest")
 
@@ -134,6 +136,7 @@ class marabou_largest_error(evaluation):
 
     def plot_and_save(
         self,
+        run_inst,
         result_dict,
         key,
         solution,

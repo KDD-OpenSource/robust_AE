@@ -1,4 +1,3 @@
-# state before refactoring
 import time
 import multiprocessing as mp
 from src.utils.util_main import exec_cfg

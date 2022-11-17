@@ -23,11 +23,12 @@ class marabou_robust(evaluation):
         delta=0.1,
     ):
         self.name = name
-        self.desired_delta = delta
+        self.delta = delta
+        self.surrounding_margin = 0.1
 
     def evaluate(self, dataset, algorithm, run_inst):
         collapsing = test_for_collapsing(dataset, algorithm)
-        network = elf.get_marabou_network(algorithm, dataset)
+        network = self.get_marabou_network(algorithm, dataset, run_inst)
         label_means = dataset.calc_label_means(subset="test")
         result_dict = {}
 
@@ -39,11 +40,12 @@ class marabou_robust(evaluation):
                     tot_time,
                     eps,
                     tot_solution_stats
-            ) = self.binary_search_eps(eps=2, delta = self.desired_delta,
+            ) = self.binary_search_eps(eps=2, delta = self.delta,
                     accuracy = 0.0000005, network = network, input_sample =
                     input_sample, output_sample = output_sample)
 
             self.plot_and_save(
+                run_inst,
                 result_dict,
                 key,
                 solution,
@@ -57,7 +59,7 @@ class marabou_robust(evaluation):
             )
 
             self.plot_and_save_surrounding_fcts(
-                result_dict, input_sample, algorithm, key
+                run_inst, result_dict, input_sample, algorithm, key
             )
 
         self.save_json(run_inst, result_dict, "results_marabou_robust")
@@ -135,6 +137,7 @@ class marabou_robust(evaluation):
 
     def plot_and_save(
         self,
+        run_inst, 
         result_dict,
         key,
         solution,

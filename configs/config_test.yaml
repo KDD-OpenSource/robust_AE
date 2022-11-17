@@ -1,17 +1,7 @@
-repeat_experiment:                  2
-#ctx:                                'remaining_crop_models'
-#ctx:                                'test_robust_stats_moteStrain'
-#ctx:                                'marabou_ens_normal_rob_tot_eps_approx'
-ctx:                                '2d_boundaries'
+repeat_experiment:                  1
+ctx:                                'code_test'
 mode:                               ['test']
-  #multiple_models:                    './models/trained_models/autoencoder_tmp'
-  #multiple_models:                    './models/trained_models/simon_merged'
-  #multiple_models:                    './models/trained_models/simon4'
-test_models:                        './models/trained_models/autoencoder_dummy_test'
-  #multiple_models:                    './models/trained_models/simon_deepsvdd_satimage'
-#multiple_models:                    './models/trained_models/autoencoder_crop_diff_ds'
-#multiple_models:                    Null
-#dataset:                            'melbournePedestrian'
+test_models:                        './models/trained_models/reprod/dsaa/ae_sinecurve'
 dataset:                            'mnist'
 #algorithm:                          './models/trained_models/autoencoder_mnist_784_150_10'
 #algorithm:                          './models/trained_models/autoencoder_mnist'

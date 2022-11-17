@@ -14,7 +14,7 @@ from .neural_net import IntermediateSequential
 class autoencoder(neural_net):
     def __init__(
         self,
-        topology: list,
+        topology: list = [2,1,2],
         name: str = "autoencoder",
         bias: bool = True,
         fct_dist: list = [],

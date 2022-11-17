@@ -2,8 +2,10 @@ import os
 import matplotlib.pyplot as plt
 import time
 import json
+import torch
 import numpy as np
 import pandas as pd
+from maraboupy import Marabou
 
 
 class evaluation:
@@ -64,11 +66,11 @@ class evaluation:
         else:
             data.to_csv(os.path.join(run_inst.run_folder, name))
 
-    def plot_and_save_surrounding_fcts(result_dict, input_sample, algorithm,
+    def plot_and_save_surrounding_fcts(self, run_inst, result_dict, input_sample, algorithm,
             key):
         samples = np.random.uniform(
-            low=(input_sample - self.eps).values,
-            high=(input_sample + self.eps).values,
+            low=(input_sample - self.surrounding_margin).values,
+            high=(input_sample + self.surrounding_margin).values,
             size=(1000, len(input_sample.columns)),
         )
         distr = algorithm.count_lin_subfcts(algorithm.module, pd.DataFrame(samples))
@@ -90,10 +92,10 @@ class evaluation:
         # update statistics in result_dict
         result_dict["label_" + str(key)].update({"surrounding_fcts": len(sorted_distr)})
 
-    def get_marabou_network(self, algorithm, dataset):
+    def get_marabou_network(self, algorithm, dataset, run_inst):
         randomInput = torch.randn(1, algorithm.topology[0])
-        run_folder = self.evaluation.run_folder[
-            self.evaluation.run_folder.rfind("202") :
+        run_folder = run_inst.run_folder[
+            run_inst.run_folder.rfind("202") :
         ]
         onnx_folder = os.path.join(
             "./models/onnx_models/",

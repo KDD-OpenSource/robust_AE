@@ -43,6 +43,7 @@ def exec_cfg(cfg, start_timestamp):
         if "test" in cfg.mode:
             for evaluation in evals:
                 evaluation.evaluate(dataset, algorithm, run_inst)
+        print(f'Repetition {repetition} is done.')
     cfg.to_json(filename=os.path.join(run_inst.run_folder, "cfg.json"))
     print(f"Config {cfg.ctx} is done")
 
@@ -83,9 +84,10 @@ def read_cfg(cfg):
                     ds_dict = json.load(file)
                     cfg.dataset = ds_dict["name"]
                 dataset_type = cfg.dataset
-                for cfg_dataset in cfg.datasets.items():
-                    if cfg_dataset[0] in dataset_type:
-                        cfg_dataset[1].file_path = dataset_path
+                cfg.datasets = {dataset_type: ds_dict}
+                for conf_key, conf_value in cfg.datasets[dataset_type].items():
+                    cfg.datasets[dataset_type][conf_key] = ds_dict[conf_key]
+                cfg.datasets[dataset_type].file_path = dataset_path
             except:
                 pass
     return cfgs
@@ -110,7 +112,12 @@ def load_objects_cfgs(cfg, base_folder, run_number=None):
 
 
 def load_dataset(cfg):
-    if cfg.dataset == "sineNoise":
+    if cfg.test_models is not None:
+        mod = __import__('src.datasets.'+cfg.dataset)
+        mod = getattr(mod, 'datasets')
+        data_class = getattr(mod, cfg.dataset)
+        dataset = data_class(file_path = cfg.datasets[cfg.dataset].file_path)
+    elif cfg.dataset == "sineNoise":
         dataset = sineNoise(
             file_path=cfg.datasets.sineNoise.file_path,
             subsample=cfg.datasets.subsample,
@@ -118,6 +125,18 @@ def load_dataset(cfg):
             spacedim=cfg.datasets.sineNoise.spacedim,
             num_samples=cfg.datasets.num_samples,
             num_anomalies=cfg.datasets.sineNoise.num_anomalies,
+            num_testpoints=cfg.datasets.synthetic_test_samples,
+        )
+    elif cfg.dataset == "gaussianClouds":
+        dataset = gaussianClouds(
+            file_path=cfg.datasets.gaussianClouds.file_path,
+            subsample=cfg.datasets.subsample,
+            spacedim=cfg.datasets.gaussianClouds.spacedim,
+            clouddim=cfg.datasets.gaussianClouds.clouddim,
+            num_clouds=cfg.datasets.gaussianClouds.num_clouds,
+            num_samples=cfg.datasets.num_samples,
+            scale=cfg.datasets.scale,
+            num_anomalies=cfg.datasets.gaussianClouds.num_anomalies,
             num_testpoints=cfg.datasets.synthetic_test_samples,
         )
     elif cfg.dataset == "mnist":
@@ -232,13 +251,7 @@ def load_algorithm(cfg):
     if "/" in cfg.algorithm:
         # means that it is a path to an already trained one
         if "autoencoder" in cfg.algorithm:
-            # create a dummy autoencoder
-            algorithm = autoencoder(
-                topology=[2, 1, 2],
-                fct_dist=cfg.algorithms.autoencoder.fct_dist,
-                border_dist=cfg.algorithms.autoencoder.border_dist,
-                num_border_points=cfg.algorithms.autoencoder.num_border_points,
-            )
+            algorithm = autoencoder()
             algorithm.load(cfg.algorithm)
     else:
         if cfg.algorithm == "autoencoder":
@@ -267,25 +280,25 @@ def load_algorithm(cfg):
 def load_evals(cfg, base_folder=None, run_number=None):
     evals = []
     if "marabou_ens_normal_rob" in cfg.evaluations:
-        evals.append(marabou_ens_normal_rob(eval_inst=eval_inst, cfg=cfg))
+        evals.append(marabou_ens_normal_rob())
     if "marabou_svdd_normal_rob" in cfg.evaluations:
-        evals.append(marabou_svdd_normal_rob(eval_inst=eval_inst, cfg=cfg))
+        evals.append(marabou_svdd_normal_rob())
     if "marabou_ens_normal_rob_ae" in cfg.evaluations:
-        evals.append(marabou_ens_normal_rob_ae(eval_inst=eval_inst, cfg=cfg))
+        evals.append(marabou_ens_normal_rob_ae())
     if "marabou_ens_normal_rob_submodels" in cfg.evaluations:
-        evals.append(marabou_ens_normal_rob_submodels(eval_inst=eval_inst, cfg=cfg))
+        evals.append(marabou_ens_normal_rob_submodels())
     if "marabou_robust" in cfg.evaluations:
-        evals.append(marabou_robust(eval_inst=eval_inst))
+        evals.append(marabou_robust())
     if "marabou_largest_error" in cfg.evaluations:
-        evals.append(marabou_largest_error(eval_inst=eval_inst))
+        evals.append(marabou_largest_error())
     if "inst_area_2d_plot" in cfg.evaluations:
         evals.append(inst_area_2d_plot())
     if "downstream_naiveBayes" in cfg.evaluations:
-        evals.append(downstream_naiveBayes(eval_inst=eval_inst))
+        evals.append(downstream_naiveBayes())
     if "downstream_knn" in cfg.evaluations:
-        evals.append(downstream_knn(eval_inst=eval_inst))
+        evals.append(downstream_knn())
     if "downstream_rf" in cfg.evaluations:
-        evals.append(downstream_rf(eval_inst=eval_inst))
+        evals.append(downstream_rf())
     return evals
 
 

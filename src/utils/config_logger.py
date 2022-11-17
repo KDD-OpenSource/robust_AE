@@ -12,6 +12,7 @@ CONSOLE_LOG_LEVEL = logging.INFO
 
 def init_logging(output_dir="reports/logs"):
     # Prepare directory and file path for storing the logs
+    import pdb; pdb.set_trace()
     timestamp = time.strftime("%Y-%m-%d-%H%M%S")
     log_file_path = os.path.join(output_dir, "{}.log".format(timestamp))
     os.makedirs(output_dir, exist_ok=True)
