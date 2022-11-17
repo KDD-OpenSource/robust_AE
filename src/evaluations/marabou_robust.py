@@ -35,14 +35,14 @@ class marabou_robust(evaluation):
         for key in label_means.keys():
             input_sample = pd.DataFrame(label_means[key]).transpose()
             output_sample = algorithm.predict(input_sample)
-            (
-                    solution,
-                    tot_time,
-                    eps,
-                    tot_solution_stats
-            ) = self.binary_search_eps(eps=2, delta = self.delta,
-                    accuracy = 0.0000005, network = network, input_sample =
-                    input_sample, output_sample = output_sample)
+            (solution, tot_time, eps, tot_solution_stats) = self.binary_search_eps(
+                eps=2,
+                delta=self.delta,
+                accuracy=0.0000005,
+                network=network,
+                input_sample=input_sample,
+                output_sample=output_sample,
+            )
 
             self.plot_and_save(
                 run_inst,
@@ -111,7 +111,9 @@ class marabou_robust(evaluation):
             if network_solution[1].hasTimedOut():
                 break
             if len(network_solution[0]) > 0:
-                extr_solution = extract_marabou_solution_point(network_solution, network)
+                extr_solution = extract_marabou_solution_point(
+                    network_solution, network
+                )
                 solution = network_solution
                 diff_input = abs(
                     np.array(extr_solution[0]) - input_sample.values[0]
@@ -137,7 +139,7 @@ class marabou_robust(evaluation):
 
     def plot_and_save(
         self,
-        run_inst, 
+        run_inst,
         result_dict,
         key,
         solution,

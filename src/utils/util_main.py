@@ -43,7 +43,7 @@ def exec_cfg(cfg, start_timestamp):
         if "test" in cfg.mode:
             for evaluation in evals:
                 evaluation.evaluate(dataset, algorithm, run_inst)
-        print(f'Repetition {repetition} is done.')
+        print(f"Repetition {repetition} is done.")
     cfg.to_json(filename=os.path.join(run_inst.run_folder, "cfg.json"))
     print(f"Config {cfg.ctx} is done")
 
@@ -113,10 +113,10 @@ def load_objects_cfgs(cfg, base_folder, run_number=None):
 
 def load_dataset(cfg):
     if cfg.test_models is not None:
-        mod = __import__('src.datasets.'+cfg.dataset)
-        mod = getattr(mod, 'datasets')
+        mod = __import__("src.datasets." + cfg.dataset)
+        mod = getattr(mod, "datasets")
         data_class = getattr(mod, cfg.dataset)
-        dataset = data_class(file_path = cfg.datasets[cfg.dataset].file_path)
+        dataset = data_class(file_path=cfg.datasets[cfg.dataset].file_path)
     elif cfg.dataset == "sineNoise":
         dataset = sineNoise(
             file_path=cfg.datasets.sineNoise.file_path,

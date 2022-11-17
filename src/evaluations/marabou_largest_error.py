@@ -36,8 +36,10 @@ class marabou_largest_error(evaluation):
             input_sample = pd.DataFrame(label_means[key]).transpose()
             output_sample = algorithm.predict(input_sample)
             solution, tot_time, delta, tot_solution_stats = self.binary_search_delta(
-                network=network, input_sample=input_sample,
-                output_sample=output_sample, accuracy = 0.0001
+                network=network,
+                input_sample=input_sample,
+                output_sample=output_sample,
+                accuracy=0.0001,
             )
 
             self.plot_and_save(
@@ -58,9 +60,7 @@ class marabou_largest_error(evaluation):
             )
         self.save_json(run_inst, result_dict, "results_marabou_largest")
 
-    def binary_search_delta(
-        self, network, input_sample, output_sample, accuracy
-    ):
+    def binary_search_delta(self, network, input_sample, output_sample, accuracy):
         marabou_options = Marabou.createOptions(timeoutInSeconds=300)
         eps = self.eps
         numInputVars = len(network.inputVars[0][0])
@@ -74,7 +74,7 @@ class marabou_largest_error(evaluation):
 
         found_largest_delta = False
         delta = 1
-        delta_change = delta/2
+        delta_change = delta / 2
         start_time = time.time()
         numOutputVars = len(network.outputVars[0])
         solution = None
@@ -104,12 +104,16 @@ class marabou_largest_error(evaluation):
             network.addDisjunctionConstraint(disj_eqs)
             network_solution = network.solve(options=marabou_options)
             solution_stats = extract_marabou_solution_stats(network_solution)
-            tot_solution_stats = add_marabou_solution_stats(tot_solution_stats, solution_stats)
+            tot_solution_stats = add_marabou_solution_stats(
+                tot_solution_stats, solution_stats
+            )
             if network_solution[1].hasTimedOut():
                 solution = None
                 break
             if len(network_solution[0]) > 0:
-                extr_solution = extract_marabou_solution_point(network_solution, network)
+                extr_solution = extract_marabou_solution_point(
+                    network_solution, network
+                )
                 diff_input = abs(
                     np.array(extr_solution[0]) - input_sample.values[0]
                 ).max()

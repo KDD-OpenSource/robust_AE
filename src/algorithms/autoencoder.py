@@ -14,7 +14,7 @@ from .neural_net import IntermediateSequential
 class autoencoder(neural_net):
     def __init__(
         self,
-        topology: list = [2,1,2],
+        topology: list = [2, 1, 2],
         name: str = "autoencoder",
         bias: bool = True,
         fct_dist: list = [],
@@ -32,9 +32,7 @@ class autoencoder(neural_net):
         lr: float = 1e-3,
         seed: int = None,
     ):
-        super().__init__(
-            name, num_epochs, batch_size, lr, seed
-        )
+        super().__init__(name, num_epochs, batch_size, lr, seed)
         self.border_dist = border_dist
         self.fct_dist = fct_dist
         self.robust_ae = robust_ae
@@ -96,7 +94,6 @@ class autoencoder(neural_net):
                 loss.backward()
                 optimizer.step()
 
-
             # robust_ae block
             self.module.eval()
             if self.robust_ae is not None:
@@ -122,7 +119,6 @@ class autoencoder(neural_net):
                 logger.info(f"Duration: {duration}")
 
         self.module.erase_dropout()
-
 
     def prox_l1(self, S):
         S[abs(S) < self.robust_ae] = 0
@@ -184,6 +180,7 @@ class autoencoder(neural_net):
         # have dropout in testing
         self.module = autoencoderModule(self.topology, self.bias, dropout=False)
         self.module.load_state_dict(torch.load(os.path.join(path, "model.pth")))
+
 
 class autoencoderModule(nn.Module):
     def __init__(self, topology: list, bias: bool = True, dropout: bool = False):

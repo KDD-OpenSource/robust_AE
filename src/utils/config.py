@@ -26,7 +26,7 @@ def init_logging(output_dir="reports/logs"):
     root_logger = logging.getLogger()
     root_logger.setLevel(LOG_LEVEL)
     # Removes previous handlers (required for running pipeline multiple times)
-    #root_logger.handlers = []
+    # root_logger.handlers = []
     handlers = root_logger.handlers.copy()
     for handler in handlers:
         root_logger.removeHandler(handler)

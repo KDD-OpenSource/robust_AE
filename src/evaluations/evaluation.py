@@ -66,8 +66,9 @@ class evaluation:
         else:
             data.to_csv(os.path.join(run_inst.run_folder, name))
 
-    def plot_and_save_surrounding_fcts(self, run_inst, result_dict, input_sample, algorithm,
-            key):
+    def plot_and_save_surrounding_fcts(
+        self, run_inst, result_dict, input_sample, algorithm, key
+    ):
         samples = np.random.uniform(
             low=(input_sample - self.surrounding_margin).values,
             high=(input_sample + self.surrounding_margin).values,
@@ -94,9 +95,7 @@ class evaluation:
 
     def get_marabou_network(self, algorithm, dataset, run_inst):
         randomInput = torch.randn(1, algorithm.topology[0])
-        run_folder = run_inst.run_folder[
-            run_inst.run_folder.rfind("202") :
-        ]
+        run_folder = run_inst.run_folder[run_inst.run_folder.rfind("202") :]
         onnx_folder = os.path.join(
             "./models/onnx_models/",
             str(algorithm.name) + "_" + dataset.name,
@@ -119,6 +118,7 @@ class evaluation:
             outputName=str(2 * len(algorithm.module.get_neural_net()) + 1),
         )
         return network
+
 
 def extract_marabou_solution_point(solution, network):
     solution = solution[0]
@@ -152,6 +152,7 @@ def extract_marabou_solution_stats(solution):
     res_dict["TotalTime"] = solution[1].getTotalTime()
     res_dict["hasTimedOut"] = solution[1].hasTimedOut()
     return res_dict
+
 
 def add_marabou_solution_stats(solution1, solution2):
     if solution1 == 0:

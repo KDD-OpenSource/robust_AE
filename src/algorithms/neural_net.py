@@ -157,7 +157,6 @@ class neural_net:
         return inst_ind_pairs
 
 
-
 class IntermediateSequential(nn.Sequential):
     def __init__(self, *args, return_intermediate=True):
         super().__init__(*args)
@@ -213,6 +212,7 @@ class linearSubfunction:
         result = math.sqrt(scalar_prod)
         return result
 
+
 class smallest_k_dist_loss(nn.Module):
     def __init__(
         self,
@@ -249,16 +249,23 @@ class smallest_k_dist_loss(nn.Module):
         fct_result = 0
         neural_net = neural_net_mod.get_neural_net()
         fct_dists = torch.tensor([])
-        inst_mat, inst_bias, relus, relu_acts, dists, cross_points = self.calculate_inst(
+        (
+            inst_mat,
+            inst_bias,
+            relus,
+            relu_acts,
+            dists,
+            cross_points,
+        ) = self.calculate_inst(
             neural_net, instance, dists=True, max_layer=self.max_layer
         )
 
         # capture errors if occuring
         if dists.isnan().sum() > 0:
-            print('Return 0 as some dists are NaN')
+            print("Return 0 as some dists are NaN")
             return 0, 0
         if dists.isinf().sum() > 0:
-            print('Return 0 as some dists are Infty')
+            print("Return 0 as some dists are Infty")
             return 0, 0
 
         top_k_dists = torch.topk(input=dists, k=self.k, largest=False)
@@ -306,16 +313,23 @@ class smallest_k_dist_loss(nn.Module):
         border_result = 0
         neural_net = neural_net_mod.get_neural_net()
         fct_dists = torch.tensor([])
-        inst_mat, inst_bias, relus, relu_acts, dists, cross_points = self.calculate_inst(
+        (
+            inst_mat,
+            inst_bias,
+            relus,
+            relu_acts,
+            dists,
+            cross_points,
+        ) = self.calculate_inst(
             neural_net, instance, dists=True, max_layer=self.max_layer
         )
 
         # capture errors if occuring
         if dists.isnan().sum() > 0:
-            print('Return 0 as some dists are NaN')
+            print("Return 0 as some dists are NaN")
             return 0, 0
         if dists.isinf().sum() > 0:
-            print('Return 0 as some dists are Infty')
+            print("Return 0 as some dists are Infty")
             return 0, 0
 
         top_k_dists = torch.topk(input=dists, k=self.k, largest=False)
@@ -326,7 +340,7 @@ class smallest_k_dist_loss(nn.Module):
                     torch.zeros(self.k), 1 - (top_k_dists[0] / self.penal_dist)
                 )
             else:
-                raise Exception('You should specify gamma (variable called penal_dist)')
+                raise Exception("You should specify gamma (variable called penal_dist)")
 
             border_result += top_k_maxed.sum() / self.k
         return border_result
@@ -372,7 +386,7 @@ class smallest_k_dist_loss(nn.Module):
                     distances = torch.cat((distances, dist))
                 a = a * relu_sig[ind][:, 0]
             else:
-                raise Exception('The case of no bias has not been implemented')
+                raise Exception("The case of no bias has not been implemented")
             V = V * relu_sig[ind]
 
         # last layer calculation
