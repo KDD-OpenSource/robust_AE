@@ -9,7 +9,6 @@ git clone git://github.com/KDD-OpenSource/robust_AE.git
 virtualenv venv -p /usr/bin/python3  
 source venv/bin/activate  
 pip install -r requirements.txt  
-python3 main.py
 ```
 
 ## Reproduction of Experiments:
