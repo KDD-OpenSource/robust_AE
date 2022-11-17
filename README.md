@@ -1,5 +1,5 @@
 # On Training and Verifying Robust Autoencoders
-This repository contains the code and experimental configuration files for the DSAA2022 Paper On Training and Verifying Robust Autoencoders
+This repository contains the code and experimental configuration files for the DSAA2022 Paper 'On Training and Verifying Robust Autoencoders'
 
 ## Usage
 Please note that in order to make use of our solution framework you need to install [Marabou](https://github.com/NeuralNetworkVerification/Marabou)
